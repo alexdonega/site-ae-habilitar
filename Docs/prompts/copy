@@ -1,0 +1,279 @@
+# Prompt para Antgravity Design Mode (Gemini 3.0)
+
+I am writing a prompt to use in Antgravity Design Mode: an AI agent specialized in designing beautiful landing pages powered by Gemini 3.0. In addition to React/Shadcn/Tailwind code generation, this agent can also generate images, short videos and get stock photos from the internet.
+
+## IMPORTANT: Mobile First Approach
+
+This landing page MUST be designed with a **mobile-first approach**. All styles should start from mobile and scale up to desktop using responsive breakpoints (sm, md, lg, xl). The majority of traffic will come from WhatsApp, so mobile experience is critical.
+
+## Assets
+
+All images will be provided via upload:
+- **Background Hero:** `bg-campo-grande.jpg` - Photo of "CAMPO GRANDE" landmark with yellow ipê tree
+- **Logo:** `logo-jotta.png` - "Jotta de Autoescolas" logo (red text, transparent background)
+
+Do not generate or search for these specific assets. Use the uploaded files.
+
+---
+
+## Landing Page Structure: 4 Sections + Footer
+
+---
+
+### Section 1: Hero
+
+**Layout:** 
+- Mobile: 1 column (content stacked, form below)
+- Desktop: 2 columns (60/40 split - content left, form right)
+
+**Background:** 
+- Full-width image `bg-campo-grande.jpg` with dark overlay gradient `rgba(0,0,0,0.65)` to `rgba(0,0,0,0.8)`
+- Background-size: cover, background-position: center
+
+**Header:**
+- Logo centered: `logo-jotta.png`
+- Height: 32px mobile, 40px tablet, 56px desktop
+
+**Column 1 (Left/Top on mobile):**
+
+- **Title h1:** "A CNH MAIS BARATA DA HISTÓRIA DE CAMPO GRANDE!"
+  - "A CNH MAIS BARATA DA HISTÓRIA DE" = white
+  - "CAMPO GRANDE!" = red (#DC2626)
+  - Font: Black/900 weight
+  - Size: 30px mobile → 40px tablet → 60px desktop
+  - Text-align: center on mobile, left on desktop
+
+- **Alert Box:**
+  - Border: 2px solid red (#DC2626)
+  - Background: black/40 with backdrop-blur
+  - Icon: 📍 (red)
+  - Text: "Válido **EXCLUSIVAMENTE** para as unidades **Nova Lima** e **Julio de Castilho**"
+  - "EXCLUSIVAMENTE" in yellow (#FBBF24)
+
+- **Subtitle:**
+  - "A Autoescola Jotta vai realizar um evento **HISTÓRICO**. Se você busca 1ª Habilitação ou Mudança de Categoria nos melhores valores... o momento é **AGORA!**"
+  - Color: gray-200
+  - Bold words in white
+
+- **Badge Pills (3 inline, wrap on mobile):**
+  - "📅 5 e 6 de Dezembro"
+  - "🏷️ Até R$ 520 OFF"
+  - "🔥 Vagas Limitadas"
+  - Style: bg-gray-800/80, backdrop-blur, rounded-full, border border-gray-700
+
+**Column 2 (Right/Bottom on mobile) - Lead Capture Form:**
+
+- **Card Style:**
+  - Background: white
+  - Border-radius: 12px mobile, 16px desktop
+  - Border-top: 4px solid red (#DC2626)
+  - Padding: 20px mobile, 32px desktop
+  - Shadow: 2xl
+
+- **Card Header:**
+  - Title: "Grupo VIP de Ofertas" (bold, gray-900)
+  - Subtitle: "Preencha para garantir seu desconto exclusivo" (gray-500, small)
+
+- **Form Fields:**
+  1. Nome Completo (text) - placeholder: "Qual o seu nome?"
+  2. WhatsApp (tel) - placeholder: "(67) 99999-9999" - **ONLY NUMBERS, max 11 digits, auto-mask**
+  3. E-mail (email) - placeholder: "Seu melhor e-mail" - **EMAIL VALIDATION**
+  4. Categoria Desejada (select):
+     - "Selecione..."
+     - "Categoria A (Moto)"
+     - "Categoria B (Carro)"
+     - "Categoria AB (Carro e Moto)"
+     - "Mudança de Categoria"
+
+- **CTA Button:**
+  - Text: "🔥 QUERO MINHA VAGA"
+  - Background: green (#22C55E), hover: darker green
+  - Full width, rounded-lg
+  - Font: bold, white
+
+- **Form Webhook Integration:**
+  - POST to: `https://api.datacrazy.io/v1/crm/api/crm/flows/webhooks/319d0c5f-d827-4f3a-9c93-a17dbb0d2cc9/1e250114-cef5-480c-9faf-ade6b7dd74aa`
+  - Payload fields: `full_name`, `first_name` (extracted), `phone` (numbers only), `email`, `categoria`
+
+- **Success State:**
+  - Show success message after form submission
+  - Green checkmark icon
+  - Text: "Cadastro realizado! Você entrou no Grupo VIP."
+
+---
+
+### Section 2: Countdown Timer
+
+**Layout:** 1 column, centered
+**Background:** Solid red (#DC2626)
+**Padding:** 24px mobile, 40px desktop
+
+**Content:**
+- Label: "ESSA PROMOÇÃO COMEÇA EM:" (white, uppercase, tracking-wider)
+- 4 Timer Boxes inline:
+  - DIAS | HORAS | MIN | SEG
+  - Box style: bg-gray-800, rounded-lg/xl, padding responsive
+  - Numbers: 24px mobile → 48px desktop, bold, white
+  - Labels: 10px mobile → 14px desktop, gray-400
+
+---
+
+### Section 3: Diferenciais
+
+**Layout:** 1 column
+**Background:** Dark (#111827)
+**Padding:** 48px mobile, 80px desktop
+
+**Headline (centered):**
+- "Condições que **ninguém mais** tem coragem de oferecer"
+- "ninguém mais" in red (#EF4444)
+- Size: 24px mobile → 48px desktop, font-black
+
+**3 Feature Cards:**
+- Grid: 1 column mobile → 2 columns tablet → 3 columns desktop
+- Gap: 16px mobile, 24px desktop
+
+**Card 1 - Alto Índice de Aprovação:**
+- Icon: CheckCircle (green) in circle container (bg-green-500/20)
+- Title: "Alto Índice de Aprovação"
+- Description: "Instrutores experientes que te preparam de verdade"
+
+**Card 2 - Cartão em até 10x:**
+- Icon: CreditCard (green)
+- Title: "Cartão em até 10x"
+- Description: "Sem burocracia, parcela que cabe no seu bolso"
+
+**Card 3 - Promissória sem Consulta:**
+- Icon: FileText (green)
+- Title: "Promissória sem Consulta"
+- Description: "Sem SPC, sem Serasa. Nome sujo? A gente resolve."
+
+**Card Style:**
+- Background: gray-800
+- Border: 2px gray-700, hover: border-green-500
+- Border-radius: 12px mobile, 16px desktop
+- Padding: 20px mobile, 24px desktop
+- Text-align: center
+
+**Additional Checklist (below cards):**
+- Container: bg-gray-800/50, rounded-xl, max-width 672px, centered
+- Items with green checkmarks:
+  - ✓ Maior desconto já oferecido em Campo Grande
+  - ✓ Unidades em Nova Lima e Julio de Castilho
+
+---
+
+### Section 4: Final CTA
+
+**Layout:** 1 column, centered
+**Background:** Gradient from gray-800 to gray-900
+**Padding:** 48px mobile, 96px desktop
+
+**Content:**
+- **Headline:** "Chega de depender dos outros **pra ir e vir!**"
+  - "pra ir e vir!" in green (#4ADE80)
+  - Size: 24px mobile → 48px desktop, font-black
+
+- **Subtitle:** "Em 2025, conquiste sua liberdade. A Autoescola Jotta tá pronta pra te ajudar a realizar esse sonho."
+  - Color: gray-400
+  - Size: 14px mobile → 20px desktop
+
+- **CTA Button:**
+  - Text: "SIM, QUERO MINHA CNH! 🚗"
+  - Background: red (#DC2626)
+  - Rounded-full (pill shape)
+  - Padding: 16px 32px mobile → 24px 64px desktop
+  - Font: bold, 16px mobile → 24px desktop
+  - Shadow: xl, shadow-red-600/30
+  - Hover: scale-105
+
+- **Fine print:** "Vagas limitadas para os dias 5 e 6 de dezembro" (gray-500, small)
+
+---
+
+### Footer
+
+**Layout:** 1 column, centered
+**Background:** Dark (#111827) with top border (gray-800)
+**Padding:** 32px mobile, 40px desktop
+
+**Content:**
+
+1. **Logo:** `logo-jotta.png` centered (40px mobile, 64px desktop height)
+
+2. **Address Cards (2 cards, grid):**
+   - Grid: 1 column mobile → 2 columns tablet+
+   - Card style: bg-gray-800, rounded-lg, padding 12px-16px
+   
+   - **Unidade Nova Lima:**
+     - "📍 Unidade Nova Lima" (red, semibold)
+     - "Av. Presidente Vargas, 1247 / Nova Lima, Campo Grande-MS"
+   
+   - **Unidade Julio de Castilho:**
+     - "📍 Unidade Julio de Castilho" (red, semibold)
+     - "Rua 14 de Julho, 890 / Julio de Castilho, Campo Grande-MS"
+
+3. **Links:** "Política de Privacidade | Termos de Uso | Contato" (gray-400, hover: white)
+
+4. **Copyright:** "© 2025 Autoescola Jotta. Todos os direitos reservados." (gray-500)
+
+---
+
+### Floating WhatsApp Button
+
+- **Position:** Fixed, bottom-right (16px from edges)
+- **Size:** 48px mobile, 56px desktop
+- **Background:** Green (#22C55E), hover: darker
+- **Icon:** WhatsApp icon (white)
+- **Shadow:** lg, shadow-green-500/30
+- **Hover:** scale-110
+- **Link:** `https://wa.me/556792059340?text=Olá! Quero saber mais sobre a promoção da CNH mais barata de Campo Grande!`
+
+---
+
+## Color Palette
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| Red Primary | #DC2626 | CTAs, highlights, borders |
+| Red Light | #EF4444 | Text emphasis |
+| Green Primary | #22C55E | Form CTA, WhatsApp, success |
+| Green Light | #4ADE80 | Text highlights |
+| Yellow | #FBBF24 | Alert emphasis |
+| Dark BG | #111827 | Section backgrounds |
+| Gray 800 | #1F2937 | Cards, timer boxes |
+| Gray 700 | #374151 | Borders |
+| Gray 400 | #9CA3AF | Secondary text |
+| Gray 200 | #E5E7EB | Body text on dark |
+| White | #FFFFFF | Primary text, form bg |
+
+---
+
+## Typography
+
+- **Headings:** System font stack, font-black (900)
+- **Body:** System font stack, font-normal (400)
+- **Responsive scale:** Use clamp() or Tailwind responsive prefixes
+
+---
+
+## Design Principles
+
+1. **Mobile First:** All styles start mobile, scale up
+2. **High Contrast:** Dark backgrounds, bright CTAs
+3. **Urgency:** Countdown, limited slots messaging
+4. **Trust:** Clear differentials, local addresses
+5. **Conversion Focus:** Form always visible, multiple CTAs
+
+---
+
+## Responsive Breakpoints (Tailwind)
+
+- `sm`: 640px
+- `md`: 768px  
+- `lg`: 1024px (2-column layout starts here)
+- `xl`: 1280px
+
+---
+
+Please generate the complete React/Tailwind code following these specifications exactly. Ensure all mobile-first responsive classes are properly applied.
