@@ -1,0 +1,168 @@
+You are designing a landing page for Pluma, a Brazilian AI-powered financial assistant app. Follow the design.json below as your design system guidelines. The overall aesthetic should feel premium, trustworthy, and warm - like a sophisticated fintech brand that's approachable yet professional.
+
+Follow instructions below for copy and landing page content
+design.json
+{ "designPrinciples": { "overall": "Premium fintech with warmth. The design should feel like a trusted financial advisor who's also a friend - sophisticated but never cold or intimidating.", "keywords": ["trustworthy", "premium", "warm", "clean", "sophisticated", "approachable"], "avoid": ["generic SaaS look", "overly corporate", "cold/sterile", "cluttered", "aggressive CTAs"] },
+
+"colorPalette": { "primary": { "forest": "#1C3F3A", "forestLight": "#2A5A52", "forestDark": "#152E2A" }, "neutral": { "white": "#FFFFFF", "cream": "#F8F6F0", "sand": "#EBE8D8", "warmGray": "#A8A598", "charcoal": "#2D2D2D", "black": "#1A1A1A" }, "accent": { "sage": "#C5D4C0", "gold": "#C9A962", "terracotta": "#D4A574" }, "usage": { "backgrounds": ["white for main sections", "cream for alternating sections", "forest for emphasis sections and CTAs"], "text": { "headings": "charcoal or white (on dark bg)", "body": "warmGray or charcoal at 80% opacity", "accent": "forest for links and highlights" }, "buttons": { "primary": "forest background with white text", "secondary": "white background with forest text and forest border" } } },
+
+"typography": { "fontFamilies": { "headings": { "family": "Playfair Display or similar elegant serif", "weight": "500-600", "style": "Use italic for emphasis words (like 'money', 'Pluma')" }, "body": { "family": "Inter, DM Sans, or similar clean geometric sans-serif", "weight": "400 for body, 500 for emphasis" } }, "scale": { "hero-h1": { "size": "clamp(2.5rem, 5vw, 4rem)", "lineHeight": "1.1", "letterSpacing": "-0.02em" }, "h2": { "size": "clamp(2rem, 4vw, 3rem)", "lineHeight": "1.2", "letterSpacing": "-0.01em" }, "h3": { "size": "1.25rem", "lineHeight": "1.4", "weight": "600" }, "body": { "size": "1rem", "lineHeight": "1.6" }, "small": { "size": "0.875rem", "lineHeight": "1.5" } }, "emphasis": { "technique": "Use italic serif for key emotional words in headlines", "example": "O primeiro assistente financeiro com IA que realmente entende seu dinheiro" } },
+
+"spacing": { "philosophy": "Generous, breathing room. White space is a feature, not wasted space.", "sectionPadding": { "vertical": "clamp(80px, 10vw, 140px)", "horizontal": "clamp(20px, 5vw, 80px)" }, "containerMaxWidth": "1200px", "componentSpacing": { "betweenSections": "0 (sections handle their own padding)", "betweenHeadingAndContent": "24px - 40px", "betweenCards": "24px - 32px", "insideCards": "32px - 48px" }, "grid": { "columns": "12-column grid", "gutter": "24px - 32px" } },
+
+"components": { "buttons": { "primary": { "background": "#1C3F3A", "text": "#FFFFFF", "borderRadius": "100px (fully rounded/pill shape)", "padding": "16px 32px", "fontSize": "0.9375rem", "fontWeight": "500", "hover": { "background": "#2A5A52", "transform": "translateY(-2px)", "shadow": "0 4px 12px rgba(28, 63, 58, 0.3)" }, "transition": "all 0.3s ease" }, "secondary": { "background": "transparent", "text": "#1C3F3A", "border": "1.5px solid #1C3F3A", "borderRadius": "100px" } }, "cards": { "default": { "background": "#FFFFFF", "borderRadius": "16px - 24px", "padding": "32px - 48px", "shadow": "0 2px 8px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06)", "border": "none or 1px solid rgba(0,0,0,0.05)" }, "elevated": { "background": "#FFFFFF", "borderRadius": "24px", "shadow": "0 4px 16px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.1)" }, "subtle": { "background": "#F8F6F0", "borderRadius": "16px", "shadow": "none", "border": "1px solid rgba(0,0,0,0.06)" }, "hover": { "transform": "translateY(-4px)", "shadow": "0 8px 32px rgba(0,0,0,0.12)", "transition": "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)" } }, "icons": { "style": "Lucide icons, stroke weight 1.5-2", "size": { "small": "20px", "default": "24px", "large": "32px", "feature": "48px (in feature cards)" }, "container": { "background": "#F8F6F0 or light sage", "borderRadius": "12px", "padding": "16px" } }, "badges": { "style": { "background": "#EBE8D8", "text": "#1C3F3A", "borderRadius": "100px", "padding": "8px 16px", "fontSize": "0.75rem", "fontWeight": "500", "textTransform": "uppercase", "letterSpacing": "0.05em" } }, "inputs": { "borderRadius": "12px", "border": "1px solid #E5E5E5", "padding": "16px 20px", "focusBorder": "#1C3F3A", "focusShadow": "0 0 0 3px rgba(28, 63, 58, 0.1)" } },
+
+"imagery": { "style": "Warm, natural, lifestyle-focused. Show real hands interacting with phones/app. Avoid stock photo feel.", "treatment": { "photos": "Slightly warm color grade, soft natural lighting", "illustrations": "If used, keep minimal and abstract - geometric shapes in brand colors", "backgrounds": "Subtle textures (paper, grain) add warmth" }, "heroImage": { "composition": "Phone mockup showing app interface, floating UI elements around it, hands holding device", "elements": "Include subtle floating cards/numbers that suggest financial data visualization" } },
+
+"backgrounds": { "patterns": { "texturedGradient": "Subtle noise texture (2-3% opacity) overlaid on solid colors", "meshGradient": "Very subtle gradient blends between cream tones" }, "sections": { "alternating": "Alternate between #FFFFFF and #F8F6F0 for visual rhythm", "emphasis": "#1C3F3A for CTAs and key sections", "special": "Textured cream (#EBE8D8) with subtle gradient for trust/safety sections" } },
+
+"animations": { "philosophy": "Subtle and purposeful. Animations should feel like natural responses, not decorations.", "types": { "fadeInUp": { "initial": "opacity: 0, y: 20px", "animate": "opacity: 1, y: 0", "duration": "0.6s", "easing": "cubic-bezier(0.4, 0, 0.2, 1)" }, "hoverLift": { "transform": "translateY(-4px)", "duration": "0.3s" }, "stagger": { "delayBetween": "0.1s", "use": "For card grids and list items" } }, "microInteractions": { "buttons": "Scale 1.02 on hover, slight shadow increase", "cards": "Lift on hover with enhanced shadow", "links": "Underline animation from left to right" } },
+
+"layout": { "philosophy": "Generous spacing, clear visual hierarchy, breathing room around elements", "hero": { "layout": "Two columns, 55/45 or 50/50 split", "textAlignment": "left", "imagePosition": "Slightly overlapping or floating above fold" }, "featureCards": { "grid": "3 columns on desktop, 1 on mobile", "alignment": "Top-aligned icons, left-aligned text" }, "ctaSections": { "layout": "Centered, single column", "maxWidth": "600px for text content" } },
+
+"trustElements": { "logoBar": { "style": "Grayscale logos, subtle, horizontal scroll on mobile", "opacity": "60-70%", "size": "Height ~24-32px" }, "stats": { "style": "Large serif numbers, small sans-serif labels", "numberSize": "3rem - 4rem", "labelSize": "0.875rem" }, "checkmarks": { "icon": "Check or CheckCircle from Lucide", "color": "#1C3F3A", "style": "Inline with text, subtle background optional" } },
+
+"footer": { "background": "#FFFFFF or #F8F6F0", "layout": "4-column grid: Logo + description, Links, Links, Contact", "divider": "1px solid rgba(0,0,0,0.08) above footer", "bottomBar": "Copyright, privacy, terms - small text, muted color" } }
+copy
+Updated Section Specifications with Design Context
+
+Section 1: Hero
+
+Background: #FFFFFF Layout: 2 columns (55/45 split) Left Column:
+
+Badge (optional): "Novo" or "Open Finance" - pill shape, cream background Title h1: "O primeiro agente de IA que realmente entende seu dinheiro"
+
+Style: Serif font, emphasize "dinheiro" in italic Size: clamp(2.5rem, 5vw, 4rem)
+
+Subtitle: Body text, warmGray color, max-width 480px CTA Button: Pill-shaped, forest green, "Teste grátis por 14 dias" Trust indicator: Small stars + "Avaliação 4.9" or similar
+
+Right Column:
+
+[Generate] Phone mockup with floating UI cards showing financial data (balance cards, chat interface preview) Floating card 1: "Meta atingida!" + Check Icon Floating card 2: "Você economizou R$2,800!" + Cash Icon Style: Warm, premium feel with subtle shadows No background or hands holding the phone. Just the phone mockup with a apple wallet-like UI in the phone + floating UI cards.
+
+Section 2: Why Pluma
+
+Background: #FFFFFF (white) Section padding: 120px vertical Header:
+
+Eyebrow: "SOBRE O PLUMA" - uppercase, small, forest green Title h2: "Porque Pluma?" - serif with italic emphasis
+
+Cards Grid: 3 columns, 24px gap Card Style:
+
+White background, 24px border-radius Icon in cream/sage container at top 32px internal padding Subtle shadow, lift on hover
+
+Section 3: Pluma Answers
+
+Background: #1C3F3A (forest) - add subtle grain texture Text color: White Layout: Centered Chat UI mockup:
+
+Slightly elevated white/cream card Rounded corners (24px) Input field at bottom with "Pergunte-me qualquer coisa..." Prompt suggestion chips above input Chips: Pill-shaped, semi-transparent white border, hover fills with white (20% opacity) Stagger animation on load, subtle scale on hover
+
+Section 4: Safety
+
+Background: Textured gradient on #FFFFFF Layout: 2 columns (40/60 split) Left: Large serif h2 "Seus dados estão seguros conosco" Right: Stacked check items
+
+Each item: CheckCircle icon (forest) + text Subtle card containers optional Slight stagger animation on scroll
+
+Section 5: Call To Action
+
+Background: #1C3F3A Card with rounded corners (20px) and slight drop shadow behind it Layout: Centered, max-width 600px Title: Large, white, serif Checklist: White text with white checkmarks CTA Button: White background, forest text (inverted primary) Optional: Subtle decorative elements (abstract shapes, stars)
+
+Section 6: Footer
+
+Background: #FFFFFF Top border: subtle divider line Grid: Logo column + 3 link columns Bottom: Copyright + legal links, muted text
+
+
+
+{ "designSystem": { "name": "Pluma Design System", "version": "1.0", "description": "A modern, trustworthy fintech design system inspired by premium financial platforms. Clean, spacious, and confidence-inspiring." },
+
+"designPrinciples": [ { "name": "Trust Through Clarity", "description": "Every element should feel intentional and professional. Avoid clutter. Let whitespace breathe. Financial apps must feel secure and reliable." }, { "name": "Hierarchy Through Contrast", "description": "Use bold weight contrasts and size differences to guide the eye. Mix regular and bold weights within headlines for emphasis on key words." }, { "name": "Approachable Sophistication", "description": "Balance professionalism with warmth. Rounded corners, friendly colors, and conversational copy make finance less intimidating." }, { "name": "Motion With Purpose", "description": "Subtle hover states and micro-interactions add polish without distraction. Animations should feel smooth and professional, never playful or bouncy." } ],
+
+"colors": { "primary": { "main": "#1C3F3A", "description": "Deep forest green - conveys trust, stability, growth. Use for dark sections, CTAs on light backgrounds, and emphasis." }, "accent": { "main": "#C4F233", "hover": "#D4FF4D", "description": "Electric lime/chartreuse - modern, fintech-forward, energetic. Use sparingly for CTAs, highlights, and interactive elements." }, "background": { "white": "#FFFFFF", "cream": "#F8F7F2", "warmGray": "#EBE8D8", "dark": "#1C3F3A", "description": "Alternate between white and warm neutrals for section rhythm. Dark sections create visual breaks and emphasize key messages." }, "text": { "primary": "#0A0F1C", "secondary": "#4A5568", "muted": "#718096", "onDark": "#FFFFFF", "onDarkMuted": "rgba(255,255,255,0.7)", "description": "Near-black for headlines, gray tones for body. High contrast is essential for readability and accessibility." }, "ui": { "border": "#E2E8F0", "borderSubtle": "#EDF2F7", "shadow": "rgba(0,0,0,0.08)", "success": "#38A169", "description": "Subtle borders and shadows. Never harsh or heavy." } },
+
+"typography": { "fontFamily": { "heading": "Inter, 'SF Pro Display', system-ui, sans-serif", "body": "Inter, 'SF Pro Text', system-ui, sans-serif", "description": "Clean, modern sans-serif with excellent readability. Inter is ideal for fintech - professional yet approachable." }, "headings": { "h1": { "size": "clamp(2.5rem, 5vw, 4rem)", "weight": "700", "lineHeight": "1.1", "letterSpacing": "-0.02em", "description": "Hero headlines should be impactful. Use mixed weights within the headline to emphasize key words (e.g., 'realmente' in bold, rest in medium)." }, "h2": { "size": "clamp(2rem, 4vw, 3rem)", "weight": "600", "lineHeight": "1.2", "letterSpacing": "-0.01em" }, "h3": { "size": "1.25rem", "weight": "600", "lineHeight": "1.4" } }, "body": { "large": { "size": "1.125rem", "lineHeight": "1.7", "weight": "400" }, "base": { "size": "1rem", "lineHeight": "1.6", "weight": "400" }, "small": { "size": "0.875rem", "lineHeight": "1.5", "weight": "400" } }, "special": { "label": { "size": "0.75rem", "weight": "500", "letterSpacing": "0.05em", "textTransform": "uppercase", "description": "Use for section labels, badges, and small categorizations." } } },
+
+"spacing": { "section": { "paddingY": "clamp(4rem, 10vw, 8rem)", "paddingX": "clamp(1.5rem, 5vw, 4rem)", "description": "Generous vertical padding between sections. Sections should breathe." }, "container": { "maxWidth": "1200px", "description": "Content should never feel cramped. Centered container with comfortable reading width." }, "grid": { "gap": "2rem", "cardGap": "1.5rem", "description": "Consistent spacing between grid items and cards." }, "content": { "headingToBody": "1.5rem", "bodyToCta": "2rem", "cardPadding": "2rem", "description": "Vertical rhythm between content elements." } },
+
+"components": { "buttons": { "primary": { "background": "#C4F233", "text": "#0A0F1C", "borderRadius": "9999px", "paddingX": "2rem", "paddingY": "1rem", "fontWeight": "600", "fontSize": "1rem", "boxShadow": "none", "hoverBackground": "#D4FF4D", "hoverTransform": "translateY(-2px)", "transition": "all 0.2s ease", "description": "Pill-shaped, bold accent color. Subtle lift on hover. Arrow icon optional." }, "secondary": { "background": "transparent", "text": "#1C3F3A", "border": "2px solid #1C3F3A", "borderRadius": "9999px", "paddingX": "2rem", "paddingY": "1rem", "fontWeight": "600", "hoverBackground": "#1C3F3A", "hoverText": "#FFFFFF" }, "onDark": { "background": "#C4F233", "text": "#0A0F1C", "description": "Same accent color works on dark backgrounds." } }, "cards": { "default": { "background": "#FFFFFF", "borderRadius": "1rem", "padding": "2rem", "boxShadow": "0 4px 20px rgba(0,0,0,0.06)", "border": "1px solid #EDF2F7", "hoverTransform": "translateY(-4px)", "hoverShadow": "0 8px 30px rgba(0,0,0,0.1)", "transition": "all 0.3s ease" }, "feature": { "background": "#FFFFFF", "borderRadius": "1.5rem", "padding": "2.5rem", "border": "none", "boxShadow": "0 2px 12px rgba(0,0,0,0.04)" }, "glass": { "background": "rgba(255,255,255,0.9)", "backdropFilter": "blur(10px)", "borderRadius": "1rem", "border": "1px solid rgba(255,255,255,0.2)" } }, "icons": { "style": "Lucide icons - stroke weight 1.5-2, consistent sizing", "sizeSmall": "1.25rem", "sizeMedium": "1.5rem", "sizeLarge": "2.5rem", "featureIconContainer": { "size": "3.5rem", "background": "#F8F7F2", "borderRadius": "0.75rem", "display": "flex", "alignItems": "center", "justifyContent": "center" }, "checkIcon": { "color": "#38A169", "size": "1.25rem", "description": "Green checkmarks for trust/security lists." } }, "navigation": { "height": "5rem", "background": "#FFFFFF", "borderBottom": "1px solid #EDF2F7", "logoSize": "2rem", "linkColor": "#4A5568", "linkHoverColor": "#0A0F1C", "linkFontWeight": "500", "ctaButton": "primary style, smaller padding" }, "footer": { "background": "#0A0F1C", "textColor": "rgba(255,255,255,0.7)", "headingColor": "#FFFFFF", "linkHoverColor": "#FFFFFF", "paddingY": "4rem", "gridColumns": "5 columns on desktop, stack on mobile" }, "badges": { "sectionLabel": { "background": "#C4F233", "text": "#0A0F1C", "borderRadius": "9999px", "paddingX": "1rem", "paddingY": "0.375rem", "fontSize": "0.75rem", "fontWeight": "600", "textTransform": "uppercase", "letterSpacing": "0.05em" }, "trustBadge": { "display": "flex", "alignItems": "center", "gap": "0.5rem", "color": "#4A5568" } }, "chatUI": { "container": { "background": "#FFFFFF", "borderRadius": "1.5rem", "boxShadow": "0 20px 60px rgba(0,0,0,0.15)", "border": "1px solid #E2E8F0", "overflow": "hidden" }, "header": { "background": "#F8F7F2", "padding": "1rem 1.5rem", "borderBottom": "1px solid #E2E8F0" }, "input": { "background": "#FFFFFF", "border": "1px solid #E2E8F0", "borderRadius": "0.75rem", "padding": "1rem 1.25rem", "placeholder": "#9CA3AF" }, "promptSuggestion": { "background": "#F8F7F2", "hoverBackground": "#C4F233", "borderRadius": "0.75rem", "padding": "1rem 1.25rem", "cursor": "pointer", "transition": "all 0.2s ease", "hoverTransform": "translateX(4px)" } } },
+
+"effects": { "shadows": { "sm": "0 1px 3px rgba(0,0,0,0.08)", "md": "0 4px 12px rgba(0,0,0,0.08)", "lg": "0 10px 40px rgba(0,0,0,0.1)", "xl": "0 20px 60px rgba(0,0,0,0.15)" }, "gradients": { "warmTexture": "radial-gradient(ellipse at top left, #EBE8D8 0%, #F5F2E8 50%, #EBE8D8 100%)", "darkOverlay": "linear-gradient(180deg, rgba(28,63,58,0.95) 0%, rgba(28,63,58,1) 100%)", "subtleGlow": "radial-gradient(circle at center, rgba(196,242,51,0.1) 0%, transparent 70%)" }, "transitions": { "default": "all 0.2s ease", "smooth": "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)", "bounce": "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)" }, "hoverEffects": { "lift": "translateY(-4px)", "scale": "scale(1.02)", "glow": "box-shadow: 0 0 20px rgba(196,242,51,0.3)" } },
+
+"patterns": { "heroLayout": { "structure": "Two columns - text left, visual right", "textColumnWidth": "55%", "visualColumnWidth": "45%", "alignment": "vertically centered", "mobileStack": "text on top, visual below" }, "sectionRhythm": { "pattern": "Alternate between light (white/cream) and dark (#1C3F3A) sections", "purpose": "Creates visual interest and emphasizes key sections" }, "contentHierarchy": { "pattern": "Section label (badge) → Headline → Description → CTA/Cards", "description": "Consistent information architecture across all sections" }, "trustSignals": { "placement": "Near CTAs, in dedicated security section, footer", "elements": ["Check icons", "Partner logos", "Certification badges", "Statistics"] } },
+
+"responsive": { "breakpoints": { "sm": "640px", "md": "768px", "lg": "1024px", "xl": "1280px" }, "mobileAdaptations": [ "Single column layouts", "Reduced heading sizes (use clamp)", "Stacked cards", "Full-width buttons", "Reduced section padding", "Hamburger navigation" ] },
+
+"imagery": { "style": { "type": "Modern, clean UI mockups and abstract 3D renders", "mood": "Professional, trustworthy, innovative", "colors": "Should incorporate brand greens and lime accent", "avoid": "Stock photo clichés, overly corporate imagery, complex illustrations" }, "heroImage": { "description": "3D rendered credit card or phone mockup with slight tilt, floating effect, subtle shadows. Incorporate brand colors and modern gradients." }, "decorativeElements": { "description": "Subtle geometric shapes, soft gradients, abstract financial symbols (charts, coins) rendered in modern 3D style" } } }
+BRIEF: Pluma Landing Page
+Create a premium fintech landing page for Pluma, an AI-powered financial assistant. The design should feel trustworthy, modern, and approachable—like a blend of a premium banking app and a friendly AI assistant. DESIGN SYSTEM REFERENCE: Use the design.json above as the definitive style guide. Key points:
+
+Color Palette: Primary dark green (#1C3F3A), electric lime accent (#C4F233), warm cream backgrounds (#EBE8D8, #F8F7F2), white sections Typography: Inter font family, large bold headlines with -0.02em letter spacing, mixed weight headlines for emphasis Buttons: Pill-shaped (border-radius: 9999px), lime accent color, subtle hover lift Cards: Generous padding (2rem), soft shadows, rounded corners (1rem) Spacing: Very generous whitespace, sections breathe with 6-8rem vertical padding Hover Effects: Subtle lifts (translateY(-4px)), smooth transitions (0.3s ease)
+
+SECTIONS: Section 1: Hero
+
+Layout: 2 columns (55% text / 45% visual) Background: #FFFFFF Left Column:
+
+Small badge/pill above title: "Assistente Financeiro IA" (lime background) Title h1: "O primeiro assistente financeiro com IA que realmente entende seu dinheiro" (use bold weight on "realmente entende") Subtitle (text-secondary, 1.125rem): "O Pluma é o único app que combina Open Finance com IA conversacional para dar respostas instantâneas sobre suas finanças - sem você precisar interpretar gráficos complicados ou fazer cálculos manuais." CTA button (pill, lime): "Teste grátis por 14 dias →" Trust logos below CTA: Banco Central logo + "Open Finance Certificado"
+
+Right Column:
+
+Generate: Modern 3D phone mockup showing a chat interface, floating at slight angle, with subtle shadow. Phone should display a simple AI chat bubble. Include subtle floating elements (coins, charts) around the phone.
+
+Section 2: Why Pluma
+
+Layout: Centered title + 3-column card grid Background: #F8F7F2 (warm cream) Section label badge: "Por que Pluma?" Title h2: "Tudo que você precisa para entender suas finanças" 3 Feature Cards (equal height, hover lift effect):
+
+Card 1:
+
+Icon container (3.5rem, cream bg): Landmark icon (Lucide) Title h3: "Conecta automaticamente" Description: "Conecta automaticamente todas suas contas via Open Finance do Banco Central"
+
+Card 2:
+
+Icon container: MessageSquare icon (Lucide) Title h3: "Experiência personalizada" Description: "Responde suas dúvidas em linguagem humana, e sugere ações para a sua situação real"
+
+Card 3:
+
+Icon container: RefreshCw icon (Lucide) Title h3: "Atualiza sozinho" Description: "Não precisa fazer input de nenhuma informação - você só conversa e toma decisões"
+
+Section 3: Pluma Answers (Chat Demo)
+
+Layout: Full-width centered Background: #1C3F3A (dark green) Text color: White Content:
+
+Section label badge (lime): "Converse com sua IA" Title h2: "Você tem perguntas, a Pluma tem respostas" Interactive Chat UI Component:
+
+White card container with large shadow, rounded corners (1.5rem) Header bar with Pluma logo/avatar Input field with placeholder: "Pergunte-me qualquer coisa sobre suas finanças" Prompt suggestion pills/cards below input:
+
+"Quanto posso gastar neste fim de semana?" "Por que minha conta está sempre no vermelho?" "Consigo trocar de carro este ano?" "Onde estou gastando demais?" "Quanto preciso guardar para a reserva de emergência?"
+
+Hover effect on suggestions: slide right 4px + lime background Add subtle floating animation to the entire chat component
+
+Section 4: Safety & Trust
+
+Layout: 2 columns (40% title / 60% cards) Background: Textured warm gradient based on #EBE8D8 (use radial gradient) Left Column:
+
+Section label badge: "Segurança" Title h2: "Seus dados estão seguros conosco" Subtitle: "A mesma proteção que você já confia no seu banco"
+
+Right Column:
+
+2x2 grid of trust cards (white, subtle shadow):
+
+Card: ShieldCheck icon (green) + "Open Finance Certificado pelo Banco Central" Card: Lock icon (green) + "Mesma segurança que seu internet banking" Card: MapPin icon (green) + "Seus dados nunca saem do Brasil" Card: KeyRound icon (green) + "Criptografia de ponta a ponta"
+
+Section 5: Final CTA
+
+Layout: Centered single column Background: #1C3F3A Text: White Content:
+
+Title h2: "Retome o controle da sua vida financeira" Benefits list (with check icons, lime color):
+
+"14 dias grátis - cancele quando quiser" "Conecte suas contas em 2 minutos via Open Finance" "Sem pegadinhas - preço fixo após o trial"
+
+Large CTA button (lime): "Teste grátis agora →"
+
+Section 6: Footer
+
+Background: #0A0F1C (near black) Text: White/gray Layout: 4-5 column grid Content:
+
+Pluma logo Navigation links Legal links (Política de Privacidade, Termos de Uso) Open Finance certification badge Copyright: "© 2025 Pluma. Todos os direitos reservados."
+
+IMPORTANT STYLE NOTES:
+
+Use generous whitespace between all elements Headlines should have mixed font weights for emphasis All interactive elements need smooth hover transitions Cards should have subtle lift on hover Maintain consistent 1rem-1.5rem border-radius across all components Section backgrounds should alternate to create rhythm Trust signals should appear near every CTA Mobile-first responsive design with single-column stacking
+
