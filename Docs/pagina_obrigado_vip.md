@@ -15,3 +15,4 @@ apenas para quem estiver no Grupo Vip do WhatsApp
 ### CTA Principal
 [Botão verde]
 **ENTRAR NO GRUPO VIP**
+Link: https://chat.whatsapp.com/G3Ur00PBB1A4Iq5Qudjm6p
