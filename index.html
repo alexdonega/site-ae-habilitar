@@ -46,24 +46,37 @@
                 setIsSubmitting(true);
                 try {
                     const payload = {
-                        full_name: formData.full_name,
-                        first_name: getFirstName(formData.full_name),
-                        phone: phoneNumbers,
+                        nome_completo: formData.full_name,
+                        whatsapp: formData.phone,
                         email: formData.email,
-                        categoria: formData.categoria
+                        categoria_desejada: formData.categoria
                     };
-                    const response = await fetch('https://api.datacrazy.io/v1/crm/api/crm/flows/webhooks/319d0c5f-d827-4f3a-9c93-a17dbb0d2cc9/1e250114-cef5-480c-9faf-ade6b7dd74aa', {
+
+                    // Envio para Google Sheets
+                    const googleSheetsPromise = fetch('https://script.google.com/macros/s/AKfycby45iOPKUUQSCYJAgmEqw_3rOoFDV54dmCGQlOsEzQFdPtDGcSls39yXTQcQ0m-OUBx/exec', {
                         method: 'POST',
+                        mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    if (response.ok) {
-                        setSubmitSuccess(true);
-                        setFormData({ full_name: '', phone: '', email: '', categoria: '' });
-                    } else {
-                        const errorText = await response.text();
-                        throw new Error(`Erro do servidor: ${response.status} ${response.statusText} - ${errorText}`);
-                    }
+
+                    // Envio para Novo Envio Webhook
+                    const novoEnvioPromise = fetch('https://hook.novoenvio.com.br/webhook/f05ec049-fb8e-4e18-8a1a-c5a0c98542ef', {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    await Promise.all([googleSheetsPromise, novoEnvioPromise]);
+
+                    setSubmitSuccess(true);
+                    setFormData({ full_name: '', phone: '', email: '', categoria: '' });
+
+                    setTimeout(() => {
+                        window.location.href = 'grupo-vip.html';
+                    }, 1500);
+
                 } catch (error) {
                     console.error('Erro detalhado:', error);
                     setSubmitError(`Erro ao enviar: ${error.message}`);
