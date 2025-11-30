@@ -56,7 +56,7 @@
                     const googleSheetsPromise = fetch('https://script.google.com/macros/s/AKfycby45iOPKUUQSCYJAgmEqw_3rOoFDV54dmCGQlOsEzQFdPtDGcSls39yXTQcQ0m-OUBx/exec', {
                         method: 'POST',
                         mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 'Content-Type': 'text/plain' },
                         body: JSON.stringify(payload)
                     });
 
