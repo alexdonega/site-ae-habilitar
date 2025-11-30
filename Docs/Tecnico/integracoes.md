@@ -16,7 +16,11 @@
 
 **Token da API:** `EAAKxJDw3klcBQIO2ZADccb25FhmD1ogC8PEFkX7IX9BRsVB5THIiRjTBxEBZAIfIMBFuRImDpabmh3N8XpsnOQ8Jg8s2xHu7BmEMrTBqv7syBjrpRp4RiKJxP0TRlcPwZC0JmO0IurY5sdPf9XoQmaoaZCp3ROADfXxhEQZAoSLF7ZB820ZBaW2EZCKsGMSYPM3IdQZDZD`
 
-**Eventos de acesso:** `PageView e CompleteRegistration`
+**Eventos de acesso:**
+*   `PageView`: Ao carregar qualquer página.
+*   `CompleteRegistration`: Ao enviar o formulário com sucesso.
+*   `Contact`: Ao clicar no botão flutuante do WhatsApp ou no link de contato do rodapé (`index.html`).
+*   `Lead`: Ao clicar no botão "ENTRAR NO GRUPO VIP" (`grupo-vip.html`).
 
 **Código de teste:** ``
 
