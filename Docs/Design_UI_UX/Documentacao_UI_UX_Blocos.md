@@ -27,8 +27,8 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 > *   *Exemplo:* "Configuração em 5 minutos" ou "Sem cartão de crédito".
 
 ### Referências Visuais
-![Hero Section Exemplo 1](../assets/template-blocos/ref_1_hero_destaque.png)
-![Hero Section Exemplo 2](image%20ref_1_hero_destaque.png)
+![Hero Section Exemplo 1](../../assets/ref_sessions/ref_1_hero_destaque.png)
+![Hero Section Exemplo 2](../../assets/ref_sessions/ref_1_hero_destaque.png)
 
 ---
 
@@ -54,8 +54,8 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 > 📝 **Notificações em Tempo Real:** Pop-ups mostrando "Fulano acabou de comprar" podem aumentar conversões em 10-15% pelo gatilho da urgência/medo de ficar de fora (FOMO).
 
 ### Referências Visuais
-![Prova Social 1](image%201ref_7_faq.png)
-![Prova Social 2](image%203ref_2_argumento_incontestavel_01.png)
+![Prova Social 1](../../assets/ref_sessions/1ref_7_faq.png)
+![Prova Social 2](../../assets/ref_sessions/3ref_2_argumento_incontestavel_01.png)
 
 ---
 
@@ -74,8 +74,8 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 > 📝 **Argumento Incontestável:** Combine lógica e emoção de forma que concordar seja inevitável. Use fatos, dados ou senso comum forte.
 
 ### Referências Visuais
-![Problemas](image%20ref_4_beneficios_detalhados.png)
-![Falsa Solução](image%20ref_6_painel_tldr.png)
+![Problemas](../../assets/ref_sessions/ref_4_beneficios_detalhados.png)
+![Falsa Solução](../../assets/ref_sessions/ref_6_painel_tldr.png)
 
 ---
 
@@ -95,8 +95,8 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 > *   *Conceito:* O cliente quer o resultado, não a ferramenta.
 
 ### Referências Visuais
-![Com vs Sem 1](../assets/template-blocos/ref_3_com_vs_sem_saas_01.png)
-![Com vs Sem 2](image%203ref_6_painel_tldr.png)
+![Com vs Sem 1](../../assets/ref_sessions/ref_3_com_vs_sem_saas_01.png)
+![Com vs Sem 2](../../assets/ref_sessions/3ref_6_painel_tldr.png)
 
 ---
 
@@ -115,8 +115,8 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 > *   *Resultado:* Transmite o valor mesmo sem o play.
 
 ### Referências Visuais
-![Depoimentos Vídeo](../assets/template-blocos/ref_5_videos_depoimentos_01.png)
-![Depoimentos Headline](image%202ref_2_argumento_incontestavel_01.png)
+![Depoimentos Vídeo](../../assets/ref_sessions/ref_5_videos_depoimentos_01.png)
+![Depoimentos Headline](../../assets/ref_sessions/2ref_2_argumento_incontestavel_01.png)
 
 ---
 
@@ -133,7 +133,7 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 *   Ex: "Preciso de cartão de crédito?", "Tem fidelidade?", "Serve para iniciantes?".
 
 ### Referências Visuais
-![FAQ](../assets/template-blocos/ref_7_faq.png)
+![FAQ](../../assets/ref_sessions/ref_7_faq.png)
 
 ---
 
@@ -150,8 +150,8 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 > 📝 **Too Long; Didn't Read:** Resuma a oferta inteira em 3 frases + Preço + Garantia. É a última chance de pescar o usuário apressado.
 
 ### Referências Visuais
-![TLDR Painel](../assets/template-blocos/ref_6_painel_tldr.png)
-![TLDR Exemplo](image%202ref_7_faq.png)
+![TLDR Painel](../../assets/ref_sessions/ref_6_painel_tldr.png)
+![TLDR Exemplo](../../assets/ref_sessions/2ref_7_faq.png)
 
 ---
 
@@ -161,9 +161,9 @@ Este documento consolida as melhores práticas de design (UI/UX), posicionamento
 *   **Gatilho:** Intenção de saída ou tempo na página.
 *   **Conteúdo:** Oferta irresistível ou "Lead Magnet" (Teste Grátis).
 *   **Visual:** Deve ofuscar o fundo para focar a atenção.
-![Popup](../assets/template-blocos/ref_popup_conversao.png)
+![Popup](../../assets/ref_sessions/ref_popup_conversao.png)
 
 ### Aviso Legal (Footer)
 *   Essencial para anúncios (Facebook/Google Ads).
 *   Deve conter: Termos de Uso, Política de Privacidade, CNPJ, Isenção de Responsabilidade (Disclaimers).
-![Footer Legal](../assets/template-blocos/ref_8_aviso_legal.png)
+![Footer Legal](../../assets/ref_sessions/ref_8_aviso_legal.png)

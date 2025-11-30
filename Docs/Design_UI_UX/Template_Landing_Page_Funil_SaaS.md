@@ -59,7 +59,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Botão de CTA (Botão)
 - 03 Bullets de benefícios (Lista ul/li)
 
-![ref_1_hero_destaque.png](../assets/template-blocos/ref_1_hero_destaque.png)
+![ref_1_hero_destaque.png](../../assets/ref_sessions/ref_1_hero_destaque.png)
 
 ---
 
@@ -69,9 +69,9 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Subtítulo (Texto p)
 - 2 ícones com estatísticas de apoio (Ícones + Texto p)
 
-![ref_2_argumento_incontestavel_01.png](../assets/template-blocos/ref_2_argumento_incontestavel_01.png)
+![ref_2_argumento_incontestavel_01.png](../../assets/ref_sessions/ref_2_argumento_incontestavel_01.png)
 
-![2ref_1_hero_destaque.png](2ref_1_hero_destaque.png)
+![2ref_1_hero_destaque.png](../../assets/ref_sessions/2ref_1_hero_destaque.png)
 
 ---
 
@@ -87,9 +87,9 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
     - Benefícios como antídoto direto aos problemas (Lista ul/li)
     
 
-![ref_3_com_vs_sem_saas_01.png](../assets/template-blocos/ref_3_com_vs_sem_saas_01.png)
+![ref_3_com_vs_sem_saas_01.png](../../assets/ref_sessions/ref_3_com_vs_sem_saas_01.png)
 
-![3ref_1_hero_destaque.png](3ref_1_hero_destaque.png)
+![3ref_1_hero_destaque.png](../../assets/ref_sessions/3ref_1_hero_destaque.png)
 
 ---
 
@@ -105,7 +105,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
     - Imagem ilustrativa (Imagem)
     - Botão de CTA (Botão)
 
-![ref_4_beneficios_detalhados.png](../assets/template-blocos/ref_4_beneficios_detalhados.png)
+![ref_4_beneficios_detalhados.png](../../assets/ref_sessions/ref_4_beneficios_detalhados.png)
 
 ---
 
@@ -119,11 +119,11 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
     - Vídeo depoimento (Video embed)
     - Nome da pessoa e empresa (Texto p)
 
-![ref_5_videos_depoimentos_01.png](../assets/template-blocos/ref_5_videos_depoimentos_01.png)
+![ref_5_videos_depoimentos_01.png](../../assets/ref_sessions/ref_5_videos_depoimentos_01.png)
 
-![5ref_1_hero_destaque.png](5ref_1_hero_destaque.png)
+![5ref_1_hero_destaque.png](../../assets/ref_sessions/5ref_1_hero_destaque.png)
 
-![5ref_2_argumento_incontestavel_01.png](5ref_2_argumento_incontestavel_01.png)
+![5ref_2_argumento_incontestavel_01.png](../../assets/ref_sessions/5ref_2_argumento_incontestavel_01.png)
 
 ---
 
@@ -133,7 +133,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Subtítulo (Texto p)
 - CTA final (Botão)
 
-![ref_6_painel_tldr.png](../assets/template-blocos/ref_6_painel_tldr.png)
+![ref_6_painel_tldr.png](../../assets/ref_sessions/ref_6_painel_tldr.png)
 
 ---
 
@@ -146,7 +146,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
     - Resposta (Texto p)
     - CTA (Botão)
 
-![ref_7_faq.png](../assets/template-blocos/ref_7_faq.png)
+![ref_7_faq.png](../../assets/ref_sessions/ref_7_faq.png)
 
 ---
 
@@ -156,7 +156,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Disclaimers legais extensos (Texto p)
 - Links para Termos de Uso e Política de Privacidade (Links a)
 
-![ref_8_aviso_legal.png](../assets/template-blocos/ref_8_aviso_legal.png)
+![ref_8_aviso_legal.png](../../assets/ref_sessions/ref_8_aviso_legal.png)
 
 ---
 
@@ -179,13 +179,13 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Botão de CTA principal (Botão)
 - Texto de garantia/benefícios adicionais (Texto small)
 
-![PopUp de Conversão.png](../assets/template-blocos/ref_popup_conversao.png)
+![PopUp de Conversão.png](../../assets/ref_sessions/ref_popup_conversao.png)
 
 ---
 
 ### Landing Page Completa
 
-![ref_landing_page_completa.png](../assets/template-blocos/ref_landing_page_completa.png)
+![ref_landing_page_completa.png](../../assets/ref_sessions/ref_landing_page_completa.png)
 
 ---
 
@@ -230,7 +230,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Deve ser simples e claro
 - Visualmente proeminente na página
 
-![ref_1_hero_destaque.png](../assets/template-blocos/ref_1_hero_destaque.png)
+![ref_1_hero_destaque.png](../../assets/ref_sessions/ref_1_hero_destaque.png)
 
 ---
 
@@ -256,9 +256,9 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Subtítulo explicativo
 - 2 ícones com estatísticas que reforçam o argumento
 
-![ref_2_argumento_incontestavel_01.png](../assets/template-blocos/ref_2_argumento_incontestavel_01.png)
+![ref_2_argumento_incontestavel_01.png](../../assets/ref_sessions/ref_2_argumento_incontestavel_01.png)
 
-![2ref_1_hero_destaque.png](2ref_1_hero_destaque.png)
+![2ref_1_hero_destaque.png](../../assets/ref_sessions/2ref_1_hero_destaque.png)
 
 ---
 
@@ -290,9 +290,9 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Valor da transformação fica óbvio
 - Cria senso de urgência para mudança
 
-![ref_3_com_vs_sem_saas_01.png](../assets/template-blocos/ref_3_com_vs_sem_saas_01.png)
+![ref_3_com_vs_sem_saas_01.png](../../assets/ref_sessions/ref_3_com_vs_sem_saas_01.png)
 
-![3ref_1_hero_destaque.png](3ref_1_hero_destaque.png)
+![3ref_1_hero_destaque.png](../../assets/ref_sessions/3ref_1_hero_destaque.png)
 
 ---
 
@@ -315,7 +315,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - **Imagem ilustrativa:** Demonstração visual da funcionalidade
 - **Botão de CTA:** Oportunidade de conversão por benefício
 
-![ref_4_beneficios_detalhados.png](../assets/template-blocos/ref_4_beneficios_detalhados.png)
+![ref_4_beneficios_detalhados.png](../../assets/ref_sessions/ref_4_beneficios_detalhados.png)
 
 ---
 
@@ -343,11 +343,11 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Aumenta efetividade da prova social
 - Exemplo: "Economizei 10 horas por semana com este serviço!"
 
-![ref_5_videos_depoimentos_01.png](../assets/template-blocos/ref_5_videos_depoimentos_01.png)
+![ref_5_videos_depoimentos_01.png](../../assets/ref_sessions/ref_5_videos_depoimentos_01.png)
 
-![5ref_1_hero_destaque.png](5ref_1_hero_destaque.png)
+![5ref_1_hero_destaque.png](../../assets/ref_sessions/5ref_1_hero_destaque.png)
 
-![5ref_2_argumento_incontestavel_01.png](5ref_2_argumento_incontestavel_01.png)
+![5ref_2_argumento_incontestavel_01.png](../../assets/ref_sessions/5ref_2_argumento_incontestavel_01.png)
 
 ---
 
@@ -367,7 +367,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Resume benefícios principais
 - Oferece conversão rápida
 
-![ref_6_painel_tldr.png](../assets/template-blocos/ref_6_painel_tldr.png)
+![ref_6_painel_tldr.png](../../assets/ref_sessions/ref_6_painel_tldr.png)
 
 ---
 
@@ -389,7 +389,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - **Respostas:** Eliminam barreiras à conversão
 - **CTA:** Oportunidade de ação pós-esclarecimento
 
-![ref_7_faq.png](../assets/template-blocos/ref_7_faq.png)
+![ref_7_faq.png](../../assets/ref_sessions/ref_7_faq.png)
 
 ---
 
@@ -409,7 +409,7 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Transparência com usuários
 - Conformidade regulatória
 
-![ref_8_aviso_legal.png](../assets/template-blocos/ref_8_aviso_legal.png)
+![ref_8_aviso_legal.png](../../assets/ref_sessions/ref_8_aviso_legal.png)
 
 ---
 
@@ -450,13 +450,13 @@ A landing page reflete uma filosofia de "menos é mais", eliminando elementos qu
 - Oferece valor imediato
 - Captura dados para nutrição posterior
 
-![PopUp de Conversão.png](../assets/template-blocos/ref_popup_conversao.png)
+![PopUp de Conversão.png](../../assets/ref_sessions/ref_popup_conversao.png)
 
 ---
 
 ### Landing Page Completa
 
-![ref_landing_page_completa.png](../assets/template-blocos/ref_landing_page_completa.png)
+![ref_landing_page_completa.png](../../assets/ref_sessions/ref_landing_page_completa.png)
 
 ---
 

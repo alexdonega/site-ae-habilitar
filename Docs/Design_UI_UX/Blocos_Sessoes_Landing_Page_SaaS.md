@@ -11,7 +11,7 @@ Status: Em andamento
 
 - Texto
 
-![ref_banner_aviso.png](../assets/template-blocos/ref_banner_aviso.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_banner_aviso.png)
 
 ## **2. Seção de destaque (hero section)**
 
@@ -23,14 +23,14 @@ Status: Em andamento
 - **Botão de CTA (Call to Action):** O botão deve ser destacado e descritivo. Mantenha-o simples.
 - **Prova Social (Social Proof):** Mostre 3 a 5 fotos de clientes e destaque o número total de clientes que você já atendeu. Exemplo: “Junte-se a mais de 100 alunos”.
 
-![ref_banner_aviso.png](image%20ref_1_hero_destaque.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_1_hero_destaque.png)
 
 ## **3. Demonstrativo interativo ou visual do produto (Vídeo)**
 
 - **Vídeo de Vendas (Video Sales Letter):** Exatamente o que parece – uma carta de vendas gravada em formato de vídeo.
 - 06 Bullet Points benefícios
 
-![ref_banner_aviso.png](image%20ref_2_argumento_incontestavel_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_2_argumento_incontestavel_01.png)
 
 # ABAIXO DA 1º DOBRA
 
@@ -40,7 +40,7 @@ Status: Em andamento
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](image%20ref_3_com_vs_sem_saas_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_3_com_vs_sem_saas_01.png)
 
 ## 4. Problemas
 
@@ -51,9 +51,9 @@ Status: Em andamento
 - Ampliação do Problema 4
 - Botão de CTA
 
-![ref_banner_aviso.png](image%20ref_4_beneficios_detalhados.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_4_beneficios_detalhados.png)
 
-![ref_banner_aviso.png](image%20ref_5_videos_depoimentos_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_5_videos_depoimentos_01.png)
 
 ## 3. **Mecanismo de falsa solução**
 
@@ -63,7 +63,7 @@ Status: Em andamento
 - Solução 3
 - Botão de CTA
 
-![ref_banner_aviso.png](image%20ref_6_painel_tldr.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_6_painel_tldr.png)
 
 ## 3. Introduzir o produto
 
@@ -75,7 +75,7 @@ O objetivo aqui é fazer com que entendam como o seu produto pode tirá-los da s
 - Entregável 4 com breve descrição
 - CTA
 
-![ref_banner_aviso.png](image%20ref_6_painel_tldr.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_6_painel_tldr.png)
 
 ## 3. Benefícios
 
@@ -87,7 +87,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Entrega 4 com breve descrição
 - Botão de CTA
 
-![ref_banner_aviso.png](image%20ref_7_faq.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_7_faq.png)
 
 ## 3. Qualificação
 
@@ -103,7 +103,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Bullet point
 - CTA
 
-![ref_banner_aviso.png](image%20ref_8_aviso_legal.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_8_aviso_legal.png)
 
 ## Empilhamento de Oferta/Valor (Offer/Value Stacking)
 
@@ -111,7 +111,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](../assets/template-blocos/ref_empilhamento_oferta.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_empilhamento_oferta.png)
 
 ## 3. Vídeos Depoimentos com Headline
 
@@ -119,7 +119,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](../assets/template-blocos/ref_videos_depoimentos_headline_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_videos_depoimentos_headline_01.png)
 
 ## 3. Manifesto
 
@@ -127,7 +127,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](image%201ref_1_hero_destaque.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_1_hero_destaque.png)
 
 ## 3. Perguntas Frequentes
 
@@ -135,7 +135,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_faq_novo_envio.png](../assets/template-blocos/ref_faq_novo_envio.png)
+![ref_faq_novo_envio.png](../../assets/ref_sessions/ref_faq_novo_envio.png)
 
 ## 3. Painel de Chamada para Ação "Too Long Didn't Read" (TL;DR)
 
@@ -143,9 +143,9 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](image%201ref_2_argumento_incontestavel_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_2_argumento_incontestavel_01.png)
 
-![WhatsApp Image 2025-09-23 at 09.59.15.jpeg](../assets/template-blocos/ref_tldr_whatsapp.jpeg)
+![WhatsApp Image 2025-09-23 at 09.59.15.jpeg](../../assets/ref_sessions/ref_tldr_whatsapp.jpeg)
 
 ## 3. Rodapé
 
@@ -153,7 +153,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](image%201ref_3_com_vs_sem_saas_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_3_com_vs_sem_saas_01.png)
 
 ## 3. Aviso Legal
 
@@ -161,7 +161,7 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](image%201ref_4_beneficios_detalhados.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_4_beneficios_detalhados.png)
 
 ## 3. Tabela de Comparação
 
@@ -169,17 +169,9 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](image%201ref_5_videos_depoimentos_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_5_videos_depoimentos_01.png)
 
-![ref_banner_aviso.png](image%201ref_6_painel_tldr.png)
-
-## 3. Depoimentos
-
-- Título
-- Depoimentos em WhatsApp
-- CTA
-
-![ref_banner_aviso.png](image%20ref_3_com_vs_sem_saas_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_6_painel_tldr.png)
 
 ## 3. Depoimentos
 
@@ -187,7 +179,15 @@ Use esta seção para aprofundar na solução que seu produto oferece.
 - Depoimentos em WhatsApp
 - CTA
 
-![ref_banner_aviso.png](image%20ref_3_com_vs_sem_saas_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_3_com_vs_sem_saas_01.png)
+
+## 3. Depoimentos
+
+- Título
+- Depoimentos em WhatsApp
+- CTA
+
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_3_com_vs_sem_saas_01.png)
 
 ---
 
@@ -213,11 +213,11 @@ Utilize o topo da sua landing page para mostrar provas sociais e construir confi
 
 </aside>
 
-![ref_banner_aviso.png](image%201ref_7_faq.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_7_faq.png)
 
-![ref_banner_aviso.png](image%201ref_8_aviso_legal.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_8_aviso_legal.png)
 
-![ref_banner_aviso.png](../assets/template-blocos/ref_prova_social_acima_dobra_03.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_prova_social_acima_dobra_03.png)
 
 ---
 
@@ -230,7 +230,7 @@ Adicione notificações de prova social em tempo real, como pop-ups que mostram 
 
 </aside>
 
-![ref_banner_aviso.png](../assets/template-blocos/ref_notificacoes_prova_social.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_notificacoes_prova_social.png)
 
 ---
 
@@ -243,7 +243,7 @@ Adicione notificações de prova social em tempo real, como pop-ups que mostram 
 
 </aside>
 
-![ref_banner_aviso.png](image%202ref_1_hero_destaque.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_1_hero_destaque.png)
 
 ---
 
@@ -258,11 +258,11 @@ Por exemplo, destaque uma frase-chave do depoimento, como: *"Economizei 10 horas
 
 </aside>
 
-![ref_banner_aviso.png](image%202ref_2_argumento_incontestavel_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_2_argumento_incontestavel_01.png)
 
-![ref_banner_aviso.png](image%202ref_3_com_vs_sem_saas_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_3_com_vs_sem_saas_01.png)
 
-![ref_banner_aviso.png](image%202ref_4_beneficios_detalhados.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_4_beneficios_detalhados.png)
 
 ---
 
@@ -275,9 +275,9 @@ Crie uma tabela de comparação que mostre claramente por que seu serviço é a 
 
 </aside>
 
-![ref_banner_aviso.png](image%201ref_5_videos_depoimentos_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_5_videos_depoimentos_01.png)
 
-![ref_banner_aviso.png](image%201ref_6_painel_tldr.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/1ref_6_painel_tldr.png)
 
 ---
 
@@ -288,7 +288,7 @@ Crie uma tabela de comparação que mostre claramente por que seu serviço é a 
 
 </aside>
 
-![ref_banner_aviso.png](image%202ref_5_videos_depoimentos_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_5_videos_depoimentos_01.png)
 
 ---
 
@@ -301,7 +301,7 @@ Em vez de listar as características técnicas do seu produto ou serviço, desta
 
 </aside>
 
-![ref_banner_aviso.png](image%202ref_6_painel_tldr.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_6_painel_tldr.png)
 
 ---
 
@@ -314,7 +314,7 @@ Alguns visitantes irão direto para o final da página em busca de informações
 
 </aside>
 
-![ref_banner_aviso.png](image%202ref_7_faq.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_7_faq.png)
 
 ---
 
@@ -327,9 +327,9 @@ Incentive os visitantes a clicarem no botão de CTA adicionando uma pequena linh
 
 </aside>
 
-![ref_banner_aviso.png](image%202ref_8_aviso_legal.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/2ref_8_aviso_legal.png)
 
-![ref_banner_aviso.png](../assets/template-blocos/ref_otimizacao_cta_02.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_otimizacao_cta_02.png)
 
 ---
 
@@ -342,7 +342,7 @@ A **seção de qualificação** tem o objetivo de identificar o público ideal p
 
 </aside>
 
-![ref_banner_aviso.png](image%20ref_8_aviso_legal.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_8_aviso_legal.png)
 
 ---
 
@@ -367,7 +367,7 @@ Se substituir por um manifesto, o foco será mais em transmitir sua visão e val
 
 </aside>
 
-![ref_banner_aviso.png](../assets/template-blocos/ref_historia_pessoal.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_historia_pessoal.png)
 
 ---
 
@@ -378,7 +378,7 @@ Se substituir por um manifesto, o foco será mais em transmitir sua visão e val
 
 </aside>
 
-![ref_banner_aviso.png](image%203ref_1_hero_destaque.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_1_hero_destaque.png)
 
 ---
 
@@ -391,7 +391,7 @@ O **mecanismo de falsa solução** é uma estratégia usada no marketing e copyw
 
 </aside>
 
-![ref_banner_aviso.png](image%20ref_6_painel_tldr.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/ref_6_painel_tldr.png)
 
 ---
 
@@ -428,7 +428,7 @@ Esse empilhamento cria uma narrativa clara de confiança, credibilidade e sucess
 
 </aside>
 
-![ref_banner_aviso.png](image%203ref_2_argumento_incontestavel_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_2_argumento_incontestavel_01.png)
 
 ---
 
@@ -439,7 +439,7 @@ Esse empilhamento cria uma narrativa clara de confiança, credibilidade e sucess
 
 </aside>
 
-![ref_banner_aviso.png](image%203ref_2_argumento_incontestavel_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_2_argumento_incontestavel_01.png)
 
 ---
 
@@ -469,7 +469,7 @@ https://groove.cm/
 
 https://www.woodburnwealthgroup.com/
 
-![ref_banner_aviso.png](image%203ref_3_com_vs_sem_saas_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_3_com_vs_sem_saas_01.png)
 
 ---
 
@@ -477,14 +477,14 @@ https://www.woodburnwealthgroup.com/
 
 Um argumento incontestável combina lógica e emoção de forma tão eficaz que o "óbvio" é concordar com ele. Ele precisa se ancorar em pilares de credibilidade, como: um fato real (notícia, acontecimento histórico, vivencia pessoal), um dado de fonte confiável (estudos, pesquisas, artigos) ou uma premissa de senso comum muito forte.
 
-![ref_banner_aviso.png](image%203ref_4_beneficios_detalhados.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_4_beneficios_detalhados.png)
 
-![ref_banner_aviso.png](image%203ref_5_videos_depoimentos_01.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_5_videos_depoimentos_01.png)
 
 ---
 
 ## Com o Saas e Sem o Saas
 
-![ref_banner_aviso.png](image%203ref_6_painel_tldr.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_6_painel_tldr.png)
 
-![ref_banner_aviso.png](image%203ref_7_faq.png)
+![ref_banner_aviso.png](../../assets/ref_sessions/3ref_7_faq.png)
