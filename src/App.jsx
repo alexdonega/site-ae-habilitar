@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function AutoescolaJottaLanding() {
+    const navigate = useNavigate();
     const [timeLeft, setTimeLeft] = useState({ days: 6, hours: 5, minutes: 33, seconds: 44 });
     const [formData, setFormData] = useState({ full_name: '', phone: '', email: '', categoria: 'Moto [A]' });
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,7 +64,7 @@ function AutoescolaJottaLanding() {
             setFormData({ full_name: '', phone: '', email: '', categoria: '' });
 
             // Redirecionamento imediato
-            window.location.href = 'grupo-vip.html';
+            navigate('/grupo-vip');
 
         } catch (error) {
             console.error('Erro detalhado:', error);
