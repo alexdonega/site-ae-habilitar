@@ -118,7 +118,7 @@ function AutoescolaJottaLanding() {
             <section className="relative min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.8)), url('assets/images/bg-campo-grande.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <header className="w-full py-3 md:py-4">
                     <div className="max-w-7xl mx-auto px-4 flex justify-center">
-                        <img src="assets/images/Logo fundo transparente.webp" alt="Jotta de Autoescolas" className="h-12 sm:h-16 md:h-24" width="300" height="100" />
+                        <img src="assets/images/Logo fundo transparente.webp" alt="Jotta de Autoescolas" className="h-12 sm:h-16 md:h-24 w-auto" width="300" height="100" />
                     </div>
                 </header>
                 <div className="flex-1 flex items-center">
@@ -206,7 +206,7 @@ function AutoescolaJottaLanding() {
                                                     {fieldErrors.email && <span className="text-red-500 text-xs mt-1 block">{fieldErrors.email}</span>}
                                                 </div>
                                                 <div>
-                                                    <label htmlFor="categoria" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Categoria Desejada</label>
+                                                    <label htmlFor="categoria" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Escolha a sua Categoria Desejada</label>
                                                     <select
                                                         id="categoria"
                                                         className={`w-full px-3 py-2.5 md:px-4 md:py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base ${fieldErrors.categoria ? 'border-red-500' : 'border-gray-300'}`}
@@ -282,7 +282,7 @@ function AutoescolaJottaLanding() {
                         <div className="bg-gray-800 rounded-xl md:rounded-2xl p-5 md:p-6 text-center border-2 border-gray-700 hover:border-green-500 transition-all duration-300 sm:col-span-2 md:col-span-1">
                             <div className="w-12 h-12 md:w-16 md:h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4"><svg className="w-6 h-6 md:w-8 md:h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg></div>
                             <h3 className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">Promissória sem Consulta</h3>
-                            <p className="text-gray-400 text-sm md:text-base">Sem SPC, sem Serasa. Nome sujo? A gente resolve.</p>
+                            <p className="text-gray-400 text-sm md:text-base">Sem SPC, sem Serasa.</p>
                         </div>
                     </div>
                     <div className="bg-gray-800/50 rounded-xl md:rounded-2xl p-5 md:p-8 max-w-2xl mx-auto mb-8 md:mb-10">
@@ -310,7 +310,7 @@ function AutoescolaJottaLanding() {
             {/* FOOTER */}
             <footer className="bg-gray-900 border-t border-gray-800 py-8 md:py-10">
                 <div className="max-w-6xl mx-auto px-4">
-                    <div className="flex justify-center mb-5 md:mb-6"><img src="assets/images/Logo fundo transparente.webp" alt="Jotta de Autoescolas" className="h-16 md:h-24" width="300" height="100" /></div>
+                    <div className="flex justify-center mb-5 md:mb-6"><img src="assets/images/Logo fundo transparente.webp" alt="Jotta de Autoescolas" className="h-16 md:h-24 w-auto" width="300" height="100" /></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8 max-w-2xl mx-auto">
                         <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><a href="https://www.google.com/maps/place/20%C2%B023'52.9%22S+54%C2%B034'21.9%22W/@-20.3980278,-54.57275,786m/data=!3m1!1e3!4m4!3m3!8m2!3d-20.3980278!4d-54.57275?hl=pt-BR&entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="text-red-500 font-semibold text-sm md:text-base mb-1 hover:underline">📍 Unidade Nova Lima</a><p className="text-gray-300 text-xs md:text-sm">Rua Jerônimo de Albuquerque, 705<br />Nova Lima, Campo Grande-MS</p></div>
                         <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><a href="https://www.google.com/maps/place/20%C2%B026'44.5%22S+54%C2%B039'58.3%22W/@-20.4456944,-54.6661944,786m/data=!3m1!1e3!4m4!3m3!8m2!3d-20.4456944!4d-54.6661944?hl=pt-BR&entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="text-red-500 font-semibold text-sm md:text-base mb-1 hover:underline">📍 Unidade Julio de Castilho</a><p className="text-gray-300 text-xs md:text-sm">Av. Júlio de Castilho, 3927<br />Julio de Castilho, Campo Grande-MS</p></div>
