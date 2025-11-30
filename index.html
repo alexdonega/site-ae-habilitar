@@ -19,7 +19,7 @@
 
         function AutoescolaJottaLanding() {
             const [timeLeft, setTimeLeft] = useState({ days: 6, hours: 5, minutes: 33, seconds: 44 });
-            const [formData, setFormData] = useState({ full_name: '', phone: '', email: '', categoria: 'Categoria A (Moto)' });
+            const [formData, setFormData] = useState({ full_name: '', phone: '', email: '', categoria: 'Moto [A]' });
             const [isSubmitting, setIsSubmitting] = useState(false);
             const [submitSuccess, setSubmitSuccess] = useState(false);
             const [submitError, setSubmitError] = useState('');
@@ -162,13 +162,13 @@
                                                         <div>
                                                             <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Categoria Desejada</label>
                                                             <select className="w-full px-3 py-2.5 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base" value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })} required>
-                                                                <option value="Categoria A (Moto)">Categoria A (Moto)</option>
-                                                                <option value="Categoria B (Carro)">Categoria B (Carro)</option>
-                                                                <option value="Categoria AB (Carro e Moto)">Categoria AB (Carro e Moto)</option>
-                                                                <option value="Adição A (Moto)">Adição A (Moto)</option>
-                                                                <option value="Adição B (Carro)">Adição B (Carro)</option>
-                                                                <option value="Mudança de Categoria D (Ônibus)">Mudança de Categoria D (Ônibus)</option>
-                                                                <option value="Mudança de Categoria E (Carreta)">Mudança de Categoria E (Carreta)</option>
+                                                                <option value="Moto [A]">Categoria A (Moto)</option>
+                                                                <option value="Carro [B]">Categoria B (Carro)</option>
+                                                                <option value="Carro e Moto [AB]">Categoria AB (Carro e Moto)</option>
+                                                                <option value="Adição Moto [A]">Adição A (Moto)</option>
+                                                                <option value="Adição Carro [B]">Adição B (Carro)</option>
+                                                                <option value="Ônibus [D]">Mudança de Categoria D (Ônibus)</option>
+                                                                <option value="Carreta [E]">Mudança de Categoria E (Carreta)</option>
                                                             </select>
                                                         </div>
                                                         <button type="submit" disabled={isSubmitting} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 md:py-4 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base shadow-lg shadow-green-500/30 disabled:opacity-70 disabled:cursor-not-allowed">
