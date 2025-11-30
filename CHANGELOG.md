@@ -17,6 +17,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## [1.0.1] - 2025-11-30
 ### Adicionado
+- Implementado o Pixel do Facebook (ID `1154742620035043`) para rastreamento de `PageView` e `CompleteRegistration`.
 - Criado documento de especificação do formulário (`Docs/especificacao_formulario.md`).
 - Criado documento de integrações (`Docs/integracoes.md`).
 
