@@ -62,7 +62,7 @@ O formulário possui 4 campos obrigatórios.
     2.  Envia dados para **Google Sheets** (via Webhook).
     3.  Envia dados para **Novo Envio** (via Webhook).
     4.  Exibe mensagem de sucesso.
-    5.  Redireciona para `grupo-vip.html` após 1.5 segundos.
+    5.  Redireciona para `grupo-vip.html` imediatamente.
 
 *   **Payload (Dados enviados):**
     ```json
