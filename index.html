@@ -63,7 +63,7 @@
                     // Envio para Novo Envio Webhook
                     const novoEnvioPromise = fetch('https://hook.novoenvio.com.br/webhook/f05ec049-fb8e-4e18-8a1a-c5a0c98542ef', {
                         method: 'POST',
-                        mode: 'no-cors',
+                        mode: 'cors',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
