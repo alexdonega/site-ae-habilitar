@@ -73,3 +73,10 @@ O formulário possui 4 campos obrigatórios.
       "categoria_desejada": "Valor selecionado"
     }
     ```
+
+## 5. Página de Obrigado / Grupo VIP (`grupo-vip.html`)
+
+*   **Pixel do Facebook:**
+    *   Dispara o evento `CompleteRegistration` imediatamente ao carregar a página.
+*   **Redirecionamento Automático:**
+    *   Caso o usuário não clique no botão "ENTRAR NO GRUPO VIP", ele será redirecionado automaticamente para o link do WhatsApp após **7 segundos**.

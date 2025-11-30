@@ -10,6 +10,26 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Facebook Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+            };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1154742620035043');
+        fbq('track', 'PageView');
+        fbq('track', 'CompleteRegistration');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=1154742620035043&ev=PageView&noscript=1" /></noscript>
+    <!-- End Facebook Pixel Code -->
 </head>
 
 <body>
@@ -21,6 +41,7 @@
             const [timeLeft, setTimeLeft] = useState({ days: 6, hours: 5, minutes: 33, seconds: 44 });
 
             useEffect(() => {
+                // Timer para contagem regressiva visual
                 const timer = setInterval(() => {
                     setTimeLeft(prev => {
                         let { days, hours, minutes, seconds } = prev;
@@ -32,7 +53,16 @@
                         return { days, hours, minutes, seconds };
                     });
                 }, 1000);
-                return () => clearInterval(timer);
+
+                // Redirecionamento automático após 7 segundos
+                const redirectTimer = setTimeout(() => {
+                    window.location.href = "https://chat.whatsapp.com/G3Ur00PBB1A4Iq5Qudjm6p";
+                }, 7000);
+
+                return () => {
+                    clearInterval(timer);
+                    clearTimeout(redirectTimer);
+                };
             }, []);
 
             const formatNumber = (num) => String(num).padStart(2, '0');
