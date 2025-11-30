@@ -8,6 +8,7 @@ function AutoescolaJottaLanding() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
     const [submitError, setSubmitError] = useState('');
+    const [fieldErrors, setFieldErrors] = useState({});
 
     const formatPhone = (value) => {
         const numbers = value.replace(/\D/g, '').slice(0, 11);
@@ -22,11 +23,30 @@ function AutoescolaJottaLanding() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError('');
-        if (!formData.full_name.trim()) { setSubmitError('Por favor, preencha seu nome'); return; }
+        setFieldErrors({});
+
+        if (!formData.full_name.trim()) {
+            setFieldErrors(prev => ({ ...prev, full_name: 'Por favor, preencha seu nome' }));
+            return;
+        }
+
         const phoneNumbers = formData.phone.replace(/\D/g, '');
-        if (phoneNumbers.length < 10 || phoneNumbers.length > 11) { setSubmitError('WhatsApp inválido. Use DDD + número'); return; }
-        if (!isValidEmail(formData.email)) { setSubmitError('E-mail inválido'); return; }
-        if (!formData.categoria) { setSubmitError('Selecione uma categoria'); return; }
+        if (!formData.phone) {
+            setFieldErrors(prev => ({ ...prev, phone: 'WhatsApp é obrigatório' }));
+            return;
+        }
+        if (phoneNumbers.length < 10 || phoneNumbers.length > 11) {
+            setFieldErrors(prev => ({ ...prev, phone: 'Digite o número completo com DDD + 9 dígitos' }));
+            return;
+        }
+        if (!isValidEmail(formData.email)) {
+            setFieldErrors(prev => ({ ...prev, email: 'E-mail inválido' }));
+            return;
+        }
+        if (!formData.categoria) {
+            setFieldErrors(prev => ({ ...prev, categoria: 'Selecione uma categoria' }));
+            return;
+        }
 
         setIsSubmitting(true);
         try {
@@ -138,19 +158,65 @@ function AutoescolaJottaLanding() {
                                             <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
                                                 <div>
                                                     <label htmlFor="full_name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-                                                    <input id="full_name" type="text" placeholder="Qual o seu nome?" className="w-full px-3 py-2.5 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base" value={formData.full_name} onChange={(e) => setFormData({ ...formData, full_name: e.target.value })} required />
+                                                    <input
+                                                        id="full_name"
+                                                        type="text"
+                                                        placeholder="Qual o seu nome?"
+                                                        className={`w-full px-3 py-2.5 md:px-4 md:py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base ${fieldErrors.full_name ? 'border-red-500' : 'border-gray-300'}`}
+                                                        value={formData.full_name}
+                                                        onChange={(e) => {
+                                                            setFormData({ ...formData, full_name: e.target.value });
+                                                            if (fieldErrors.full_name) setFieldErrors(prev => ({ ...prev, full_name: '' }));
+                                                        }}
+                                                        required
+                                                    />
+                                                    {fieldErrors.full_name && <span className="text-red-500 text-xs mt-1 block">{fieldErrors.full_name}</span>}
                                                 </div>
                                                 <div>
                                                     <label htmlFor="phone" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
-                                                    <input id="phone" type="tel" placeholder="(67) 99999-9999" className="w-full px-3 py-2.5 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })} maxLength={16} required />
+                                                    <input
+                                                        id="phone"
+                                                        type="tel"
+                                                        placeholder="(67) 99999-9999"
+                                                        className={`w-full px-3 py-2.5 md:px-4 md:py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base ${fieldErrors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                                                        value={formData.phone}
+                                                        onChange={(e) => {
+                                                            setFormData({ ...formData, phone: formatPhone(e.target.value) });
+                                                            if (fieldErrors.phone) setFieldErrors(prev => ({ ...prev, phone: '' }));
+                                                        }}
+                                                        maxLength={16}
+                                                        required
+                                                    />
+                                                    {fieldErrors.phone && <span className="text-red-500 text-xs mt-1 block">{fieldErrors.phone}</span>}
                                                 </div>
                                                 <div>
                                                     <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                                                    <input id="email" type="email" placeholder="seu@email.com" className="w-full px-3 py-2.5 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} required />
+                                                    <input
+                                                        id="email"
+                                                        type="email"
+                                                        placeholder="seu@email.com"
+                                                        className={`w-full px-3 py-2.5 md:px-4 md:py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base ${fieldErrors.email ? 'border-red-500' : 'border-gray-300'}`}
+                                                        value={formData.email}
+                                                        onChange={(e) => {
+                                                            setFormData({ ...formData, email: e.target.value });
+                                                            if (fieldErrors.email) setFieldErrors(prev => ({ ...prev, email: '' }));
+                                                        }}
+                                                        required
+                                                    />
+                                                    {fieldErrors.email && <span className="text-red-500 text-xs mt-1 block">{fieldErrors.email}</span>}
                                                 </div>
                                                 <div>
                                                     <label htmlFor="categoria" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Categoria Desejada</label>
-                                                    <select id="categoria" className="w-full px-3 py-2.5 md:px-4 md:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base" value={formData.categoria} onChange={(e) => setFormData({ ...formData, categoria: e.target.value })} required>
+                                                    <select
+                                                        id="categoria"
+                                                        className={`w-full px-3 py-2.5 md:px-4 md:py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-sm md:text-base ${fieldErrors.categoria ? 'border-red-500' : 'border-gray-300'}`}
+                                                        value={formData.categoria}
+                                                        onChange={(e) => {
+                                                            setFormData({ ...formData, categoria: e.target.value });
+                                                            if (fieldErrors.categoria) setFieldErrors(prev => ({ ...prev, categoria: '' }));
+                                                        }}
+                                                        required
+                                                    >
                                                         <option value="Moto [A]">Categoria A (Moto)</option>
                                                         <option value="Carro [B]">Categoria B (Carro)</option>
                                                         <option value="Carro e Moto [AB]">Categoria AB (Carro e Moto)</option>
@@ -159,6 +225,7 @@ function AutoescolaJottaLanding() {
                                                         <option value="Ônibus [D]">Mudança de Categoria D (Ônibus)</option>
                                                         <option value="Carreta [E]">Mudança de Categoria E (Carreta)</option>
                                                     </select>
+                                                    {fieldErrors.categoria && <span className="text-red-500 text-xs mt-1 block">{fieldErrors.categoria}</span>}
                                                 </div>
                                                 <button type="submit" disabled={isSubmitting} className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 md:py-4 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 text-sm md:text-base shadow-lg shadow-green-500/30 disabled:opacity-70 disabled:cursor-not-allowed">
                                                     {isSubmitting ? (
