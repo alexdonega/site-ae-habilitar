@@ -116,7 +116,7 @@ function LeadDetailPage() {
     }, [navigate]);
 
     // URL da API do Google Sheets
-    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyxiHD3NJzuBR85LEupnvq9Rbkx9_kfmnMDs3yCRbVEUKR1-QED0s4fjnw515kD_4YT/exec';
+    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzdUuTJ-ZZ6x6OswD8xUFzh5py3rqqEpAnie3KztQdtb31hDKowsC_1bgYXSImRUNXl/exec';
 
     // Carregar lead do Google Sheets
     useEffect(() => {
@@ -142,32 +142,24 @@ function LeadDetailPage() {
     }, [id]);
 
     // Atualizar status
-    const handleUpdateStatus = () => {
+    const handleUpdateStatus = async () => {
         if (!lead || newStatus === lead.status) return;
 
-        const storedLeads = localStorage.getItem('ae_habilitar_leads');
-        if (storedLeads) {
-            const leads = JSON.parse(storedLeads);
-            const index = leads.findIndex(l => l.id === id);
-            if (index !== -1) {
-                const updatedLead = {
-                    ...leads[index],
-                    status: newStatus,
-                    interacoes: [
-                        ...(leads[index].interacoes || []),
-                        {
-                            id: Date.now().toString(),
-                            tipo: 'status_change',
-                            de: lead.status,
-                            para: newStatus,
-                            data: new Date().toISOString()
-                        }
-                    ]
-                };
-                leads[index] = updatedLead;
-                localStorage.setItem('ae_habilitar_leads', JSON.stringify(leads));
-                setLead(updatedLead);
-            }
+        try {
+            const params = new URLSearchParams({
+                action: 'update_status',
+                row: id,
+                status: newStatus
+            });
+            await fetch(`${SHEETS_API_URL}?${params}`, {
+                method: 'GET',
+                mode: 'no-cors'
+            });
+            setLead({ ...lead, status: newStatus });
+            alert('Status atualizado com sucesso!');
+        } catch (error) {
+            console.error('Erro ao atualizar status:', error);
+            alert('Erro ao atualizar status');
         }
     };
 
