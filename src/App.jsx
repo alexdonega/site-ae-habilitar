@@ -67,10 +67,10 @@ function AutoescolaHabilitarLanding() {
 
         // Enviar dados em background (não bloqueia o redirecionamento)
         // Envio para Google Sheets (CRM)
-        fetch('https://script.google.com/macros/s/AKfycby45iOPKUUQSCYJAgmEqw_3rOoFDV54dmCGQlOsEzQFdPtDGcSls39yXTQcQ0m-OUBx/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbzJDIYdeDLVexLV_c4mmDgxdJL6UUI5iRVn_U8qwnpXDUxQdfp6nNVNeV7QRx96sLeR/exec', {
             method: 'POST',
             mode: 'no-cors',
-            headers: { 'Content-Type': 'text/plain' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).catch(err => console.error('Erro Google Sheets:', err));
 
