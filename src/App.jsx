@@ -75,6 +75,22 @@ function AutoescolaHabilitarLanding() {
 
             await Promise.all([googleSheetsPromise, novoEnvioPromise]);
 
+            // Salvar lead no localStorage para o CRM
+            const newLead = {
+                id: Date.now().toString(),
+                nome_completo: formData.full_name,
+                email: formData.email,
+                whatsapp: formData.phone,
+                categoria_desejada: formData.categoria,
+                score: Math.floor(Math.random() * 50) + 10,
+                status: 'novo',
+                created_at: new Date().toISOString(),
+                notas: [],
+                interacoes: []
+            };
+            const existingLeads = JSON.parse(localStorage.getItem('ae_habilitar_leads') || '[]');
+            localStorage.setItem('ae_habilitar_leads', JSON.stringify([newLead, ...existingLeads]));
+
             // Facebook Pixel Event
             if (typeof window.fbq === 'function') {
                 window.fbq('track', 'CompleteRegistration');
