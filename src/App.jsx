@@ -66,12 +66,16 @@ function AutoescolaHabilitarLanding() {
         navigate('/grupo-vip');
 
         // Enviar dados em background (não bloqueia o redirecionamento)
-        // Envio para Google Sheets (CRM)
-        fetch('https://script.google.com/macros/s/AKfycbxHyym4GtdOvl1xM1eVaKgO_5qbN0t1wL1xqd4SPu0wAv9vR-E7_8-UzvN0i9tyaLx-/exec', {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+        // Envio para Google Sheets (CRM) via GET com parâmetros
+        const params = new URLSearchParams({
+            nome_completo: payload.nome_completo,
+            whatsapp: payload.whatsapp,
+            email: payload.email,
+            categoria_desejada: payload.categoria_desejada
+        });
+        fetch(`https://script.google.com/macros/s/AKfycbxHyym4GtdOvl1xM1eVaKgO_5qbN0t1wL1xqd4SPu0wAv9vR-E7_8-UzvN0i9tyaLx-/exec?${params}`, {
+            method: 'GET',
+            mode: 'no-cors'
         }).catch(err => console.error('Erro Google Sheets:', err));
 
         // Envio para Novo Envio Webhook
