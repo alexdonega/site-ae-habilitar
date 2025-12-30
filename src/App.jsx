@@ -128,10 +128,10 @@ function AutoescolaHabilitarLanding() {
                                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
                                     <span className="text-white">A CNH MAIS BARATA</span><br />
                                     <span className="text-white">DA HISTÓRIA DE</span><br />
-                                    <span className="text-red-600">SORRISO!</span>
+                                    <span className="text-habilitar-orange">SORRISO!</span>
                                 </h1>
-                                <div className="border-2 border-red-600 bg-black/40 backdrop-blur-sm px-3 py-2 md:px-4 md:py-3 rounded-lg inline-flex items-start gap-2 md:gap-3 max-w-xl mx-auto lg:mx-0">
-                                    <span className="text-red-500 text-lg md:text-xl">📍</span>
+                                <div className="border-2 border-habilitar-orange bg-black/40 backdrop-blur-sm px-3 py-2 md:px-4 md:py-3 rounded-lg inline-flex items-start gap-2 md:gap-3 max-w-xl mx-auto lg:mx-0">
+                                    <span className="text-habilitar-orange text-lg md:text-xl">📍</span>
                                     <p className="text-white text-xs sm:text-sm md:text-base text-left">Válido <strong className="text-yellow-400">EXCLUSIVAMENTE</strong> para a <strong className="text-white">Autoescola Habilitar</strong> - <strong className="text-white">Rua das Videiras, 634 - sala 2 - Centro Sul, Sorriso - MT</strong></p>
                                 </div>
                                 <p className="text-gray-200 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mx-auto lg:mx-0">A Autoescola Habilitar vai realizar um evento <strong className="text-white">HISTÓRICO</strong>. Se você busca 1ª Habilitação ou Mudança de Categoria nos melhores valores... o momento é <strong className="text-white">AGORA!</strong></p>
@@ -142,7 +142,7 @@ function AutoescolaHabilitarLanding() {
                                 </div>
                             </div>
                             <div className="w-full max-w-md mx-auto">
-                                <div className="bg-white text-gray-900 rounded-xl md:rounded-2xl p-5 md:p-8 shadow-2xl border-t-4 border-red-600">
+                                <div className="bg-white text-gray-900 rounded-xl md:rounded-2xl p-5 md:p-8 shadow-2xl border-t-4 border-habilitar-orange">
                                     <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-center mb-1 md:mb-2 text-gray-900">Grupo VIP de Ofertas</h2>
                                     <p className="text-gray-500 text-center text-xs sm:text-sm mb-4 md:mb-6">Preencha para garantir seu desconto exclusivo</p>
                                     <div className="space-y-3 md:space-y-4">
@@ -249,7 +249,7 @@ function AutoescolaHabilitarLanding() {
             </section>
 
             {/* COUNTDOWN SECTION */}
-            <section className="bg-red-600 py-6 md:py-10">
+            <section className="bg-habilitar-orange py-6 md:py-10">
                 <div className="text-center px-4">
                     <p className="text-white text-xs sm:text-sm md:text-base font-semibold tracking-wider mb-4 md:mb-5">ESSA PROMOÇÃO COMEÇA EM:</p>
                     <div className="flex justify-center gap-2 sm:gap-3 md:gap-4">
@@ -267,7 +267,7 @@ function AutoescolaHabilitarLanding() {
             <section className="bg-gray-900 py-12 md:py-20">
                 <div className="max-w-6xl mx-auto px-4">
                     <div className="text-center mb-8 md:mb-12">
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight">Condições que <span className="text-red-500">ninguém mais</span> tem coragem de oferecer</h2>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight">Condições que <span className="text-habilitar-orange">ninguém mais</span> tem coragem de oferecer</h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-10">
                         <div className="bg-gray-800 rounded-xl md:rounded-2xl p-5 md:p-6 text-center border-2 border-gray-700 hover:border-green-500 transition-all duration-300">
@@ -303,7 +303,7 @@ function AutoescolaHabilitarLanding() {
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4 leading-tight">Chega de depender dos outros<br /><span className="text-green-400">pra ir e vir!</span></h2>
                     <p className="text-gray-400 text-sm sm:text-base md:text-xl mb-6 md:mb-8 max-w-2xl mx-auto">Em 2026, conquiste sua liberdade. A Autoescola Habilitar tá pronta pra te ajudar a realizar esse sonho.</p>
-                    <button onClick={scrollToForm} className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 sm:px-10 md:px-16 py-4 md:py-6 rounded-full transition-all duration-300 transform hover:scale-105 text-base sm:text-lg md:text-2xl shadow-xl shadow-red-600/30">SIM, QUERO MINHA CNH! 🚗</button>
+                    <button onClick={scrollToForm} className="bg-habilitar-orange hover:bg-habilitar-orange-dark text-white font-bold px-8 sm:px-10 md:px-16 py-4 md:py-6 rounded-full transition-all duration-300 transform hover:scale-105 text-base sm:text-lg md:text-2xl shadow-xl shadow-habilitar-orange/30">SIM, QUERO MINHA CNH! 🚗</button>
                     <p className="text-gray-500 text-xs sm:text-sm mt-4 md:mt-6">Apenas 50 vagas para o dia 12 de janeiro de 2026</p>
                 </div>
             </section>
@@ -313,7 +313,7 @@ function AutoescolaHabilitarLanding() {
                 <div className="max-w-6xl mx-auto px-4">
                     <div className="flex justify-center mb-5 md:mb-6"><img src="assets/images/logo-autoescola-habilitar.webp" alt="Autoescola Habilitar" className="h-16 md:h-24 w-auto" width="300" height="100" /></div>
                     <div className="flex justify-center mb-6 md:mb-8 max-w-2xl mx-auto">
-                        <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><span className="text-red-500 font-semibold text-sm md:text-base mb-1">📍 Autoescola Habilitar</span><p className="text-gray-300 text-xs md:text-sm">Rua das Videiras, 634 - sala 2<br />Centro Sul, Sorriso - MT</p></div>
+                        <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><span className="text-habilitar-orange font-semibold text-sm md:text-base mb-1">📍 Autoescola Habilitar</span><p className="text-gray-300 text-xs md:text-sm">Rua das Videiras, 634 - sala 2<br />Centro Sul, Sorriso - MT</p></div>
                     </div>
                     <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-gray-400 text-xs md:text-sm mb-3 md:mb-4">
                         <a href="politica_privacidade.html" className="hover:text-white transition">Política de Privacidade</a>

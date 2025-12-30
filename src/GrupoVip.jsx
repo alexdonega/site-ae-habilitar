@@ -53,7 +53,7 @@ function GrupoVip() {
                             </span>
                             <h1 className="text-3xl sm:text-4xl md:text-6xl font-black leading-tight mb-6 text-white">
                                 ESPERE, ESPERE...<br />
-                                <span className="text-red-600">AINDA FALTA UM PASSO</span>
+                                <span className="text-habilitar-orange">AINDA FALTA UM PASSO</span>
                             </h1>
                             <p className="text-gray-300 text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed mb-8">
                                 O Mega Desconto será Liberado no dia <strong className="text-white">12 de janeiro de 2026</strong>,
