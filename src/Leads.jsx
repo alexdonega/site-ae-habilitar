@@ -143,63 +143,7 @@ function LeadsPage() {
         if (storedLeads) {
             setLeads(JSON.parse(storedLeads));
         } else {
-            // Dados de exemplo se não houver leads
-            const sampleLeads = [
-                {
-                    id: '1',
-                    nome_completo: 'Alcides Medeiros',
-                    email: 'alcidesmedeiros.ott@gmail.com',
-                    whatsapp: '+5519998152223',
-                    categoria_desejada: 'Carro [B]',
-                    valor: 1890,
-                    score: 45,
-                    status: 'novo',
-                    created_at: '2025-12-29T00:54:00',
-                    notas: [],
-                    interacoes: []
-                },
-                {
-                    id: '2',
-                    nome_completo: 'Jonathan Tebaldi',
-                    email: 'tebaldi@naveo.com.br',
-                    whatsapp: '+5511999887766',
-                    categoria_desejada: 'Moto [A]',
-                    valor: 1290,
-                    score: 15,
-                    status: 'novo',
-                    created_at: '2025-12-29T00:54:00',
-                    notas: [],
-                    interacoes: []
-                },
-                {
-                    id: '3',
-                    nome_completo: 'Wagner',
-                    email: 'wagner.piva@makeda.com.br',
-                    whatsapp: '+5511888776655',
-                    categoria_desejada: 'Carro e Moto [AB]',
-                    valor: 2890,
-                    score: 25,
-                    status: 'novo',
-                    created_at: '2025-12-29T00:54:00',
-                    notas: [],
-                    interacoes: []
-                },
-                {
-                    id: '4',
-                    nome_completo: 'Vinicius Ribeiro',
-                    email: 'vinicius@atomicpay.com.br',
-                    whatsapp: '+5521999665544',
-                    categoria_desejada: 'Caminhão [C]',
-                    valor: 2490,
-                    score: 40,
-                    status: 'novo',
-                    created_at: '2025-12-29T00:54:00',
-                    notas: [],
-                    interacoes: []
-                }
-            ];
-            setLeads(sampleLeads);
-            localStorage.setItem('ae_habilitar_leads', JSON.stringify(sampleLeads));
+            setLeads([]);
         }
     }, []);
 
