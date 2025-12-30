@@ -115,18 +115,30 @@ function LeadDetailPage() {
         }
     }, [navigate]);
 
-    // Carregar lead
+    // URL da API do Google Sheets
+    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbyxiHD3NJzuBR85LEupnvq9Rbkx9_kfmnMDs3yCRbVEUKR1-QED0s4fjnw515kD_4YT/exec';
+
+    // Carregar lead do Google Sheets
     useEffect(() => {
-        const storedLeads = localStorage.getItem('ae_habilitar_leads');
-        if (storedLeads) {
-            const leads = JSON.parse(storedLeads);
-            const foundLead = leads.find(l => l.id === id);
-            if (foundLead) {
-                setLead(foundLead);
-                setNewStatus(foundLead.status);
+        const fetchLead = async () => {
+            try {
+                const response = await fetch(SHEETS_API_URL, {
+                    method: 'GET',
+                    redirect: 'follow'
+                });
+                const leads = await response.json();
+                const foundLead = leads.find(l => l.id === id);
+                if (foundLead) {
+                    setLead(foundLead);
+                    setNewStatus(foundLead.status || 'novo');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar lead:', error);
+            } finally {
+                setLoading(false);
             }
-        }
-        setLoading(false);
+        };
+        fetchLead();
     }, [id]);
 
     // Atualizar status
