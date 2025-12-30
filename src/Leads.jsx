@@ -139,7 +139,7 @@ function LeadsPage() {
     };
 
     // URL da API do Google Sheets
-    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzJDIYdeDLVexLV_c4mmDgxdJL6UUI5iRVn_U8qwnpXDUxQdfp6nNVNeV7QRx96sLeR/exec';
+    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbxHyym4GtdOvl1xM1eVaKgO_5qbN0t1wL1xqd4SPu0wAv9vR-E7_8-UzvN0i9tyaLx-/exec';
 
     // Função para carregar leads do Google Sheets
     const fetchLeads = async () => {
