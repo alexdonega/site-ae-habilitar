@@ -73,7 +73,7 @@ function AutoescolaHabilitarLanding() {
             email: payload.email,
             categoria_desejada: payload.categoria_desejada
         });
-        fetch(`https://script.google.com/macros/s/AKfycbw4dzwoJJ9tpVmCySrdahbazll1ZXYnE7uk_j4EDiD6pMoRwr4iRCX2DffEuY3WQzCx/exec?${params}`, {
+        fetch(`https://script.google.com/macros/s/AKfycbyxiHD3NJzuBR85LEupnvq9Rbkx9_kfmnMDs3yCRbVEUKR1-QED0s4fjnw515kD_4YT/exec?${params}`, {
             method: 'GET',
             mode: 'no-cors'
         }).catch(err => console.error('Erro Google Sheets:', err));
