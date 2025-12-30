@@ -49,65 +49,38 @@ function AutoescolaHabilitarLanding() {
         }
 
         setIsSubmitting(true);
-        try {
-            const payload = {
-                nome_completo: formData.full_name,
-                whatsapp: formData.phone,
-                email: formData.email,
-                categoria_desejada: formData.categoria
-            };
 
-            // Envio para Google Sheets
-            const googleSheetsPromise = fetch('https://script.google.com/macros/s/AKfycby45iOPKUUQSCYJAgmEqw_3rOoFDV54dmCGQlOsEzQFdPtDGcSls39yXTQcQ0m-OUBx/exec', {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify(payload)
-            });
+        const payload = {
+            nome_completo: formData.full_name,
+            whatsapp: formData.phone,
+            email: formData.email,
+            categoria_desejada: formData.categoria
+        };
 
-            // Envio para Novo Envio Webhook
-            const novoEnvioPromise = fetch('https://hook.novoenvio.com.br/webhook/f05ec049-fb8e-4e18-8a1a-c5a0c98542ef', {
-                method: 'POST',
-                mode: 'cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            await Promise.all([googleSheetsPromise, novoEnvioPromise]);
-
-            // Salvar lead no localStorage para o CRM
-            const newLead = {
-                id: Date.now().toString(),
-                nome_completo: formData.full_name,
-                email: formData.email,
-                whatsapp: formData.phone,
-                categoria_desejada: formData.categoria,
-                score: Math.floor(Math.random() * 50) + 10,
-                status: 'novo',
-                created_at: new Date().toISOString(),
-                notas: [],
-                interacoes: []
-            };
-            const existingLeads = JSON.parse(localStorage.getItem('ae_habilitar_leads') || '[]');
-            localStorage.setItem('ae_habilitar_leads', JSON.stringify([newLead, ...existingLeads]));
-
-            // Facebook Pixel Event
-            if (typeof window.fbq === 'function') {
-                window.fbq('track', 'CompleteRegistration');
-            }
-
-            setSubmitSuccess(true);
-            setFormData({ full_name: '', phone: '', email: '', categoria: '' });
-
-            // Redirecionamento imediato
-            navigate('/grupo-vip');
-
-        } catch (error) {
-            console.error('Erro detalhado:', error);
-            setSubmitError(`Erro ao enviar: ${error.message}`);
-        } finally {
-            setIsSubmitting(false);
+        // Facebook Pixel Event
+        if (typeof window.fbq === 'function') {
+            window.fbq('track', 'CompleteRegistration');
         }
+
+        // Redirecionar IMEDIATAMENTE para página de obrigado
+        navigate('/grupo-vip');
+
+        // Enviar dados em background (não bloqueia o redirecionamento)
+        // Envio para Google Sheets (CRM)
+        fetch('https://script.google.com/macros/s/AKfycby45iOPKUUQSCYJAgmEqw_3rOoFDV54dmCGQlOsEzQFdPtDGcSls39yXTQcQ0m-OUBx/exec', {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(payload)
+        }).catch(err => console.error('Erro Google Sheets:', err));
+
+        // Envio para Novo Envio Webhook
+        fetch('https://hook.novoenvio.com.br/webhook/f05ec049-fb8e-4e18-8a1a-c5a0c98542ef', {
+            method: 'POST',
+            mode: 'cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(err => console.error('Erro Webhook:', err));
     };
 
     useEffect(() => {
