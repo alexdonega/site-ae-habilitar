@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function AutoescolaJottaLanding() {
+function AutoescolaHabilitarLanding() {
     const navigate = useNavigate();
     const [timeLeft, setTimeLeft] = useState({ days: 6, hours: 5, minutes: 33, seconds: 44 });
     const [formData, setFormData] = useState({ full_name: '', phone: '', email: '', categoria: 'Moto [A]' });
@@ -118,7 +118,7 @@ function AutoescolaJottaLanding() {
             <section className="relative min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.8)), url('assets/images/bg-campo-grande.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <header className="w-full py-3 md:py-4">
                     <div className="max-w-7xl mx-auto px-4 flex justify-center">
-                        <img src="assets/images/Logo fundo transparente.webp" alt="Jotta de Autoescolas" className="h-12 sm:h-16 md:h-24 w-auto" width="300" height="100" />
+                        <img src="assets/images/Logo fundo transparente.webp" alt="Autoescola Habilitar" className="h-12 sm:h-16 md:h-24 w-auto" width="300" height="100" />
                     </div>
                 </header>
                 <div className="flex-1 flex items-center">
@@ -128,17 +128,17 @@ function AutoescolaJottaLanding() {
                                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
                                     <span className="text-white">A CNH MAIS BARATA</span><br />
                                     <span className="text-white">DA HISTÓRIA DE</span><br />
-                                    <span className="text-red-600">CAMPO GRANDE!</span>
+                                    <span className="text-red-600">SORRISO!</span>
                                 </h1>
                                 <div className="border-2 border-red-600 bg-black/40 backdrop-blur-sm px-3 py-2 md:px-4 md:py-3 rounded-lg inline-flex items-start gap-2 md:gap-3 max-w-xl mx-auto lg:mx-0">
                                     <span className="text-red-500 text-lg md:text-xl">📍</span>
-                                    <p className="text-white text-xs sm:text-sm md:text-base text-left">Válido <strong className="text-yellow-400">EXCLUSIVAMENTE</strong> para as unidades <strong className="text-white">Nova Lima</strong> e <strong className="text-white">Julio de Castilho</strong></p>
+                                    <p className="text-white text-xs sm:text-sm md:text-base text-left">Válido <strong className="text-yellow-400">EXCLUSIVAMENTE</strong> para a <strong className="text-white">Autoescola Habilitar</strong> - <strong className="text-white">Rua das Videiras, 634 - sala 2 - Centro Sul, Sorriso - MT</strong></p>
                                 </div>
-                                <p className="text-gray-200 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mx-auto lg:mx-0">A Autoescola Jotta vai realizar um evento <strong className="text-white">HISTÓRICO</strong>. Se você busca 1ª Habilitação ou Mudança de Categoria nos melhores valores... o momento é <strong className="text-white">AGORA!</strong></p>
+                                <p className="text-gray-200 text-sm sm:text-base md:text-lg max-w-xl leading-relaxed mx-auto lg:mx-0">A Autoescola Habilitar vai realizar um evento <strong className="text-white">HISTÓRICO</strong>. Se você busca 1ª Habilitação ou Mudança de Categoria nos melhores valores... o momento é <strong className="text-white">AGORA!</strong></p>
                                 <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
-                                    <span className="bg-gray-800/80 backdrop-blur px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1.5 md:gap-2 border border-gray-700">📅 5 e 6 de Dezembro</span>
+                                    <span className="bg-gray-800/80 backdrop-blur px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1.5 md:gap-2 border border-gray-700">📅 12 de Janeiro de 2026</span>
                                     <span className="bg-gray-800/80 backdrop-blur px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1.5 md:gap-2 border border-gray-700">🏷️ Até R$ 520 OFF</span>
-                                    <span className="bg-gray-800/80 backdrop-blur px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1.5 md:gap-2 border border-gray-700">🔥 Vagas Limitadas</span>
+                                    <span className="bg-gray-800/80 backdrop-blur px-3 py-1.5 md:px-4 md:py-2 rounded-full text-xs sm:text-sm font-medium flex items-center gap-1.5 md:gap-2 border border-gray-700">🔥 Apenas 50 Vagas</span>
                                 </div>
                             </div>
                             <div className="w-full max-w-md mx-auto">
@@ -287,8 +287,8 @@ function AutoescolaJottaLanding() {
                     </div>
                     <div className="bg-gray-800/50 rounded-xl md:rounded-2xl p-5 md:p-8 max-w-2xl mx-auto mb-8 md:mb-10">
                         <ul className="space-y-3 md:space-y-4">
-                            <li className="flex items-center gap-2 md:gap-3"><span className="w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"><svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></span><span className="text-gray-200 text-sm sm:text-base md:text-lg">Maior desconto já oferecido em Campo Grande</span></li>
-                            <li className="flex items-center gap-2 md:gap-3"><span className="w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"><svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></span><span className="text-gray-200 text-sm sm:text-base md:text-lg">Unidades em Nova Lima e Julio de Castilho</span></li>
+                            <li className="flex items-center gap-2 md:gap-3"><span className="w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"><svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></span><span className="text-gray-200 text-sm sm:text-base md:text-lg">Maior desconto já oferecido em Sorriso</span></li>
+                            <li className="flex items-center gap-2 md:gap-3"><span className="w-5 h-5 md:w-6 md:h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0"><svg className="w-3 h-3 md:w-4 md:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg></span><span className="text-gray-200 text-sm sm:text-base md:text-lg">Rua das Videiras, 634 - sala 2 - Centro Sul</span></li>
                         </ul>
                     </div>
                     <div className="text-center">
@@ -301,34 +301,32 @@ function AutoescolaJottaLanding() {
             <section className="bg-gradient-to-b from-gray-800 to-gray-900 py-12 md:py-24">
                 <div className="max-w-4xl mx-auto text-center px-4">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-3 md:mb-4 leading-tight">Chega de depender dos outros<br /><span className="text-green-400">pra ir e vir!</span></h2>
-                    <p className="text-gray-400 text-sm sm:text-base md:text-xl mb-6 md:mb-8 max-w-2xl mx-auto">Em 2025, conquiste sua liberdade. A Autoescola Jotta tá pronta pra te ajudar a realizar esse sonho.</p>
+                    <p className="text-gray-400 text-sm sm:text-base md:text-xl mb-6 md:mb-8 max-w-2xl mx-auto">Em 2026, conquiste sua liberdade. A Autoescola Habilitar tá pronta pra te ajudar a realizar esse sonho.</p>
                     <button onClick={scrollToForm} className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 sm:px-10 md:px-16 py-4 md:py-6 rounded-full transition-all duration-300 transform hover:scale-105 text-base sm:text-lg md:text-2xl shadow-xl shadow-red-600/30">SIM, QUERO MINHA CNH! 🚗</button>
-                    <p className="text-gray-500 text-xs sm:text-sm mt-4 md:mt-6">Vagas limitadas para os dias 5 e 6 de dezembro</p>
+                    <p className="text-gray-500 text-xs sm:text-sm mt-4 md:mt-6">Apenas 50 vagas para o dia 12 de janeiro de 2026</p>
                 </div>
             </section>
 
             {/* FOOTER */}
             <footer className="bg-gray-900 border-t border-gray-800 py-8 md:py-10">
                 <div className="max-w-6xl mx-auto px-4">
-                    <div className="flex justify-center mb-5 md:mb-6"><img src="assets/images/Logo fundo transparente.webp" alt="Jotta de Autoescolas" className="h-16 md:h-24 w-auto" width="300" height="100" /></div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-8 max-w-2xl mx-auto">
-                        <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><a href="https://www.google.com/maps/place/20%C2%B023'52.9%22S+54%C2%B034'21.9%22W/@-20.3980278,-54.57275,786m/data=!3m1!1e3!4m4!3m3!8m2!3d-20.3980278!4d-54.57275?hl=pt-BR&entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="text-red-500 font-semibold text-sm md:text-base mb-1 hover:underline">📍 Unidade Nova Lima</a><p className="text-gray-300 text-xs md:text-sm">Rua Jerônimo de Albuquerque, 705<br />Nova Lima, Campo Grande-MS</p></div>
-                        <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><a href="https://www.google.com/maps/place/20%C2%B026'44.5%22S+54%C2%B039'58.3%22W/@-20.4456944,-54.6661944,786m/data=!3m1!1e3!4m4!3m3!8m2!3d-20.4456944!4d-54.6661944?hl=pt-BR&entry=ttu&g_ep=EgoyMDI1MTEyMy4xIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer" className="text-red-500 font-semibold text-sm md:text-base mb-1 hover:underline">📍 Unidade Julio de Castilho</a><p className="text-gray-300 text-xs md:text-sm">Av. Júlio de Castilho, 3927<br />Julio de Castilho, Campo Grande-MS</p></div>
+                    <div className="flex justify-center mb-5 md:mb-6"><img src="assets/images/Logo fundo transparente.webp" alt="Autoescola Habilitar" className="h-16 md:h-24 w-auto" width="300" height="100" /></div>
+                    <div className="flex justify-center mb-6 md:mb-8 max-w-2xl mx-auto">
+                        <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><span className="text-red-500 font-semibold text-sm md:text-base mb-1">📍 Autoescola Habilitar</span><p className="text-gray-300 text-xs md:text-sm">Rua das Videiras, 634 - sala 2<br />Centro Sul, Sorriso - MT</p></div>
                     </div>
                     <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-gray-400 text-xs md:text-sm mb-3 md:mb-4">
                         <a href="politica_privacidade.html" className="hover:text-white transition">Política de Privacidade</a>
                         <a href="termos_uso.html" className="hover:text-white transition">Termos de Uso</a>
-                        <a href="https://wa.me/556792059340?text=Ol%C3%A1%21%20Quero%20saber%20mais%20sobre%20a%20promo%C3%A7%C3%A3o%20da%20CNH%20mais%20barata%20de%20Campo%20Grande%21" target="_blank" rel="noopener noreferrer" className="hover:text-white transition" onClick={() => window.fbq && window.fbq('track', 'Contact')}>Contato</a>
                     </div>
-                    <p className="text-gray-400 text-xs md:text-sm text-center">© 2025 Autoescola Jotta. Todos os direitos reservados.</p>
+                    <p className="text-gray-400 text-xs md:text-sm text-center">© 2026 Autoescola Habilitar. Todos os direitos reservados.</p>
                 </div>
             </footer>
 
-            <a href="https://wa.me/556792059340?text=Ol%C3%A1%21%20Quero%20saber%20mais%20sobre%20a%20promo%C3%A7%C3%A3o%20da%20CNH%20mais%20barata%20de%20Campo%20Grande%21" target="_blank" rel="noopener noreferrer" className="fixed bottom-4 right-4 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-110 z-50" onClick={() => window.fbq && window.fbq('track', 'Contact')} aria-label="Fale conosco no WhatsApp">
+            <a href="https://chat.whatsapp.com/KCD3kqs8Lu97EDhkTAADL6" target="_blank" rel="noopener noreferrer" className="fixed bottom-4 right-4 w-14 h-14 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-110 z-50" onClick={() => window.fbq && window.fbq('track', 'Contact')} aria-label="Entrar no Grupo VIP do WhatsApp">
                 <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
             </a>
         </div>
     );
 }
 
-export default AutoescolaJottaLanding;
+export default AutoescolaHabilitarLanding;
