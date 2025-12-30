@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 function GrupoVip() {
     const [redirectCountdown, setRedirectCountdown] = useState(5);
-    const whatsappLink = "https://chat.whatsapp.com/KCD3kqs8Lu97EDhkTAADL6";
+    const whatsappLink = "https://chat.whatsapp.com/JoY33aZ5FmQEOqfCC4u0EU";
 
     useEffect(() => {
         // Facebook Pixel Event
