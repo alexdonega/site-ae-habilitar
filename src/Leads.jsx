@@ -123,6 +123,7 @@ function LeadsPage() {
     const [activeFilter, setActiveFilter] = useState('todos');
     const [sortBy, setSortBy] = useState('data');
     const [sortOrder, setSortOrder] = useState('desc');
+    const [isLoading, setIsLoading] = useState(true);
 
     // Verificar autenticação
     useEffect(() => {
@@ -137,14 +138,27 @@ function LeadsPage() {
         navigate('/login');
     };
 
-    // Carregar leads do localStorage
-    useEffect(() => {
-        const storedLeads = localStorage.getItem('ae_habilitar_leads');
-        if (storedLeads) {
-            setLeads(JSON.parse(storedLeads));
-        } else {
+    // URL da API do Google Sheets
+    const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbzJDIYdeDLVexLV_c4mmDgxdJL6UUI5iRVn_U8qwnpXDUxQdfp6nNVNeV7QRx96sLeR/exec';
+
+    // Função para carregar leads do Google Sheets
+    const fetchLeads = async () => {
+        setIsLoading(true);
+        try {
+            const response = await fetch(SHEETS_API_URL);
+            const data = await response.json();
+            setLeads(data);
+        } catch (error) {
+            console.error('Erro ao carregar leads:', error);
             setLeads([]);
+        } finally {
+            setIsLoading(false);
         }
+    };
+
+    // Carregar leads ao montar
+    useEffect(() => {
+        fetchLeads();
     }, []);
 
     // Calcular métricas
@@ -241,6 +255,23 @@ function LeadsPage() {
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <h1 className="text-xl font-bold">Leads & CRM</h1>
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={fetchLeads}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 rounded-lg transition"
+                        >
+                            {isLoading ? (
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                            ) : (
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            )}
+                            <span>Atualizar</span>
+                        </button>
                         <a
                             href="/"
                             target="_blank"
