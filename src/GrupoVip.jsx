@@ -38,9 +38,10 @@ function GrupoVip() {
     return (
         <div className="min-h-screen bg-gray-900 text-white font-sans">
             {/* HERO SECTION */}
-            <section className="relative min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('assets/images/bg-campo-grande.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+            <section className="relative min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95)), url('assets/images/Cidade-de-Sorriso-Sim-Incorporadora-1024x627.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <header className="w-full py-3 md:py-4">
-                    <div className="max-w-7xl mx-auto px-4 flex justify-center">
+                    <div className="max-w-7xl mx-auto px-4 flex justify-center items-center gap-4 md:gap-6">
+                        <img src="assets/images/cnh-do-brasil.webp" alt="CNH do Brasil" className="h-10 sm:h-14 md:h-20 w-auto" />
                         <img src="assets/images/logo-autoescola-habilitar.webp" alt="Autoescola Habilitar" className="h-12 sm:h-16 md:h-24 w-auto" width="300" height="100" />
                     </div>
                 </header>
@@ -55,10 +56,11 @@ function GrupoVip() {
                                 ESPERE, ESPERE...<br />
                                 <span className="text-habilitar-orange">AINDA FALTA UM PASSO</span>
                             </h1>
-                            <p className="text-gray-300 text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed mb-8">
-                                O Mega Desconto será Liberado no dia <strong className="text-white">12 de janeiro de 2026</strong>,
-                                apenas para quem estiver no <strong className="text-green-400">Grupo Vip do WhatsApp</strong>.
+                            <p className="text-gray-300 text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed mb-4">
+                                As condições especiais de lançamento serão liberadas no dia <strong className="text-white">12 de janeiro de 2026</strong>,
+                                apenas para quem estiver no <strong className="text-green-400">Grupo VIP do WhatsApp</strong>.
                             </p>
+                            <p className="text-habilitar-orange font-semibold text-base md:text-xl mb-8">CNH do Brasil, sua liberdade começa agora.</p>
                         </div>
 
                         <div className="flex flex-col items-center gap-6">
