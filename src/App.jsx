@@ -118,7 +118,7 @@ function AutoescolaHabilitarLanding() {
             <section className="relative min-h-screen flex flex-col" style={{ backgroundImage: `linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.8)), url('assets/images/bg-campo-grande.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
                 <header className="w-full py-3 md:py-4">
                     <div className="max-w-7xl mx-auto px-4 flex justify-center">
-                        <img src="assets/images/Logo fundo transparente.webp" alt="Autoescola Habilitar" className="h-12 sm:h-16 md:h-24 w-auto" width="300" height="100" />
+                        <img src="assets/images/logo-autoescola-habilitar.webp" alt="Autoescola Habilitar" className="h-12 sm:h-16 md:h-24 w-auto" width="300" height="100" />
                     </div>
                 </header>
                 <div className="flex-1 flex items-center">
@@ -311,7 +311,7 @@ function AutoescolaHabilitarLanding() {
             {/* FOOTER */}
             <footer className="bg-gray-900 border-t border-gray-800 py-8 md:py-10">
                 <div className="max-w-6xl mx-auto px-4">
-                    <div className="flex justify-center mb-5 md:mb-6"><img src="assets/images/Logo fundo transparente.webp" alt="Autoescola Habilitar" className="h-16 md:h-24 w-auto" width="300" height="100" /></div>
+                    <div className="flex justify-center mb-5 md:mb-6"><img src="assets/images/logo-autoescola-habilitar.webp" alt="Autoescola Habilitar" className="h-16 md:h-24 w-auto" width="300" height="100" /></div>
                     <div className="flex justify-center mb-6 md:mb-8 max-w-2xl mx-auto">
                         <div className="bg-gray-800 rounded-lg p-3 md:p-4 text-center"><span className="text-red-500 font-semibold text-sm md:text-base mb-1">📍 Autoescola Habilitar</span><p className="text-gray-300 text-xs md:text-sm">Rua das Videiras, 634 - sala 2<br />Centro Sul, Sorriso - MT</p></div>
                     </div>
