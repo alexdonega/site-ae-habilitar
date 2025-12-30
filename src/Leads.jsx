@@ -145,9 +145,13 @@ function LeadsPage() {
     const fetchLeads = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(SHEETS_API_URL);
+            const response = await fetch(SHEETS_API_URL, {
+                method: 'GET',
+                redirect: 'follow'
+            });
             const data = await response.json();
-            setLeads(data);
+            console.log('Leads carregados:', data);
+            setLeads(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('Erro ao carregar leads:', error);
             setLeads([]);
