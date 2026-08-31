@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App.jsx'
 import GrupoVip from './GrupoVip.jsx'
 import Login from './Login.jsx'
@@ -13,7 +13,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<App />} />
-                <Route path="/grupo-vip" element={<GrupoVip />} />
+                <Route path="/mega-oferta" element={<GrupoVip />} />
+                <Route path="/grupo-vip" element={<Navigate to="/mega-oferta" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/lead" element={<Leads />} />
                 <Route path="/lead/:id" element={<LeadDetail />} />
