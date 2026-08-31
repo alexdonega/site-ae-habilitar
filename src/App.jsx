@@ -138,10 +138,10 @@ function AutoescolaHabilitarLanding() {
                     <div className="w-full max-w-7xl mx-auto px-4 py-6 md:py-8">
                         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
                             <div className="space-y-4 md:space-y-6 text-center lg:text-left">
-                                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight">
-                                    <span className="text-white">A NOVA CNH DO BRASIL</span><br />
-                                    <span className="text-white">ESTÁ CHEGANDO EM</span><br />
-                                    <span className="text-habilitar-orange">SORRISO!</span>
+                                <h1 className="text-[clamp(1.625rem,7vw,3rem)] lg:text-[clamp(2.25rem,3.5vw,3.5rem)] font-black leading-tight">
+                                    <span className="text-white whitespace-nowrap">A NOVA CNH DO BRASIL</span><br />
+                                    <span className="text-white whitespace-nowrap">ESTÁ CHEGANDO EM</span><br />
+                                    <span className="text-habilitar-orange whitespace-nowrap">SORRISO!</span>
                                 </h1>
                                 <div className="border-2 border-habilitar-orange bg-black/40 backdrop-blur-sm px-3 py-2 md:px-4 md:py-3 rounded-lg inline-flex items-start gap-2 md:gap-3 max-w-xl mx-auto lg:mx-0">
                                     <span className="text-habilitar-orange text-lg md:text-xl">📍</span>
