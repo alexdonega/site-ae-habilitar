@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const WEBINAR_DEADLINE = new Date('2026-09-04T20:00:00-03:00');
+const WEBINAR_DEADLINE = new Date('2026-09-04T00:00:00-03:00');
 
 const getTimeLeft = () => {
     const diff = Math.max(0, WEBINAR_DEADLINE - new Date());
