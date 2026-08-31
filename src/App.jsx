@@ -235,9 +235,6 @@ function AutoescolaHabilitarLanding() {
                                                         <option value="Carro e Moto [AB]">Categoria AB (Carro e Moto)</option>
                                                         <option value="Adição Moto [A]">Adição A (Moto)</option>
                                                         <option value="Adição Carro [B]">Adição B (Carro)</option>
-                                                        <option value="Caminhão [C]">Mudança de Categoria C (Caminhão)</option>
-                                                        <option value="Ônibus [D]">Mudança de Categoria D (Ônibus)</option>
-                                                        <option value="Carreta [E]">Mudança de Categoria E (Carreta)</option>
                                                     </select>
                                                     {fieldErrors.categoria && <span className="text-red-500 text-xs mt-1 block">{fieldErrors.categoria}</span>}
                                                 </div>
