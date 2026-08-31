@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { captureLead } from './lib/leadCapture';
 
 const PRE_MATRICULA_DEADLINE = new Date('2026-09-03T23:59:59-03:00');
 
@@ -74,8 +75,22 @@ function AutoescolaHabilitarLanding() {
             window.fbq('track', 'CompleteRegistration');
         }
 
+        // Envio para Supabase (tabela "leads") com metadados completos:
+        // página, UTMs, referrer e dispositivo (mesmo padrão do site
+        // alexdonega-website). A tabela não tem coluna categoria_desejada,
+        // então a categoria escolhida vai embutida no produto.
+        // IMPORTANTE: disparar antes do navigate(), porque os metadados da
+        // página (URL com UTMs) são lidos no momento da chamada.
+        captureLead({
+            nome_completo: payload.nome_completo,
+            email: payload.email,
+            whatsapp: payload.whatsapp,
+            produto: `Pré-Matrícula CNH — Autoescola Habilitar (${payload.categoria_desejada})`,
+            formulario: 'pre_matricula_home',
+        }).catch(err => console.error('Erro Supabase:', err));
+
         // Redirecionar IMEDIATAMENTE para página de obrigado
-        navigate('/grupo-vip');
+        navigate('/mega-oferta');
 
         // Enviar dados em background (não bloqueia o redirecionamento)
         // Envio para Google Sheets (CRM) via GET com parâmetros
