@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 
 function GrupoVip() {
     const [redirectCountdown, setRedirectCountdown] = useState(5);
-    const whatsappLink = "https://chat.whatsapp.com/JoY33aZ5FmQEOqfCC4u0EU";
+    const whatsappNumber = "556699630260";
+    const whatsappMessage = "Quero Mega Oferta WhatsApp da Autoescola";
+    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
     useEffect(() => {
         // Facebook Pixel Event
@@ -64,7 +66,7 @@ function GrupoVip() {
                             </a>
                             {redirectCountdown > 0 && (
                                 <p className="text-gray-400 text-sm animate-pulse">
-                                    Abrindo grupo em <span className="text-green-400 font-bold">{redirectCountdown}</span> segundos...
+                                    Abrindo o WhatsApp em <span className="text-green-400 font-bold">{redirectCountdown}</span> segundos...
                                 </p>
                             )}
                         </div>
