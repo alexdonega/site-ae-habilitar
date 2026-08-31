@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const WEBINAR_DEADLINE = new Date('2026-09-03T20:00:00-03:00');
+const WEBINAR_DEADLINE = new Date('2026-09-04T20:00:00-03:00');
 
 const getTimeLeft = () => {
     const diff = Math.max(0, WEBINAR_DEADLINE - new Date());
@@ -15,7 +15,7 @@ const getTimeLeft = () => {
 function Webinar() {
     const [timeLeft, setTimeLeft] = useState(getTimeLeft);
     const whatsappNumber = "556699630260";
-    const whatsappMessage = "Quero participar do Webinar da Mega Oferta da CNH da Autoescola Habilitar no dia 03 de setembro";
+    const whatsappMessage = "Quero participar do Webinar da Mega Oferta da CNH da Autoescola Habilitar nos dias 04 e 05 de setembro";
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
     useEffect(() => {
@@ -42,14 +42,14 @@ function Webinar() {
                     <div className="w-full max-w-4xl mx-auto px-4 py-8 text-center">
                         <div className="mb-8">
                             <span className="inline-block bg-yellow-500 text-black font-bold px-4 py-1 rounded-full text-sm md:text-base mb-4 animate-pulse">
-                                🔴 WEBINAR EXCLUSIVO — AO VIVO
+                                🔴 WEBINAR EXCLUSIVO — DIAS 04 E 05 DE SETEMBRO
                             </span>
                             <h1 className="text-3xl sm:text-4xl md:text-6xl font-black leading-tight mb-6 text-white">
                                 MEGA OFERTA DA CNH<br />
                                 <span className="text-habilitar-orange">SERÁ REVELADA AO VIVO</span>
                             </h1>
                             <p className="text-gray-300 text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed mb-4">
-                                No dia <strong className="text-white">03 de setembro de 2026</strong>, vamos apresentar ao vivo as
+                                Nos dias <strong className="text-white">04 e 05 de setembro de 2026</strong>, vamos apresentar ao vivo as
                                 <strong className="text-white"> condições especiais de lançamento</strong> da Mega Oferta da CNH
                                 da Autoescola Habilitar.
                             </p>
