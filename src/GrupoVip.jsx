@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 function GrupoVip() {
     const [redirectCountdown, setRedirectCountdown] = useState(5);
     const whatsappNumber = "556699630260";
-    const whatsappMessage = "Quero receber a Mega Oferta da CNH da Autoescola Habilitar, no dia 03 de Setembro";
+    const whatsappMessage = "Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 03 de Setembro";
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
     useEffect(() => {
@@ -54,7 +54,7 @@ function GrupoVip() {
                             </h1>
                             <p className="text-gray-300 text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed mb-4">
                                 As condições especiais de lançamento serão liberadas no dia <strong className="text-white">03 de Setembro de 2026</strong>,
-                                apenas para quem enviar a mensagem <strong className="text-green-400">"Quero receber a Mega Oferta da CNH da Autoescola Habilitar, no dia 03 de Setembro"</strong>.
+                                apenas para quem enviar a mensagem <strong className="text-green-400">"Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 03 de Setembro"</strong>.
                             </p>
                             <p className="text-habilitar-orange font-semibold text-base md:text-xl mb-8">CNH do Brasil, sua liberdade começa agora.</p>
                         </div>
