@@ -5,6 +5,10 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-08-31
+### Adicionado
+- Google Tag Manager (container `GTM-TB3VSC3M`) injetado no `index.html`: script no `<head>` e iframe `<noscript>` no `<body>`, cobrindo todas as rotas da SPA. Pixel do Facebook permanece inalterado.
+
 ## [1.1.0] - 2026-08-31
 ### Adicionado
 - Integração com Supabase (projeto `dtugwspbkkqxkeoajunf`, compartilhado com o site alexdonega-website): o formulário de pré-matrícula agora insere leads na tabela `leads` com metadados completos — `page_url`, `page_path`, `page_title`, `referrer`, `utm_source/medium/campaign/term/content`, `user_agent`, `language`, `screen_*` e `viewport_*` (mesmo padrão de captura do alexdonega-website).
