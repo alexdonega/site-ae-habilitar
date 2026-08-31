@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const PRE_MATRICULA_DEADLINE = new Date('2026-09-03T23:59:59-03:00');
+
+const getTimeLeft = () => {
+    const diff = Math.max(0, PRE_MATRICULA_DEADLINE - new Date());
+    return {
+        days: Math.floor(diff / 86400000),
+        hours: Math.floor(diff / 3600000) % 24,
+        minutes: Math.floor(diff / 60000) % 60,
+        seconds: Math.floor(diff / 1000) % 60
+    };
+};
+
 function AutoescolaHabilitarLanding() {
     const navigate = useNavigate();
-    const [timeLeft, setTimeLeft] = useState({ days: 6, hours: 5, minutes: 33, seconds: 44 });
+    const [timeLeft, setTimeLeft] = useState(getTimeLeft);
     const [formData, setFormData] = useState({ full_name: '', phone: '', email: '', categoria: 'Moto [A]' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -89,15 +101,7 @@ function AutoescolaHabilitarLanding() {
 
     useEffect(() => {
         const timer = setInterval(() => {
-            setTimeLeft(prev => {
-                let { days, hours, minutes, seconds } = prev;
-                seconds--;
-                if (seconds < 0) { seconds = 59; minutes--; }
-                if (minutes < 0) { minutes = 59; hours--; }
-                if (hours < 0) { hours = 23; days--; }
-                if (days < 0) { days = 0; hours = 0; minutes = 0; seconds = 0; }
-                return { days, hours, minutes, seconds };
-            });
+            setTimeLeft(getTimeLeft());
         }, 1000);
         return () => clearInterval(timer);
     }, []);
