@@ -5,6 +5,19 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-08-31
+### Adicionado
+- Página de webinar em `/webinar`: landing com selo "Mega Oferta ao Vivo — dias 04 e 05 de setembro", countdown real até a virada do dia 04/09/2026 (evento o dia todo, sem horário fixo) e CTA de WhatsApp com mensagem pré-preenchida.
+- Selo amarelo pulsante no hero da home com a data do evento ("🔴 Mega Oferta Ao Vivo — Dias 04 e 05 de Setembro"), primeiro elemento da primeira seção.
+- AE Studio em `/studio`: geração de imagens (GLM-Image) e vídeos (CogVideoX-3) via API da Z.ai, através de funções serverless em `api/` (`create-image`, `create-video`, `task-status`). Protegido por senha compartilhada (`ZAI_STUDIO_TOKEN`, header `x-studio-token`); a chave `ZAI_API_KEY` vive apenas no servidor. Requer configurar as duas variáveis na Vercel. Documentação em `Docs/Tecnico/integracao_zai.md`.
+- `vercel.json`: configuração de `functions` para `api/*.js` (maxDuration 30s).
+
+### Alterado
+- Formulário de pré-matrícula: removidas as opções de mudança de categoria (C-Caminhão, D-Ônibus, E-Carreta).
+- Título do hero sempre renderiza em exatamente 3 linhas (`whitespace-nowrap` + font-size fluido com `clamp`).
+- Botão flutuante de WhatsApp: mensagem pré-preenchida alterada para "Quero tirar dúvidas sobre a CNH do Brasil".
+- (1.1.x sequência) Rota `/grupo-vip` renomeada para `/mega-oferta` com redirect da antiga; Google Tag Manager `GTM-TB3VSC3M` no `index.html`.
+
 ## [1.1.1] - 2026-08-31
 ### Adicionado
 - Google Tag Manager (container `GTM-TB3VSC3M`) injetado no `index.html`: script no `<head>` e iframe `<noscript>` no `<body>`, cobrindo todas as rotas da SPA. Pixel do Facebook permanece inalterado.
