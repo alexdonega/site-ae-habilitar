@@ -93,6 +93,17 @@ Tags aplicadas a cada lead (IDs em `api/_falazapp.js`, listados via
 
 Falha nas tags não derruba nada: volta em `tagsError` na resposta do endpoint.
 
+### Gravação do ID no Supabase (`contact_falazapp`)
+
+Após criar o contato, a função grava o `contact.id` da FalazApp na coluna
+`contact_falazapp` do lead correspondente (tabela `leads`). O insert do lead é
+client-side com anon key e o RLS não devolve o id da linha, então a correlação
+é pelo `whatsapp` (mesma string mascarada gravada no lead), via **service
+role** (mesmo padrão do `/api/leads`). Só preenche linhas com a coluna vazia
+(`contact_falazapp is null`) — se o lead reenviar o formulário, o primeiro ID
+é preservado. Falha no update não derruba contato/mensagem/tags: volta em
+`leadUpdate` na resposta.
+
 ## Nossos arquivos
 
 | Arquivo | Rota | Descrição |

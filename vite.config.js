@@ -83,7 +83,7 @@ function devApiLeads({ supabaseUrl, serviceRoleKey }) {
 // /api/falazapp-contact (api/falazapp-contact.js) no dev server do Vite —
 // mesmo motivo do devApiLeads acima. Reusa o helper api/_falazapp.js para
 // garantir comportamento idêntico entre dev e produção.
-function devApiFalazapp({ falazappApiUrl, falazappToken }) {
+function devApiFalazapp({ falazappApiUrl, falazappToken, supabaseUrl, serviceRoleKey }) {
     return {
         name: 'dev-api-falazapp',
         apply: 'serve',
@@ -107,7 +107,32 @@ function devApiFalazapp({ falazappApiUrl, falazappToken }) {
                         token: falazappToken,
                         apiUrl: falazappApiUrl,
                     })
-                    send(200, { ok: true, ...resultado })
+
+                    // Grava o ID do contato FalazApp no lead do Supabase
+                    // (mesma lógica da função /api/falazapp-contact).
+                    let leadUpdate = null
+                    if (resultado?.contact?.id && supabaseUrl && serviceRoleKey) {
+                        try {
+                            const rest = await fetch(
+                                `${supabaseUrl}/rest/v1/leads?whatsapp=eq.${encodeURIComponent(whatsapp)}&contact_falazapp=is.null`,
+                                {
+                                    method: 'PATCH',
+                                    headers: {
+                                        apikey: serviceRoleKey,
+                                        Authorization: `Bearer ${serviceRoleKey}`,
+                                        'Content-Type': 'application/json',
+                                        Prefer: 'return=minimal',
+                                    },
+                                    body: JSON.stringify({ contact_falazapp: resultado.contact.id }),
+                                },
+                            )
+                            leadUpdate = { ok: rest.ok, error: rest.ok ? null : `Supabase respondeu ${rest.status}` }
+                        } catch (err) {
+                            leadUpdate = { ok: false, error: err.message }
+                        }
+                    }
+
+                    send(200, { ok: true, ...resultado, leadUpdate })
                 } catch (err) {
                     send(err.statusCode || 502, { error: err.message })
                 }
@@ -164,6 +189,8 @@ export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as
             devApiFalazapp({
                 falazappApiUrl: env.FALAZAPP_API_URL,
                 falazappToken: env.FALAZAPP_API_TOKEN,
+                supabaseUrl: env.PUBLIC_SUPABASE_URL,
+                serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.service_role,
             }),
             devApiFalazappTicket({
                 falazappApiUrl: env.FALAZAPP_API_URL,
