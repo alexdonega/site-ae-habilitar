@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { createContactAndNotify, findLatestTicketUrl, normalizeWhatsapp } from './api/_falazapp.js'
+import { syncMarketingPerformance } from './api/_windsor.js'
 
 // Lê o corpo da requisição no middleware de desenvolvimento (connect não
 // faz parse de JSON sozinho).
@@ -216,6 +217,47 @@ function devApiFalazappTicket({ falazappApiUrl, falazappPanelUrl, falazappToken 
     }
 }
 
+// Middleware de desenvolvimento que replica a função serverless
+// /api/windsor-sync (api/windsor-sync.js) — sincroniza Windsor → Supabase no
+// dev server. Roda sem segredo de autenticação porque escuta apenas em
+// localhost (em produção o endpoint exige WINDSOR_SYNC_SECRET/CRON_SECRET).
+function devApiWindsorSync({ supabaseUrl, serviceRoleKey, windsorApiKey }) {
+    return {
+        name: 'dev-api-windsor-sync',
+        apply: 'serve',
+        configureServer(server) {
+            server.middlewares.use('/api/windsor-sync', async (req, res) => {
+                const send = (status, payload) => {
+                    res.statusCode = status
+                    res.setHeader('Content-Type', 'application/json')
+                    res.end(JSON.stringify(payload))
+                }
+                try {
+                    if (req.method !== 'GET' && req.method !== 'POST') {
+                        return send(405, { error: 'Método não permitido' })
+                    }
+                    const query = new URL(req.url || '', 'http://localhost').searchParams
+                    const days = Math.min(Math.max(Number(query.get('days')) || 3, 1), 7)
+                    const result = await syncMarketingPerformance({
+                        days,
+                        from: query.get('from') || undefined,
+                        to: query.get('to') || undefined,
+                        timeoutMs: 25000,
+                        config: {
+                            apiKey: windsorApiKey,
+                            supabaseUrl,
+                            serviceRoleKey,
+                        },
+                    })
+                    send(200, { ok: true, ...result })
+                } catch (err) {
+                    send(err.invalidKey || err.config ? 500 : 502, { ok: false, error: err.message })
+                }
+            })
+        },
+    }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as variáveis do .env (inclusive as sem
     // prefixo, como service_role) — mas só para uso do dev server acima.
@@ -242,6 +284,11 @@ export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as
                 falazappApiUrl: env.FALAZAPP_API_URL,
                 falazappPanelUrl: env.FALAZAPP_PANEL_URL,
                 falazappToken: env.FALAZAPP_API_TOKEN,
+            }),
+            devApiWindsorSync({
+                supabaseUrl: env.PUBLIC_SUPABASE_URL,
+                serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.service_role,
+                windsorApiKey: env.WINDSOR_API_KEY,
             }),
         ],
         // Aceita variáveis com prefixo VITE_ e PUBLIC_ (mesma convenção do

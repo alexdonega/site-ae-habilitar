@@ -5,6 +5,14 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-09-01
+### Adicionado
+- Sincronização própria Windsor.ai → Supabase via Connectors API (`api/_windsor.js`): busca as 33 colunas em `connectors.windsor.ai/facebook` e grava na `marketing_performance` com replace por período (DELETE do intervalo + INSERT, dedup por grain anúncio × dia) — idempotente, sem duplicar. A destination task "Supabase" do painel do Windsor reportava sucesso mas nunca gravou linhas (0 rows em todos os schemas); o sync via API passa a ser o escritor oficial.
+- CLI `scripts/windsor-sync.mjs`: `--selftest` (valida o caminho de gravação no Supabase sem tocar no Windsor — já verificado OK), `--days=N`, `--from/--to` (backfill de períodos arbitrários) e `--dry-run`; carrega o `.env` sozinho.
+- Função serverless `GET/POST /api/windsor-sync` (`api/windsor-sync.js`) + cron `10 7 * * *` no `vercel.json`: refresca a janela de 3 dias diariamente na produção; protegida por `CRON_SECRET`/`WINDSOR_SYNC_SECRET` (401 sem segredo, 500 se não configurada).
+- Middleware `devApiWindsorSync` no `vite.config.js` replica o sync no `npm run dev` (localhost, sem segredo).
+- Variável de ambiente nova `WINDSOR_API_KEY` (Vercel + `.env` local). ⚠️ Pendente: a chave copiada até agora é rejeitada pela API (`Please check the API key used`) — ver Problemas conhecidos do runbook.
+
 ## [1.6.0] - 2026-09-01
 ### Adicionado
 - Dashboard completa de mídia em `/meta-ads` (`src/MetaAds.jsx`): 8 KPIs (Investimento, Leads CRM, CPL médio, Cliques, CTR, CPC, CPM, Impressões), chips complementares (alcance, frequência, views de página, leads Meta, cadastros no pixel, conversas WhatsApp), gráficos de investimento e leads por dia e tabelas por Campanha/Conjunto/Anúncio com CTR/CPC/CPM/CPL. Presets de período (Tudo/Hoje/7/14/30 dias) + intervalo custom. Reusa `/api/marketing` e `/api/leads`.

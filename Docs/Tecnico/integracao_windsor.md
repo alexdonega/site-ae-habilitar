@@ -1,17 +1,24 @@
 # Integração Windsor.ai — performance de mídia no Supabase
 
 > Destino: tabela **`public.marketing_performance`** (projeto Supabase `site-alex-donega`, ref `dtugwspbkkqxkeoajunf`)
-> Adicionada em: 2026-09-01 (expandida no mesmo dia: schema completo 33 colunas) · Docs do destino: <https://windsor.ai/destinations/supabase-integrations/>, <https://windsor.ai/documentation/how-to-integrate-data-into-postgresql/>
+> Adicionada em: 2026-09-01 (expandida no mesmo dia: schema completo 33 colunas + sync próprio via Connectors API) · Docs da API: <https://windsor.ai/api-documentation/>
 
 ## Visão geral
 
 O [Windsor.ai](https://windsor.ai) é um ELT de dados de marketing (350+ fontes).
 Nesta integração ele puxa os dados da conta de anúncios (Meta/Facebook Ads) e
-grava, **uma vez por dia**, a tabela fato **`marketing_performance`** com
-granularidade **anúncio × dia** e o schema completo de 33 colunas (14 dimensões
-+ 19 métricas — nomes exatos do [catálogo de campos do conector
+alimenta a tabela fato **`marketing_performance`** com granularidade
+**anúncio × dia** e o schema completo de 33 colunas (14 dimensões + 19 métricas
+— nomes exatos do [catálogo de campos do conector
 Facebook](https://windsor.ai/data-field/facebook/)). Campanha, conjunto e anúncio
 são agregações dessa fato (via views ou no próprio `/meta-ads`).
+
+**Escritor dos dados: nosso sync via Connectors API** (`api/_windsor.js`):
+busca em `https://connectors.windsor.ai/facebook?api_key=...&fields=<33>&date_from&date_to`
+e grava com **replace por período** (DELETE do intervalo + INSERT) — idempotente,
+rodar de novo não duplica. A *destination task* "Supabase" do painel do Windsor
+(feita primeiro) reportava sucesso mas nunca gravou linhas neste projeto — ver
+"Problemas conhecidos".
 
 Dois consumidores no site:
 
@@ -24,8 +31,11 @@ Dois consumidores no site:
 ## Fluxo dos dados
 
 ```
-Meta Ads (e outras fontes) → Windsor.ai ──sync diário 07:00 UTC──▶ Supabase
-  public.marketing_performance (fato anúncio × dia, 33 colunas, RLS sem policies)
+Meta Ads → Windsor.ai (conectado) ──Connectors API (api_key)──▶ api/_windsor.js
+        cron Vercel 07:10 UTC (/api/windsor-sync, janela 3d)          │
+        ou CLI local: node scripts/windsor-sync.mjs (backfill)        ▼
+                                                 Supabase public.marketing_performance
+                                                 (fato anúncio × dia, 33 colunas, RLS)
         │                                   │
         │ /api/marketing (service_role)     │ views: v_meta_ads_diario,
         │ /api/leads    (service_role)      │ v_meta_ads_campanha, v_meta_ads_conjunto,
@@ -34,54 +44,19 @@ Meta Ads (e outras fontes) → Windsor.ai ──sync diário 07:00 UTC──▶ 
   /meta-ads (dashboard completa)      SQL Editor / análises
 ```
 
-## Passo 1 — Destination task no Windsor (manual, uma vez)
+## Passo 1 — API key do Windsor (manual, uma vez)
 
-Em <https://onboard.windsor.ai/app/data-preview> (ou Destinations → Supabase),
-"Connect Supabase" e escolha a conta **Donega Negócios Digitais** / projeto
-**site-alex-donega** — host/port/user preenchem sozinhos a partir do
-**IPv4 Transaction Pooler** (`aws-1-us-east-1.pooler.supabase.com:6543`,
-usuário `postgres.dtugwspbkkqxkeoajunf`). Preencher o resto:
+Em <https://onboard.windsor.ai/app/data-preview>, aba **Data**: a query bar no
+topo já mostra a URL com `api_key=...` (a chave da conta). Copiar o valor
+**completo** (copiar e colar, nunca digitar/ler de screenshot) e salvar no `.env`
+local e na Vercel como **`WINDSOR_API_KEY`**.
 
-| Campo | Valor |
-|---|---|
-| Task name | `marketing-performance-diario` |
-| Table name | `marketing_performance` (tabela **já criada** por nós — ver Passo 2) |
-| Schema | (vazio — default `public`) |
-| Password | 🔒 Senha do banco: Supabase → Project Settings → Database. Nunca no repo/chat. |
-| Schedule type / (UTC) | `Daily` · `07:00` (= 04:00 de Brasília; dados do dia anterior já consolidados) |
-| Columns to Match | `date,datasource,account_id,ad_id` |
+⚠️ A chave é longa e o input corta visualmente — selecione o texto inteiro antes
+de copiar. Teste rápido (não expõe a chave no histórico se usar variável):
 
-**Columns to Match** é a chave de upsert ("rows to replace"): com a granularidade
-anúncio × dia, a chave precisa incluir `ad_id` — sem isso, um re-sync da janela de
-~3 dias substituiria as linhas de TODOS os anúncios da conta naquele dia.
-
-**Colunas selecionadas** (33 — o Windsor só entrega o que estiver marcado; as
-outras colunas da tabela ficam NULL):
-
+```bash
+source .env 2>/dev/null; curl -s "https://connectors.windsor.ai/facebook?api_key=$WINDSOR_API_KEY&fields=date,campaign,spend&date_preset=last_7d" | head -c 300
 ```
-date, datasource, source,
-account_id, account_name, account_currency,
-campaign, campaign_id, adset_name, adset_id, ad_name, ad_id, creative_id,
-objective,
-clicks, unique_clicks, impressions, reach, frequency, spend, cpc, cpm,
-actions_link_click, actions_landing_page_view,
-actions_lead, actions_leadgen_grouped, actions_offsite_conversion_fb_pixel_lead,
-actions_complete_registration,
-actions_offsite_conversion_fb_pixel_complete_registration,
-actions_onsite_conversion_total_messaging_connection,
-actions_onsite_conversion_messaging_conversation_started_7d,
-cost_per_action_type_lead, cost_per_action_type_complete_registration
-```
-
-Depois: **Test Connection** → **Save** → aguardar o primeiro upload (status
-"ok" no painel do Windsor). A tabela já existe (pré-criada no Passo 2), então o
-Windsor apenas escreve nela — não cria nem altera schema.
-
-### Rede
-
-O Supabase aceita qualquer IP por padrão. **Só se** o projeto tiver *Network
-Restrictions* ativas (Project Settings → Database → Network Restrictions),
-liberar o IP do Windsor: `168.119.226.193`.
 
 ## Passo 2 — SQL da tabela completa + views (JÁ EXECUTADO em 2026-09-01)
 
@@ -108,18 +83,56 @@ select * from public.v_meta_ads_diario order by date desc limit 14;
 select * from public.v_meta_ads_anuncio order by spend desc limit 10;
 ```
 
+## Passo 3 — Sincronizar (backfill manual + cron diário)
+
+A lógica vive em `api/_windsor.js` (`WINDSOR_FIELDS` = as 33 colunas, na ordem
+do catálogo do conector Facebook). O replace é por período: DELETE
+`date between from and to` + INSERT das linhas normalizadas (dedup por
+`date|datasource|account_id|adset_id|ad_id|creative_id`) — rodar a janela de
+novo nunca duplica. A API pode rejeitar campos que a conta não tem; o sync
+retira os campos ofensivos e segue (colunas ficam NULL).
+
+**Backfill local (uma vez, e sempre que precisar repuxar histórico):**
+
+```bash
+node scripts/windsor-sync.mjs --selftest              # valida gravação no Supabase
+node scripts/windsor-sync.mjs --days=30 [--dry-run]   # últimos 30 dias
+node scripts/windsor-sync.mjs --from=2026-06-01 --to=2026-08-31
+```
+
+**Sync contínuo (produção):** `vercel.json` agenda o cron
+`10 7 * * *` → `GET /api/windsor-sync` (janela default 3 dias — a Meta ainda
+revisa os últimos ~3 dias). Na Vercel, definir as variáveis:
+
+| Variável | Onde | Função |
+|---|---|---|
+| `WINDSOR_API_KEY` | Vercel + `.env` local | Chave da conta Windsor (query bar do data-preview). 🚨 Segredo. |
+| `CRON_SECRET` (ou `WINDSOR_SYNC_SECRET`) | Vercel | Segredo do endpoint: o cron da Vercel envia `Authorization: Bearer $CRON_SECRET` automaticamente; chamadas manuais usam `?secret=...`. Sem ela o endpoint responde 500 por segurança. |
+| `PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` | já existem | Gravação via REST. |
+
+Disparo manual em produção:
+
+```bash
+curl "https://autoescolahabilitar.vercel.app/api/windsor-sync?secret=$WINDSOR_SYNC_SECRET&days=3"
+```
+
 ## Nossos arquivos
 
 | Arquivo | Rota | Descrição |
 |---|---|---|
+| `api/_windsor.js` | — | Núcleo do sync: fetch no Connectors API, normalização, replace por período no Supabase (REST via service_role), `selftestSupabase()`. Arquivos com `_` não viram endpoints. |
+| `scripts/windsor-sync.mjs` | — | CLI: `--selftest`, `--days=N`, `--from/--to`, `--dry-run`. Carrega o `.env` sozinho. |
+| `api/windsor-sync.js` | `GET/POST /api/windsor-sync` | Sync da janela (1–7 dias) para o cron da Vercel. Exige `CRON_SECRET`/`WINDSOR_SYNC_SECRET`; `401` sem segredo válido, `500` sem configuração, `502` Windsor/Supabase recusaram. |
+| `vercel.json` | — | Cron `10 7 * * *` → `/api/windsor-sync`. |
 | `api/marketing.js` | `GET /api/marketing` | Linhas de `marketing_performance` via `service_role` (order `date desc`, limit 5000). `405` método errado, `500` credenciais ausentes, `502` Supabase recusou (ex.: tabela inexistente). |
-| `vite.config.js` | — | Middleware `devApiMarketing` replica o endpoint no `npm run dev`. |
+| `vite.config.js` | — | Middlewares `devApiMarketing` e `devApiWindsorSync` replicam os endpoints no `npm run dev` (sync local sem segredo — só escuta em localhost). |
 | `src/Dash.jsx` | `/dash` | Painel de mídia resumido (investimento/cliques/CPL médio + tabela por campanha). |
 | `src/MetaAds.jsx` | `/meta-ads` | Dashboard completa: 8 KPIs (Investimento, Leads CRM, CPL, Cliques, CTR, CPC, CPM, Impressões) + chips (alcance, frequência, views, leads Meta, cadastros, conversas WhatsApp) + gráficos investimento/leads por dia + tabelas por Campanha/Conjunto/Anúncio. Presets de período (Tudo/Hoje/7/14/30) + datas custom. |
 | `supabase/sql/2026-09-01-windsor-marketing-performance.sql` | — | DDL da tabela completa + RLS + índices + views (executado via SQL Editor). |
 
-Sem variáveis de ambiente novas — os endpoints reusam `PUBLIC_SUPABASE_URL` +
-`SUPABASE_SERVICE_ROLE_KEY`/`service_role` (Vercel e `.env` local).
+Variáveis de ambiente: `WINDSOR_API_KEY` (novo) + as já existentes
+`PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`/`service_role`
+(Vercel e `.env` local) + `CRON_SECRET`/`WINDSOR_SYNC_SECRET` (Vercel).
 
 ## Como os indicadores são calculados
 
@@ -140,10 +153,9 @@ Sem variáveis de ambiente novas — os endpoints reusam `PUBLIC_SUPABASE_URL` +
   campanha não casa — o CPL médio continua valendo. Ajuste: padronizar o
   `utm_campaign` dos links para o nome exato da campanha, ou alterar o join
   (view `v_cpl_campanha` + `campaignKey` no `MetaAds.jsx`/`Dash.jsx`).
-- **Colunas não selecionadas no Windsor ficam NULL** na tabela (o Windsor só
-  escreve os campos marcados na task). Se adicionar campos depois, rode
-  novamente o SQL do repo para garantir as colunas (o bloco `alter ... add
-  column if not exists` cobre).
+- **Campos que a conta não possui ficam NULL**: se o Connectors API rejeitar
+  um campo (ex.: `actions_*` de eventos nunca disparados), o sync o retira da
+  query e a coluna correspondente fica NULL — o restante sincroniza normalmente.
 - **Janela de refresh ~3 dias**: dados mais antigos são considerados estáveis
   pelo Windsor; correções além da janela exigem reprocesso no painel deles.
 - **Não renomear/remover colunas** da tabela manualmente — quebra o sync.
@@ -156,12 +168,32 @@ Sem variáveis de ambiente novas — os endpoints reusam `PUBLIC_SUPABASE_URL` +
 
 ## Problemas conhecidos
 
-### Test Connection falha / timeout
+### `Please check the API key used: ...` (Connectors API rejeita a chave)
 
-Confirmar que a conexão é pelo **pooler** (`...pooler.supabase.com:6432/6543`) — o
-Windsor preenche assim por padrão; conexão direta costuma dar timeout. Checar
-senha (reset em Project Settings → Database) e Network Restrictions (IP
-`168.119.226.193`).
+A `WINDSOR_API_KEY` está errada/incompleta. A chave da query bar do
+data-preview é longa e o input corta visualmente — copie selecionando o texto
+inteiro. Se ainda assim falhar, a chave pode ter sido regerada: conferir em
+onboard.windsor.ai → Account/API keys. O CLI devolve essa dica automaticamente
+(em `.invalidKey`).
+
+### Destination task "Supabase" do Windsor: sucesso no painel, 0 linhas no banco
+
+Situação observada em 2026-09-01: a task `marketing-performance-diario`
+reportava "Destination task ran successfully!" (Rows 1728) mas nenhuma linha
+chegava ao projeto (`marketing_performance` vazia; nenhuma tabela nova em
+nenhum schema — verificado via catálogo). Causa não identificada (possíveis:
+task apontando para outro destino, escrita adiada pelo plano trial). Decisão:
+**o sync via Connectors API (`/api/windsor-sync`) é o escritor oficial**. Se um
+dia a task voltar a gravar, escolher UM escritor só: ou pausar/excluir a task
+no painel do Windsor, ou remover o cron do `vercel.json` — os dois juntos
+podem duplicar linhas (a task faz upsert pelas match columns; nosso sync faz
+replace por período, que apagaria as linhas da task na janela sincronizada).
+
+Referência da época (task manual, atualmente **não é o caminho ativo**): host do
+IPv4 Transaction Pooler `aws-1-us-east-1.pooler.supabase.com:6543`, usuário
+`postgres.dtugwspbkkqxkeoajunf`, columns to match
+`date,datasource,account_id,ad_id`; só permitir o IP `168.119.226.193` se o
+projeto tiver Network Restrictions ativas.
 
 ### `/api/marketing` responde 502 "Could not find the table 'public.marketing_performance'"
 
