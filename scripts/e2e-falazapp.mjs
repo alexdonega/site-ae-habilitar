@@ -43,7 +43,7 @@ await page.type('#phone', PHONE_DIGITS, { delay: 30 });
 
 await page.click('#email');
 await page.type('#email', EMAIL, { delay: 30 });
-await page.selectOption('#categoria', CATEGORIA);
+await page.select('#categoria', CATEGORIA);
 
 const valores = await page.evaluate(() => ({
     nome: document.querySelector('#full_name').value,
