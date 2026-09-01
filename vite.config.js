@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import { createContactAndNotify } from './api/_falazapp.js'
+import { createContactAndNotify, findLatestTicketUrl, normalizeWhatsapp } from './api/_falazapp.js'
 
 // Lê o corpo da requisição no middleware de desenvolvimento (connect não
 // faz parse de JSON sozinho).
@@ -116,9 +116,41 @@ function devApiFalazapp({ falazappApiUrl, falazappToken }) {
     }
 }
 
+// Middleware de desenvolvimento que replica a função serverless
+// /api/falazapp-ticket (api/falazapp-ticket.js) — mesmo motivo dos dois
+// acima. O clique da coluna WhatsApp do /dash redireciona para o ticket no
+// painel da FalazApp (fallback: wa.me).
+function devApiFalazappTicket({ falazappApiUrl, falazappPanelUrl, falazappToken }) {
+    return {
+        name: 'dev-api-falazapp-ticket',
+        apply: 'serve',
+        configureServer(server) {
+            server.middlewares.use('/api/falazapp-ticket', async (req, res) => {
+                const redirect = (url) => {
+                    res.statusCode = 302
+                    res.setHeader('Location', url)
+                    res.end()
+                }
+                const query = new URL(req.url || '', 'http://localhost').searchParams
+                const whatsapp = query.get('whatsapp') || query.get('number') || ''
+                try {
+                    const ticketUrl = await findLatestTicketUrl({
+                        whatsapp,
+                        token: falazappToken,
+                        apiUrl: falazappApiUrl,
+                        panelUrl: falazappPanelUrl,
+                    })
+                    redirect(ticketUrl || `https://wa.me/${normalizeWhatsapp(whatsapp)}`)
+                } catch {
+                    redirect(`https://wa.me/${normalizeWhatsapp(whatsapp)}`)
+                }
+            })
+        },
+    }
+}
+
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
-    // Prefixo vazio carrega TODAS as variáveis do .env (inclusive as sem
+export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as variáveis do .env (inclusive as sem
     // prefixo, como service_role) — mas só para uso do dev server acima.
     const env = loadEnv(mode, process.cwd(), '')
 
@@ -131,6 +163,11 @@ export default defineConfig(({ mode }) => {
             }),
             devApiFalazapp({
                 falazappApiUrl: env.FALAZAPP_API_URL,
+                falazappToken: env.FALAZAPP_API_TOKEN,
+            }),
+            devApiFalazappTicket({
+                falazappApiUrl: env.FALAZAPP_API_URL,
+                falazappPanelUrl: env.FALAZAPP_PANEL_URL,
                 falazappToken: env.FALAZAPP_API_TOKEN,
             }),
         ],

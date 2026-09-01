@@ -99,8 +99,10 @@ Falha nas tags não derruba nada: volta em `tagsError` na resposta do endpoint.
 |---|---|---|
 | `api/_falazapp.js` | — | Helper compartilhado (validação, normalização do número, fetch). Arquivos com `_` não viram endpoints. |
 | `api/falazapp-contact.js` | `POST /api/falazapp-contact` | Body `{nome_completo, whatsapp, email}` → cria o contato. `405` método errado, `400` campo ausente, `500` token não configurado, `502` FalazApp recusou. |
+| `api/falazapp-ticket.js` | `GET /api/falazapp-ticket?whatsapp=` | `302` para o ticket mais recente do contato no painel (`app.falazapp.com.br/tickets/{uuid}`); sem ticket → `302` para `wa.me`. Usado pela coluna WhatsApp do `/dash`. |
 | `src/App.jsx` | — | `handleSubmit` chama `/api/falazapp-contact` em background, junto das integrações Sheets/Novo Envio. |
-| `vite.config.js` | — | Middleware `devApiFalazapp` replica a função no `npm run dev` (o dev server do Vite não executa `api/`). |
+| `src/Dash.jsx` | — | A coluna WhatsApp aponta para `/api/falazapp-ticket` (abre o ticket no FalazApp em nova aba). |
+| `vite.config.js` | — | Middlewares `devApiFalazapp` e `devApiFalazappTicket` replicam as funções no `npm run dev` (o dev server do Vite não executa `api/`). |
 
 ## Como rodar local
 

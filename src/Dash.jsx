@@ -46,11 +46,11 @@ const refHost = (referrer) => {
 // criada na tabela, ela passa a valer automaticamente.
 const igValue = (lead) => lead.ig || lead.utm_source || '—';
 
-const waLink = (whatsapp) => {
-    const digits = String(whatsapp || '').replace(/\D/g, '');
-    if (!digits) return null;
-    return `https://wa.me/${digits.length <= 11 ? `55${digits}` : digits}`;
-};
+// Coluna WhatsApp: o clique passa pelo endpoint /api/falazapp-ticket, que
+// redireciona para o ticket do lead no painel FalazApp (e cai no wa.me se
+// o contato ainda não tiver ticket lá).
+const falazappTicketLink = (whatsapp) =>
+    `/api/falazapp-ticket?whatsapp=${encodeURIComponent(whatsapp || '')}`;
 
 const formatDate = (dateString) => {
     if (!dateString) return '—';
@@ -788,7 +788,6 @@ function DashPage() {
                                           </tr>
                                       ))
                                     : visible.map((lead) => {
-                                          const wa = waLink(lead.whatsapp);
                                           return (
                                               <tr key={lead.id} className="border-b border-gray-800 hover:bg-gray-700/40 transition-colors">
                                                   <td className="px-4 py-3 text-gray-500 font-mono whitespace-nowrap">#{lead.id}</td>
@@ -796,12 +795,12 @@ function DashPage() {
                                                       {lead.nome_completo || '—'}
                                                   </td>
                                                   <td className="px-4 py-3 whitespace-nowrap">
-                                                      {wa ? (
+                                                      {lead.whatsapp ? (
                                                           <a
-                                                              href={wa}
+                                                              href={falazappTicketLink(lead.whatsapp)}
                                                               target="_blank"
                                                               rel="noreferrer"
-                                                              title="Abrir conversa no WhatsApp"
+                                                              title="Abrir conversa no FalazApp"
                                                               className="inline-flex items-center gap-1.5 text-green-400 hover:text-green-300 transition"
                                                           >
                                                               <MessageCircle className="w-4 h-4" />

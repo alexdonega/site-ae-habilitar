@@ -16,7 +16,10 @@
 //  do cliente.
 // =============================================================================
 
+import https from 'https';
+
 export const FALAZAPP_DEFAULT_API_URL = 'https://back.falazapp.com.br';
+export const FALAZAPP_DEFAULT_PANEL_URL = 'https://app.falazapp.com.br';
 
 // Campos fixos da campanha "Meteórico": os leads do formulário de pré-matrícula
 // são todos de Sorriso/MT e caem na carteira do atendente responsável pelo
@@ -238,6 +241,68 @@ export async function setTicketTags({ ticketId, produto, token, apiUrl }) {
         base,
         'Falha de comunicação com a API da FalazApp (tags)',
     );
+}
+
+// Requisição HTTPS com JSON. Necessária porque a API "Obter Tickets do
+// Contato" (GET /api/contacts/alltickets) exige o número no CORPO da requisição
+// GET — o fetch/undici do Node recusa GET com body, o módulo https aceita.
+function httpsJsonRequest(url, { method, headers, body }) {
+    return new Promise((resolve, reject) => {
+        const payload = body !== undefined ? JSON.stringify(body) : undefined;
+        const req = https.request(url, {
+            method,
+            headers: {
+                ...headers,
+                ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
+            },
+        }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+                let parsed;
+                try {
+                    parsed = data ? JSON.parse(data) : {};
+                } catch {
+                    parsed = { message: data };
+                }
+                resolve({ status: res.statusCode, data: parsed });
+            });
+        });
+        req.on('error', reject);
+        req.end(payload);
+    });
+}
+
+// Descobre a URL do ticket mais recente do lead no painel da FalazApp
+// (https://app.falazapp.com.br/tickets/{uuid}). Devolve null se não houver
+// ticket (ou em qualquer falha) — o chamador decide o fallback.
+export async function findLatestTicketUrl({ whatsapp, token, apiUrl, panelUrl }) {
+    if (!whatsapp || !token) return null;
+
+    const base = (apiUrl || FALAZAPP_DEFAULT_API_URL).replace(/\/$/, '');
+    const panel = (panelUrl || FALAZAPP_DEFAULT_PANEL_URL).replace(/\/$/, '');
+
+    let resposta;
+    try {
+        resposta = await httpsJsonRequest(`${base}/api/contacts/alltickets`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: { number: normalizeWhatsapp(whatsapp) },
+        });
+    } catch {
+        return null;
+    }
+    if (resposta.status !== 200) return null;
+
+    const tickets = Array.isArray(resposta.data) ? resposta.data : (resposta.data.tickets || []);
+    const maisRecente = tickets
+        .filter((t) => t && t.uuid)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))[0];
+
+    return maisRecente ? `${panel}/tickets/${maisRecente.uuid}` : null;
 }
 
 // Fluxo completo do lead: cria o contato e, se der certo, envia a mensagem de
