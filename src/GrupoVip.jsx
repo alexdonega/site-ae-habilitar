@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 function GrupoVip() {
     const [redirectCountdown, setRedirectCountdown] = useState(5);
     const whatsappNumber = "556699630260";
-    const lead = useLocation().state;
-    let whatsappMessage = "Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 04 de setembro";
-    if (lead?.nome || lead?.categoria) {
-        const dados = [];
-        if (lead?.nome) dados.push(`Nome: ${lead.nome}`);
-        if (lead?.categoria) dados.push(`Categoria: ${lead.categoria}`);
-        whatsappMessage += `.\n\n${dados.join('\n')}`;
-    }
+    const [searchParams] = useSearchParams();
+    const leadNome = (searchParams.get('nome') || '').trim();
+    const leadCategoria = (searchParams.get('categoria') || '').trim();
+    const whatsappMessage = `Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 04 de Setembro.\n\nNome: ${leadNome}\nCategoria: ${leadCategoria}`;
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
     useEffect(() => {

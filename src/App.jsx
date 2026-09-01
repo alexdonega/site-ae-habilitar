@@ -90,13 +90,12 @@ function AutoescolaHabilitarLanding() {
         }).catch(err => console.error('Erro Supabase:', err));
 
         // Redirecionar IMEDIATAMENTE para página de obrigado, levando nome e
-        // categoria para a mensagem pré-preenchida do WhatsApp
-        navigate('/mega-oferta', {
-            state: {
-                nome: payload.nome_completo.trim(),
-                categoria: payload.categoria_desejada
-            }
+        // categoria na URL para a mensagem pré-preenchida do WhatsApp
+        const leadParams = new URLSearchParams({
+            nome: payload.nome_completo.trim(),
+            categoria: payload.categoria_desejada
         });
+        navigate(`/mega-oferta?${leadParams.toString()}`);
 
         // Enviar dados em background (não bloqueia o redirecionamento)
         // Envio para Google Sheets (CRM) via GET com parâmetros
