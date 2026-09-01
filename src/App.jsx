@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { captureLead } from './lib/leadCapture';
+import { captureLead, buildLeadMeta } from './lib/leadCapture';
 
 const PRE_MATRICULA_DEADLINE = new Date('2026-09-03T23:59:59-03:00');
 
@@ -78,14 +78,15 @@ function AutoescolaHabilitarLanding() {
         // Envio para Supabase (tabela "leads") com metadados completos:
         // página, UTMs, referrer e dispositivo (mesmo padrão do site
         // alexdonega-website). A tabela não tem coluna categoria_desejada,
-        // então a categoria escolhida vai embutida no produto.
+        // então a categoria escolhida vai direto no produto, igual ao
+        // rótulo exibido no formulário.
         // IMPORTANTE: disparar antes do navigate(), porque os metadados da
         // página (URL com UTMs) são lidos no momento da chamada.
         captureLead({
             nome_completo: payload.nome_completo,
             email: payload.email,
             whatsapp: payload.whatsapp,
-            produto: `Pré-Matrícula CNH — Autoescola Habilitar (${payload.categoria_desejada})`,
+            produto: payload.categoria_desejada,
             formulario: 'pre_matricula_home',
         }).catch(err => console.error('Erro Supabase:', err));
 
@@ -119,14 +120,18 @@ function AutoescolaHabilitarLanding() {
         }).catch(err => console.error('Erro Webhook:', err));
 
         // Criação do contato na plataforma FalazApp, via função serverless
-        // /api/falazapp-contact (o Bearer token da API vive só no servidor)
+        // /api/falazapp-contact (o Bearer token da API vive só no servidor).
+        // Os metadados de rastreamento (página, UTMs, referrer) viram
+        // extraInfo do contato — mesmos dados gravados no Supabase.
         fetch('/api/falazapp-contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 nome_completo: payload.nome_completo,
                 whatsapp: payload.whatsapp,
-                email: payload.email
+                email: payload.email,
+                formulario: 'pre_matricula_home',
+                ...buildLeadMeta()
             })
         }).catch(err => console.error('Erro FalazApp:', err));
     };

@@ -35,10 +35,33 @@ export function normalizeWhatsapp(whatsapp) {
     return digits.length >= 12 ? digits : `55${digits}`;
 }
 
+// Metadados de rastreamento enviados junto com o lead e gravados no contato
+// como "informações extras" (extraInfo). Campos vazios/nulos são ignorados.
+const EXTRA_INFO_FIELDS = [
+    'page_url',
+    'page_title',
+    'referrer',
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_term',
+    'utm_content',
+    'formulario',
+];
+
+export function buildExtraInfo(tracking = {}) {
+    return EXTRA_INFO_FIELDS
+        .filter((field) => {
+            const value = tracking[field];
+            return value !== undefined && value !== null && String(value).trim() !== '';
+        })
+        .map((field) => ({ name: field, value: String(tracking[field]) }));
+}
+
 // Cria o contato na FalazApp a partir dos campos do lead (mesmos valores que
 // vão para a tabela "leads" do Supabase). Devolve o corpo da resposta já
 // parseado; erros viram exceção com statusCode.
-export async function createFalazappContact({ nome_completo, whatsapp, email, token, apiUrl }) {
+export async function createFalazappContact({ nome_completo, whatsapp, email, tracking, token, apiUrl }) {
     if (!nome_completo || !whatsapp || !email) {
         const err = new Error('Envie { nome_completo, whatsapp, email }');
         err.statusCode = 400;
@@ -64,6 +87,7 @@ export async function createFalazappContact({ nome_completo, whatsapp, email, to
                 name: nome_completo,
                 number: normalizeWhatsapp(whatsapp),
                 email,
+                extraInfo: buildExtraInfo(tracking),
                 ...FIXED_FIELDS,
             }),
         });

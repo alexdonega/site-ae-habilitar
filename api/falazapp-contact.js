@@ -22,12 +22,13 @@ export default async function handler(req, res) {
 
     try {
         const body = req.body && typeof req.body === 'object' ? req.body : {};
-        const { nome_completo, whatsapp, email } = body;
+        const { nome_completo, whatsapp, email, ...tracking } = body;
 
         const contact = await createFalazappContact({
             nome_completo,
             whatsapp,
             email,
+            tracking,
             token: process.env.FALAZAPP_API_TOKEN,
             apiUrl: process.env.FALAZAPP_API_URL,
         });

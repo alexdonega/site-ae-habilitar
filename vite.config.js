@@ -98,11 +98,12 @@ function devApiFalazapp({ falazappApiUrl, falazappToken }) {
                     if (req.method !== 'POST') {
                         return send(405, { error: 'Método não permitido' })
                     }
-                    const { nome_completo, whatsapp, email } = JSON.parse(await readBody(req) || '{}')
+                    const { nome_completo, whatsapp, email, ...tracking } = JSON.parse(await readBody(req) || '{}')
                     const contact = await createFalazappContact({
                         nome_completo,
                         whatsapp,
                         email,
+                        tracking,
                         token: falazappToken,
                         apiUrl: falazappApiUrl,
                     })
