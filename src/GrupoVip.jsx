@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 function GrupoVip() {
     const [redirectCountdown, setRedirectCountdown] = useState(5);
     const whatsappNumber = "556699630260";
-    const whatsappMessage = "Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 03 de setembro";
+    const lead = useLocation().state;
+    let whatsappMessage = "Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 03 de setembro";
+    if (lead?.nome || lead?.categoria) {
+        const dados = [];
+        if (lead?.nome) dados.push(`Nome: ${lead.nome}`);
+        if (lead?.categoria) dados.push(`Categoria: ${lead.categoria}`);
+        whatsappMessage += `.\n\n${dados.join('\n')}`;
+    }
     const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
     useEffect(() => {
