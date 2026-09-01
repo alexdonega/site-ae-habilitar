@@ -39,12 +39,15 @@ const MESSAGE_SEND = {
 // — semântica de SUBSTITUIÇÃO, por isso enviamos o conjunto completo). IDs
 // obtidos em GET /api/tags ("API Obter Tags da Empresa").
 const CATEGORY_TAG_IDS = {
-    // Valores do <select> do formulário → tag correspondente na FalazApp.
+    // Valores do <select> do formulário → tag correspondente na FalazApp
+    // (IDs confirmados pelo time em 2026-09-01). "Carreta [E]" ainda não é
+    // opção do formulário — mapeada por garantia para quando entrar.
     'Moto [A]': 595,
     'Carro [B]': 579,
     'Carro e Moto [AB]': 572,
     'Adição Moto [A]': 584,
     'Adição Carro [B]': 583,
+    'Carreta [E]': 582,
 };
 
 const CAMPAIGN_TAG_IDS = [
