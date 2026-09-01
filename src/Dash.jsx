@@ -323,7 +323,22 @@ function DashPage() {
         setVisibleCount(PAGE_SIZE);
     };
 
-    // --- Métricas (sobre o dataset completo) ---
+    // --- Dados dentro do período selecionado (base de TODA a dashboard:
+    // KPIs, gráfico por dia, categorias e tabela). Sem datas = tudo. ---
+
+    const filteredByDate = useMemo(() => {
+        const from = dateFrom ? new Date(`${dateFrom}T00:00:00`) : null;
+        const to = dateTo ? new Date(`${dateTo}T23:59:59.999`) : null;
+        if (!from && !to) return leads;
+        return leads.filter((lead) => {
+            const created = new Date(lead.created_at);
+            if (from && created < from) return false;
+            if (to && created > to) return false;
+            return true;
+        });
+    }, [leads, dateFrom, dateTo]);
+
+    // --- Métricas (sobre o período selecionado) ---
 
     const metrics = useMemo(() => {
         const now = new Date();
@@ -338,26 +353,48 @@ function DashPage() {
         let countToday = 0;
         let countWeek = 0;
         let countMonth = 0;
-        leads.forEach((lead) => {
+        filteredByDate.forEach((lead) => {
             const created = new Date(lead.created_at);
             if (created >= today) countToday += 1;
             if (created >= week) countWeek += 1;
             if (created >= month) countMonth += 1;
         });
-        return { total: leads.length, today: countToday, week: countWeek, month: countMonth };
-    }, [leads]);
+        return { total: filteredByDate.length, today: countToday, week: countWeek, month: countMonth };
+    }, [filteredByDate]);
 
+    // Gráfico por dia: o eixo começa na data do primeiro lead (não temos
+    // dados antes disso) ou no período filtrado, até hoje/fim do período.
+    // Sem filtro e sem histórico, cai nos "últimos 14 dias". Períodos muito
+    // longos são limitados às últimas 31 barras.
     const daily = useMemo(() => {
+        const source = filteredByDate;
+        const today = new Date();
+        const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const end = dateTo ? startOfDay(new Date(`${dateTo}T00:00:00`)) : startOfDay(today);
+
+        let start;
+        if (dateFrom) {
+            start = startOfDay(new Date(`${dateFrom}T00:00:00`));
+        } else if (source.length > 0) {
+            const oldest = new Date(source[source.length - 1].created_at); // lista é desc
+            const oldestDay = startOfDay(oldest);
+            const fourteenAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13);
+            start = oldestDay > fourteenAgo ? oldestDay : fourteenAgo;
+        } else {
+            start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13);
+        }
+
+        const maxStart = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 30);
+        if (start < maxStart) start = maxStart;
+
         const counts = new Map();
         const buckets = [];
-        const now = new Date();
-        for (let i = 13; i >= 0; i -= 1) {
-            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
             const key = dayKey(d);
             counts.set(key, 0);
-            buckets.push({ key, date: d, count: 0 });
+            buckets.push({ key, date: new Date(d), count: 0 });
         }
-        leads.forEach((lead) => {
+        source.forEach((lead) => {
             const key = dayKey(new Date(lead.created_at));
             if (counts.has(key)) counts.set(key, counts.get(key) + 1);
         });
@@ -365,16 +402,16 @@ function DashPage() {
             b.count = counts.get(b.key);
         });
         return { buckets, max: Math.max(1, ...buckets.map((b) => b.count)) };
-    }, [leads]);
+    }, [filteredByDate, dateFrom, dateTo]);
 
     const categorias = useMemo(() => {
         const map = new Map();
-        leads.forEach((lead) => {
+        filteredByDate.forEach((lead) => {
             const c = parseProduto(lead.produto);
             map.set(c, (map.get(c) || 0) + 1);
         });
         return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    }, [leads]);
+    }, [filteredByDate]);
 
     const buildOptions = useCallback(
         (accessor) => {
@@ -395,18 +432,13 @@ function DashPage() {
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        const from = dateFrom ? new Date(`${dateFrom}T00:00:00`) : null;
-        const to = dateTo ? new Date(`${dateTo}T23:59:59.999`) : null;
         const filtroSoSim = contatoFiltro.sim && !contatoFiltro.nao;
         const filtroSoNao = contatoFiltro.nao && !contatoFiltro.sim;
-        return leads.filter((lead) => {
-            const created = new Date(lead.created_at);
+        return filteredByDate.filter((lead) => {
             if (q) {
                 const haystack = `${lead.id} ${lead.nome_completo || ''} ${lead.whatsapp || ''}`.toLowerCase();
                 if (!haystack.includes(q)) return false;
             }
-            if (from && created < from) return false;
-            if (to && created > to) return false;
             if (filtroSoSim && !lead.contato_realizado) return false;
             if (filtroSoNao && lead.contato_realizado) return false;
             if (filters.produto && parseProduto(lead.produto) !== filters.produto) return false;
@@ -415,7 +447,7 @@ function DashPage() {
             if (filters.utm_medium && (lead.utm_medium || '—') !== filters.utm_medium) return false;
             return true;
         });
-    }, [leads, search, filters, dateFrom, dateTo, contatoFiltro]);
+    }, [filteredByDate, search, filters, contatoFiltro]);
 
     const visible = filtered.slice(0, visibleCount);
     const todayKey = dayKey(new Date());
@@ -503,6 +535,9 @@ function DashPage() {
                                 setDateFrom(e.target.value);
                                 setVisibleCount(PAGE_SIZE);
                             }}
+                            onClick={(e) => {
+                                try { e.currentTarget.showPicker(); } catch { /* navegador sem suporte */ }
+                            }}
                             aria-label="Data inicial"
                             title="Data inicial"
                             className="bg-transparent text-white placeholder-gray-500 [color-scheme:dark] focus:outline-none cursor-pointer"
@@ -515,6 +550,9 @@ function DashPage() {
                             onChange={(e) => {
                                 setDateTo(e.target.value);
                                 setVisibleCount(PAGE_SIZE);
+                            }}
+                            onClick={(e) => {
+                                try { e.currentTarget.showPicker(); } catch { /* navegador sem suporte */ }
                             }}
                             aria-label="Data final"
                             title="Data final"
@@ -564,7 +602,17 @@ function DashPage() {
                 {/* Gráfico por dia + categorias */}
                 <section className="grid lg:grid-cols-5 gap-4">
                     <div className="lg:col-span-3 bg-gray-800 rounded-xl border border-gray-700 p-5">
-                        <h2 className="text-sm font-semibold text-gray-300 mb-4">Leads por dia — últimos 14 dias</h2>
+                        <h2 className="text-sm font-semibold text-gray-300 mb-4">
+                            Leads por dia
+                            {daily.buckets.length > 0 && (
+                                <span className="text-gray-500 font-normal">
+                                    {' · '}
+                                    {daily.buckets[0].date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                    {' – '}
+                                    {daily.buckets[daily.buckets.length - 1].date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                </span>
+                            )}
+                        </h2>
                         <div className="flex items-end gap-1.5 h-44">
                             {daily.buckets.map((b) => {
                                 const isToday = b.key === todayKey;

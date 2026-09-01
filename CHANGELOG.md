@@ -24,6 +24,9 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Alterado
 - Layout do `/dash`: filtro de período e atalhos Meta Ads passaram a ficar em uma barra acima dos cartões de métricas (com botão "Limpar período"); coluna "Contato" movida para depois de "Produto".
+- Clicar em qualquer ponto do campo de data (início ou fim) agora abre o calendário (`showPicker()`).
+- O filtro de período passou a refletir em TODA a dashboard: KPIs, gráfico por dia, ranking por categoria e tabela.
+- Gráfico "Leads por dia" passa a começar na data do primeiro lead (ex.: 01/09), respeitando o período filtrado (máx. 31 barras); o título mostra o intervalo exibido.
 
 ## [1.2.0] - 2026-08-31
 ### Adicionado
