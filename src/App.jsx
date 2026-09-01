@@ -75,6 +75,11 @@ function AutoescolaHabilitarLanding() {
             window.fbq('track', 'CompleteRegistration');
         }
 
+        // Metadados capturados ANTES do navigate() — a URL com UTMs e o
+        // referrer só existem enquanto o usuário está nesta página. Depois
+        // do redirect virariam os da página de obrigado (sem UTMs).
+        const leadMeta = buildLeadMeta();
+
         // Envio para Supabase (tabela "leads") com metadados completos:
         // página, UTMs, referrer e dispositivo (mesmo padrão do site
         // alexdonega-website). A tabela não tem coluna categoria_desejada,
@@ -121,8 +126,8 @@ function AutoescolaHabilitarLanding() {
 
         // Criação do contato na plataforma FalazApp, via função serverless
         // /api/falazapp-contact (o Bearer token da API vive só no servidor).
-        // Os metadados de rastreamento (página, UTMs, referrer) viram
-        // extraInfo do contato — mesmos dados gravados no Supabase.
+        // Usa o leadMeta capturado antes do navigate() para as UTMs não se
+        // perderem; no contato viram extraInfo (page_url, UTMs, referrer...).
         fetch('/api/falazapp-contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -131,7 +136,7 @@ function AutoescolaHabilitarLanding() {
                 whatsapp: payload.whatsapp,
                 email: payload.email,
                 formulario: 'pre_matricula_home',
-                ...buildLeadMeta()
+                ...leadMeta
             })
         }).catch(err => console.error('Erro FalazApp:', err));
     };
