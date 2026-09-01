@@ -12,6 +12,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Filtros de tabela com combobox pesquisável (Produto, Referrer, IG, UTM Medium) + busca global por nome/WhatsApp/ID.
 - Coluna "IG" mostra `ig` quando a coluna existir; hoje exibe o `utm_source` (valor `ig`).
 - Variável `SUPABASE_SERVICE_ROLE_KEY` (Secret) configurada na Vercel para o ambiente de Production.
+- `vite.config.js`: middleware de desenvolvimento que replica o `GET /api/leads` no `npm run dev` (consulta o Supabase com a service_role do `.env`, apenas no processo do dev server) — o `/dash` no localhost agora carrega dados reais e em tempo real, sem precisar do `vercel dev`.
 
 ## [1.2.0] - 2026-08-31
 ### Adicionado
