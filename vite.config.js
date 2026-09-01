@@ -123,7 +123,7 @@ function devApiFalazapp({ falazappApiUrl, falazappToken, supabaseUrl, serviceRol
                                         'Content-Type': 'application/json',
                                         Prefer: 'return=minimal',
                                     },
-                                    body: JSON.stringify({ contact_falazapp: resultado.contact.id }),
+                                    body: JSON.stringify({ contact_falazapp: String(resultado.contact.id) }),
                                 },
                             )
                             leadUpdate = { ok: rest.ok, error: rest.ok ? null : `Supabase respondeu ${rest.status}` }

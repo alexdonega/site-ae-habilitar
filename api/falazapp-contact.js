@@ -40,7 +40,7 @@ async function salvarContactFalazapp(whatsapp, contactId) {
     });
     const { error } = await supabase
         .from('leads')
-        .update({ contact_falazapp: contactId })
+        .update({ contact_falazapp: String(contactId) })
         .eq('whatsapp', whatsapp)
         .is('contact_falazapp', null);
     return { ok: !error, error: error ? error.message : null };
