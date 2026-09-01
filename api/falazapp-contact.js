@@ -11,7 +11,7 @@
 //    email ← email | estado/cidade/referencia fixos da campanha Meteórico.
 // =============================================================================
 
-import { createFalazappContact } from './_falazapp';
+import { createFalazappContact } from './_falazapp.js';
 
 export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'no-store');
