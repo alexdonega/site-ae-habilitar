@@ -50,6 +50,20 @@ const CATEGORY_TAG_IDS = {
     'Carreta [E]': 582,
 };
 
+// Normaliza a categoria para o lookup da tag: NFC (acentos canônicos),
+// espaços colapsados e caixa baixa — tolera variações de encoding/espaço
+// entre o que chega do cliente e as chaves do mapa.
+const normalizeCategoria = (value) =>
+    String(value || '')
+        .normalize('NFC')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+
+const CATEGORY_TAG_LOOKUP = Object.fromEntries(
+    Object.entries(CATEGORY_TAG_IDS).map(([categoria, id]) => [normalizeCategoria(categoria), id])
+);
+
 const CAMPAIGN_TAG_IDS = [
     674, // meteorico-2026 — espelha a referencia fixa "Meteórico Setembro/2026"
     673, // setembro (mês de captação)
@@ -212,7 +226,7 @@ export async function setTicketTags({ ticketId, produto, token, apiUrl }) {
     }
 
     const ids = [...CAMPAIGN_TAG_IDS];
-    const categoriaTagId = CATEGORY_TAG_IDS[String(produto || '').trim()];
+    const categoriaTagId = CATEGORY_TAG_LOOKUP[normalizeCategoria(produto)];
     if (categoriaTagId) ids.unshift(categoriaTagId);
 
     const base = (apiUrl || FALAZAPP_DEFAULT_API_URL).replace(/\/$/, '');
