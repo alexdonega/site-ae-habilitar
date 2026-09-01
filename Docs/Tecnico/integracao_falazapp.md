@@ -40,6 +40,8 @@ Base: `https://back.falazapp.com.br` · Auth: `Authorization: Bearer <FALAZAPP_A
 |---|---|---|
 | Criar contato | `POST /api/contacts` | Ver mapeamento abaixo |
 | Enviar mensagem de texto | `POST /api/messages/send` | `{ number, openTicket: "1", queueId: "155", body }` |
+| Aplicar tags ao ticket | `POST /api/tags/add` | `{ ticketId, tags: [{ id }, ...] }` |
+| Listar tags da empresa | `GET /api/tags` | sem payload |
 
 ### Mapeamento de campos
 
@@ -70,6 +72,25 @@ mensagem de confirmação da pré-inscrição (`buildConfirmationMessage()` em
   nova campanha;
 - se o contato for criado mas a mensagem falhar, o endpoint responde `200`
   com `messageError` preenchido (o contato continua salvo).
+
+### Tags do ticket
+
+A API de criar contato e a de enviar mensagem **não aceitam tags** — elas são
+aplicadas ao **ticket** via `POST /api/tags/add` logo após o envio (o
+`ticketId` vem na resposta da mensagem, em `retorno.ticketId`). Semântica de
+**substituição**: todas as tags existentes são apagadas e as enviadas são
+aplicadas (irrelevante aqui, pois o ticket acaba de nascer vazio).
+
+Tags aplicadas a cada lead (IDs em `api/_falazapp.js`, listados via
+`GET /api/tags`):
+
+| Tag | ID | Origem |
+|---|---|---|
+| Moto [A] / Carro [B] / Carro e Moto [AB] / Adição Moto [A] / Adição Carro [B] | 595 / 579 / 572 / 584 / 583 | Dinâmica: categoria escolhida no formulário (`produto`) |
+| meteorico-2026 | 674 | Fixa — espelha a referencia "Meteórico Setembro/2026" |
+| setembro | 673 | Fixa — mês de captação |
+
+Falha nas tags não derruba nada: volta em `tagsError` na resposta do endpoint.
 
 ## Nossos arquivos
 

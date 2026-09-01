@@ -35,6 +35,23 @@ const MESSAGE_SEND = {
     queueId: '155',
 };
 
+// Tags aplicadas ao ticket do lead após o envio da mensagem (POST /api/tags/add
+// — semântica de SUBSTITUIÇÃO, por isso enviamos o conjunto completo). IDs
+// obtidos em GET /api/tags ("API Obter Tags da Empresa").
+const CATEGORY_TAG_IDS = {
+    // Valores do <select> do formulário → tag correspondente na FalazApp.
+    'Moto [A]': 595,
+    'Carro [B]': 579,
+    'Carro e Moto [AB]': 572,
+    'Adição Moto [A]': 584,
+    'Adição Carro [B]': 583,
+};
+
+const CAMPAIGN_TAG_IDS = [
+    674, // meteorico-2026 — espelha a referencia fixa "Meteórico Setembro/2026"
+    673, // setembro (mês de captação)
+];
+
 // O formulário grava o WhatsApp mascarado, ex. "(65) 99999-9999" (DDD + 8/9
 // dígitos, sem DDI). A FalazApp espera apenas dígitos com DDI, ex.
 // "5565999999999", então normalizamos aqui.
@@ -176,6 +193,35 @@ export async function createFalazappContact({ nome_completo, whatsapp, email, tr
     );
 }
 
+// Define as tags do ticket do lead: tag da categoria escolhida no formulário
+// + tags fixas da campanha. IDs desconhecidos seriam ignorados pela plataforma,
+// mas filtramos aqui mesmo para não enviar lixo.
+export async function setTicketTags({ ticketId, produto, token, apiUrl }) {
+    if (!ticketId) {
+        const err = new Error('ticketId obrigatório para aplicar tags');
+        err.statusCode = 400;
+        throw err;
+    }
+    if (!token) {
+        const err = new Error('FALAZAPP_API_TOKEN não configurada no ambiente');
+        err.statusCode = 500;
+        throw err;
+    }
+
+    const ids = [...CAMPAIGN_TAG_IDS];
+    const categoriaTagId = CATEGORY_TAG_IDS[String(produto || '').trim()];
+    if (categoriaTagId) ids.unshift(categoriaTagId);
+
+    const base = (apiUrl || FALAZAPP_DEFAULT_API_URL).replace(/\/$/, '');
+    return falazappPost(
+        '/api/tags/add',
+        { ticketId, tags: ids.map((id) => ({ id })) },
+        token,
+        base,
+        'Falha de comunicação com a API da FalazApp (tags)',
+    );
+}
+
 // Fluxo completo do lead: cria o contato e, se der certo, envia a mensagem de
 // confirmação. Se a mensagem falhar, o contato já criado é preservado e o
 // erro volta em `messageError` (o lead não pode parecer perdido).
@@ -184,6 +230,8 @@ export async function createContactAndNotify({ nome_completo, whatsapp, email, t
 
     let message = null;
     let messageError = null;
+    let tags = null;
+    let tagsError = null;
     try {
         message = await sendFalazappTextMessage({
             whatsapp,
@@ -192,9 +240,21 @@ export async function createContactAndNotify({ nome_completo, whatsapp, email, t
             token,
             apiUrl,
         });
+
+        // A resposta do envio traz o ticketId dentro de "retorno".
+        const ticketId = message?.retorno?.ticketId ?? message?.ticketId ?? null;
+        if (ticketId) {
+            try {
+                tags = await setTicketTags({ ticketId, produto: tracking?.produto, token, apiUrl });
+            } catch (err) {
+                tagsError = err.message;
+            }
+        } else {
+            tagsError = 'ticketId ausente na resposta da mensagem';
+        }
     } catch (err) {
         messageError = err.message;
     }
 
-    return { contact, message, messageError };
+    return { contact, message, messageError, tags, tagsError };
 }
