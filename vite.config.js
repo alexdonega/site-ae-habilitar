@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
-import { createFalazappContact } from './api/_falazapp.js'
+import { createContactAndNotify } from './api/_falazapp.js'
 
 // Lê o corpo da requisição no middleware de desenvolvimento (connect não
 // faz parse de JSON sozinho).
@@ -99,7 +99,7 @@ function devApiFalazapp({ falazappApiUrl, falazappToken }) {
                         return send(405, { error: 'Método não permitido' })
                     }
                     const { nome_completo, whatsapp, email, ...tracking } = JSON.parse(await readBody(req) || '{}')
-                    const contact = await createFalazappContact({
+                    const resultado = await createContactAndNotify({
                         nome_completo,
                         whatsapp,
                         email,
@@ -107,7 +107,7 @@ function devApiFalazapp({ falazappApiUrl, falazappToken }) {
                         token: falazappToken,
                         apiUrl: falazappApiUrl,
                     })
-                    send(200, { ok: true, contact })
+                    send(200, { ok: true, ...resultado })
                 } catch (err) {
                     send(err.statusCode || 502, { error: err.message })
                 }

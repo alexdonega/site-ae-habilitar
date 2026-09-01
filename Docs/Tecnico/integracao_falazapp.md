@@ -1,23 +1,29 @@
-# Integração FalazApp — criação de contato após o formulário
+# Integração FalazApp — contato + mensagem após o formulário
 
 > Rota interna: **POST /api/falazapp-contact** · Disparo: submit da pré-matrícula (`src/App.jsx`)
-> Adicionada em: 2026-09-01 · Docs da API: <https://principal.suitehelpers.com.br/docs/api-criar-contato>
+> Adicionada em: 2026-09-01 · Docs da API: <https://principal.suitehelpers.com.br/docs/api-criar-contato>, <https://principal.suitehelpers.com.br/docs/api-mensagem-de-texto>
 
 ## Visão geral
 
 Quando um lead preenche o formulário de pré-matrícula da landing page, além de
 gravar o lead no Supabase (tabela `leads`) e disparar as integrações Google
-Sheets e webhook Novo Envio, o site agora **cria um contato na plataforma
-FalazApp** (CRM WhatsApp da família suitehelpers).
+Sheets e webhook Novo Envio, o site:
 
-A chamada usa uma **Vercel Function** (`api/falazapp-contact.js`) como proxy:
-o Bearer token da API vive apenas em `process.env` (server-side), nunca no
-bundle do navegador — mesma regra de segurança da integração Z.ai.
+1. **cria um contato** na plataforma FalazApp (CRM WhatsApp da família
+   suitehelpers);
+2. logo em seguida **envia uma mensagem de confirmação** por WhatsApp para o
+   lead, abrindo um ticket na fila 155 (status "aguardando").
+
+As chamadas usam uma **Vercel Function** (`api/falazapp-contact.js`) como
+proxy: o Bearer token da API vive apenas em `process.env` (server-side), nunca
+no bundle do navegador — mesma regra de segurança da integração Z.ai.
 
 O envio é **fire-and-forget**: acontece em background após o redirecionamento
 para a página de obrigado e, se falhar, só loga no console (`Erro FalazApp:`).
 A falha NÃO afeta o usuário nem as outras integrações. Não há retry nem
-registro de sincronização na tabela `leads`.
+registro de sincronização na tabela `leads`. Se o contato for criado mas a
+mensagem falhar, a resposta do endpoint traz `messageError` (contato segue
+salvo).
 
 ## Variáveis de ambiente
 
@@ -33,6 +39,7 @@ Base: `https://back.falazapp.com.br` · Auth: `Authorization: Bearer <FALAZAPP_A
 | Operação | Método & path | Body |
 |---|---|---|
 | Criar contato | `POST /api/contacts` | Ver mapeamento abaixo |
+| Enviar mensagem de texto | `POST /api/messages/send` | `{ number, openTicket: "1", queueId: "155", body }` |
 
 ### Mapeamento de campos
 
@@ -46,6 +53,23 @@ Base: `https://back.falazapp.com.br` · Auth: `Authorization: Bearer <FALAZAPP_A
 | `referencia` | fixo `Meteórico Setembro/2026` | Atualizar a cada nova campanha em `api/_falazapp.js` (`FIXED_FIELDS`) |
 | `carteiraId` | fixo `254` | Atendente responsável — sem carteira o contato não aparece na listagem padrão do painel |
 | `extraInfo` | metadados do envio | Lista `{name, value}` com `produto` (categoria escolhida), `created_at`/`updated_at` (instante do envio, igual ao insert no Supabase), `page_url`, `page_title`, `referrer`, todas as UTMs e `formulario` (campos vazios são omitidos) — mesmos dados gravados no Supabase pelo `buildLeadMeta()` |
+
+### Mensagem de confirmação (WhatsApp)
+
+Logo após criar o contato com sucesso, `createContactAndNotify()` envia a
+mensagem de confirmação da pré-inscrição (`buildConfirmationMessage()` em
+`api/_falazapp.js`):
+
+- `number` = WhatsApp do lead normalizado (DDI 55);
+- `openTicket: "1"` + `queueId: "155"` = abre ticket na fila 155 e joga a
+  conversa em status "aguardando" (comportamento documentado da API);
+- corpo fixo com duas linhas dinâmicas: nome completo (`nome_completo`) e
+  categoria da CNH (`produto`);
+- a data/texto da promoção ("sexta-feira, dia 04 de setembro", "50 vagas")
+  estão escritos no texto — atualizar em `buildConfirmationMessage()` a cada
+  nova campanha;
+- se o contato for criado mas a mensagem falhar, o endpoint responde `200`
+  com `messageError` preenchido (o contato continua salvo).
 
 ## Nossos arquivos
 
