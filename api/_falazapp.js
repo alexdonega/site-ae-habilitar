@@ -67,6 +67,7 @@ const CATEGORY_TAG_LOOKUP = Object.fromEntries(
 const CAMPAIGN_TAG_IDS = [
     674, // meteorico-2026 — espelha a referencia fixa "Meteórico Setembro/2026"
     673, // setembro (mês de captação)
+    573, // Negociando — status inicial do lead após o formulário
 ];
 
 // O formulário grava o WhatsApp mascarado, ex. "(65) 99999-9999" (DDD + 8/9

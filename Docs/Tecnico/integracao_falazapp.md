@@ -89,6 +89,7 @@ Tags aplicadas a cada lead (IDs em `api/_falazapp.js`, listados via
 | Moto [A] / Carro [B] / Carro e Moto [AB] / Adição Moto [A] / Adição Carro [B] | 595 / 579 / 572 / 584 / 583 | Dinâmica: categoria escolhida no formulário (`produto`) |
 | meteorico-2026 | 674 | Fixa — espelha a referencia "Meteórico Setembro/2026" |
 | setembro | 673 | Fixa — mês de captação |
+| Negociando | 573 | Fixa — status inicial do lead após o formulário |
 
 Falha nas tags não derruba nada: volta em `tagsError` na resposta do endpoint.
 
