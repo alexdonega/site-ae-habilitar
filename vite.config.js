@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import { createFalazappContact } from './api/_falazapp.js'
 
 // Lê o corpo da requisição no middleware de desenvolvimento (connect não
 // faz parse de JSON sozinho).
@@ -78,6 +79,42 @@ function devApiLeads({ supabaseUrl, serviceRoleKey }) {
     }
 }
 
+// Middleware de desenvolvimento que replica a função serverless
+// /api/falazapp-contact (api/falazapp-contact.js) no dev server do Vite —
+// mesmo motivo do devApiLeads acima. Reusa o helper api/_falazapp.js para
+// garantir comportamento idêntico entre dev e produção.
+function devApiFalazapp({ falazappApiUrl, falazappToken }) {
+    return {
+        name: 'dev-api-falazapp',
+        apply: 'serve',
+        configureServer(server) {
+            server.middlewares.use('/api/falazapp-contact', async (req, res) => {
+                const send = (status, payload) => {
+                    res.statusCode = status
+                    res.setHeader('Content-Type', 'application/json')
+                    res.end(JSON.stringify(payload))
+                }
+                try {
+                    if (req.method !== 'POST') {
+                        return send(405, { error: 'Método não permitido' })
+                    }
+                    const { nome_completo, whatsapp, email } = JSON.parse(await readBody(req) || '{}')
+                    const contact = await createFalazappContact({
+                        nome_completo,
+                        whatsapp,
+                        email,
+                        token: falazappToken,
+                        apiUrl: falazappApiUrl,
+                    })
+                    send(200, { ok: true, contact })
+                } catch (err) {
+                    send(err.statusCode || 502, { error: err.message })
+                }
+            })
+        },
+    }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
     // Prefixo vazio carrega TODAS as variáveis do .env (inclusive as sem
@@ -90,6 +127,10 @@ export default defineConfig(({ mode }) => {
             devApiLeads({
                 supabaseUrl: env.PUBLIC_SUPABASE_URL,
                 serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.service_role,
+            }),
+            devApiFalazapp({
+                falazappApiUrl: env.FALAZAPP_API_URL,
+                falazappToken: env.FALAZAPP_API_TOKEN,
             }),
         ],
         // Aceita variáveis com prefixo VITE_ e PUBLIC_ (mesma convenção do

@@ -117,6 +117,18 @@ function AutoescolaHabilitarLanding() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).catch(err => console.error('Erro Webhook:', err));
+
+        // Criação do contato na plataforma FalazApp, via função serverless
+        // /api/falazapp-contact (o Bearer token da API vive só no servidor)
+        fetch('/api/falazapp-contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nome_completo: payload.nome_completo,
+                whatsapp: payload.whatsapp,
+                email: payload.email
+            })
+        }).catch(err => console.error('Erro FalazApp:', err));
     };
 
     useEffect(() => {
