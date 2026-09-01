@@ -12,6 +12,7 @@ import {
     MessageCircle,
     AlertCircle,
     Filter,
+    ExternalLink,
 } from 'lucide-react';
 
 // =============================================================================
@@ -190,6 +191,23 @@ function Combobox({ label, value, onChange, options }) {
 }
 
 const PAGE_SIZE = 100;
+
+// Atalhos para o Gerenciador de Anúncios da Meta (abrem em nova aba),
+// já filtrados pela campanha ativa da Autoescola Habilitar.
+const META_ADS_LINKS = [
+    {
+        label: 'Campanha',
+        url: 'https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&comparison_date=&insights_date=2023-12-18_2026-09-02%2Cmaximum&insights_comparison_date=&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407',
+    },
+    {
+        label: 'Conjunto',
+        url: 'https://adsmanager.facebook.com/adsmanager/manage/adsets?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&insights_date=2023-12-18_2026-09-02%2Cmaximum&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407',
+    },
+    {
+        label: 'Anúncio',
+        url: 'https://adsmanager.facebook.com/adsmanager/manage/ads?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&insights_date=2023-12-18_2026-09-02%2Cmaximum&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407&selected_adset_ids=120248846626200407%2C120248846618430407%2C120248846513220407%2C120248846501130407%2C120248846378430407%2C120248846331900407%2C120248846128840407',
+    },
+];
 
 // --- Página ------------------------------------------------------------------
 
@@ -625,6 +643,24 @@ function DashPage() {
                                 />
                                 Não
                             </label>
+                        </div>
+
+                        {/* Atalhos Meta Ads (abrem em nova aba) */}
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-gray-400 shrink-0">Meta Ads:</span>
+                            {META_ADS_LINKS.map(({ label, url }) => (
+                                <a
+                                    key={label}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title={`Abrir ${label} no Meta Ads`}
+                                    className="flex items-center gap-1.5 h-10 px-3 rounded-lg border border-blue-500/40 bg-blue-600/10 text-blue-300 text-sm hover:bg-blue-600/25 hover:text-blue-200 transition shrink-0"
+                                >
+                                    <ExternalLink className="w-4 h-4" />
+                                    {label}
+                                </a>
+                            ))}
                         </div>
 
                         {hasActiveFilters && (

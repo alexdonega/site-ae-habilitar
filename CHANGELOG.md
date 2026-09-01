@@ -16,6 +16,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [1.4.0] - 2026-09-01
 ### Adicionado
+- Atalhos "Meta Ads" na barra de filtros do `/dash`: botões Campanha, Conjunto e Anúncio que abrem o Gerenciador de Anúncios da Meta em nova aba, já filtrados pela campanha ativa.
 - Filtro por período (data de início e fim) na tabela de leads do `/dash`.
 - Coluna "Contato" com checkbox na tabela: marca se o contato foi feito e persiste na coluna `contato_realizado` do Supabase via `PATCH /api/leads` (atualização otimista na interface; reverte e exibe aviso se o save falhar, ex.: coluna ainda inexistente).
 - Filtro "Contato" com checkboxes (Sim/Não) na barra de filtros da tabela — um marcado filtra, os dois equivalem a todos.
