@@ -44,6 +44,7 @@ Base: `https://back.falazapp.com.br` · Auth: `Authorization: Bearer <FALAZAPP_A
 | `estado` | fixo `MT` | Campanha Meteórico (Sorriso/MT) |
 | `cidade` | fixo `Sorriso` | |
 | `referencia` | fixo `Meteórico Setembro/2026` | Atualizar a cada nova campanha em `api/_falazapp.js` (`FIXED_FIELDS`) |
+| `carteiraId` | fixo `254` | Atendente responsável — sem carteira o contato não aparece na listagem padrão do painel |
 
 ## Nossos arquivos
 

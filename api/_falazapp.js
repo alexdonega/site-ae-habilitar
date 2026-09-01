@@ -18,11 +18,13 @@
 export const FALAZAPP_DEFAULT_API_URL = 'https://back.falazapp.com.br';
 
 // Campos fixos da campanha "Meteórico": os leads do formulário de pré-matrícula
-// são todos de Sorriso/MT.
+// são todos de Sorriso/MT e caem na carteira do atendente responsável pelo
+// atendimento (sem carteiraId o contato "some" da listagem padrão do painel).
 const FIXED_FIELDS = {
     estado: 'MT',
     cidade: 'Sorriso',
     referencia: 'Meteórico Setembro/2026',
+    carteiraId: '254',
 };
 
 // O formulário grava o WhatsApp mascarado, ex. "(65) 99999-9999" (DDD + 8/9
