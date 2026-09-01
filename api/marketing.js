@@ -1,13 +1,15 @@
 // =============================================================================
-//  /api/leads — Dashboard em tempo real (/dash)
+//  /api/marketing — Painel de mídia do /dash (integração Windsor.ai)
 // =============================================================================
-//  GET   → todos os leads da tabela "leads", do mais recente para o mais
-//          antigo. A página /dash faz polling a cada 10s (e ao voltar para a
-//          aba) para se manter atualizada.
+//  GET → linhas da tabela "marketing_performance" (criada e abastecida
+//        diariamente pelo Windsor.ai como destino), da data mais recente
+//        para a mais antiga: date, datasource, account_name, source,
+//        campaign, clicks, spend.
 //
-//  Usa a service_role key EXCLUSIVAMENTE aqui no servidor: o RLS da tabela
-//  bloqueia a leitura com a anon key (o browser não consegue listar leads
-//  direto), então este endpoint é a única fonte de dados da dashboard.
+//  Usa a service_role key EXCLUSIVAMENTE aqui no servidor: a tabela tem RLS
+//  habilitado sem policies (ver supabase/sql/), então a anon key não lê os
+//  dados de investimento — este endpoint é a única fonte do painel de mídia.
+//  Runbook: Docs/Tecnico/integracao_windsor.md
 // =============================================================================
 
 import { createClient } from '@supabase/supabase-js';
@@ -33,15 +35,15 @@ export default async function handler(req, res) {
         });
 
         const { data, error } = await supabase
-            .from('leads')
+            .from('marketing_performance')
             .select('*')
-            .order('created_at', { ascending: false })
+            .order('date', { ascending: false })
             .limit(5000);
 
         if (error) throw error;
 
         return res.status(200).json({
-            leads: data,
+            rows: data,
             updatedAt: new Date().toISOString(),
         });
     } catch (err) {

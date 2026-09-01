@@ -13,6 +13,8 @@ import {
     AlertCircle,
     Filter,
     ExternalLink,
+    DollarSign,
+    MousePointerClick,
 } from 'lucide-react';
 
 // =============================================================================
@@ -21,6 +23,10 @@ import {
 //  porque o RLS da tabela bloqueia a leitura direta pelo browser. A página
 //  faz polling a cada 10s e também ao voltar para a aba — novo lead aparece
 //  sozinho, com aviso flutuante.
+//
+//  Inclui o painel de mídia (investimento/cliques/CPL por campanha), lido da
+//  tabela "marketing_performance" — destino diário do Windsor.ai — via
+//  /api/marketing (mesmo padrão: service_role só no servidor).
 // =============================================================================
 
 // --- Utilitários -------------------------------------------------------------
@@ -66,15 +72,30 @@ const formatDate = (dateString) => {
 const dayKey = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
+// "2026-09-01" ou "2026-09-01T00:00:00+00:00" → "2026-09-01" (coluna date da
+// tabela marketing_performance, comparável com os inputs de período).
+const dateOnly = (value) => String(value || '').slice(0, 10);
+
+// 1234.5 → "R$ 1.234,50"
+const fmtBRL = (value) =>
+    Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+// Chave de casamento entre o nome da campanha (Windsor) e o utm_campaign dos
+// leads — só representam a mesma campanha quando batem normalizados.
+const campaignKey = (name) => String(name || '').trim().toLowerCase();
+
 // --- Componentes internos ----------------------------------------------------
 
+// Aceita número (formata pt-BR) ou string já formatada (ex.: "R$ 1.234,50").
 const MetricCard = ({ title, value, icon: Icon, accent }) => (
     <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
         <div className="flex justify-between items-start mb-2">
             <span className="text-gray-400 text-sm">{title}</span>
             <Icon className={`w-6 h-6 ${accent}`} />
         </div>
-        <div className="text-3xl font-bold text-white">{value.toLocaleString('pt-BR')}</div>
+        <div className="text-3xl font-bold text-white">
+            {typeof value === 'number' ? value.toLocaleString('pt-BR') : value}
+        </div>
     </div>
 );
 
@@ -224,9 +245,14 @@ function DashPage() {
     const [filters, setFilters] = useState({ produto: '', referrer: '', ig: '', utm_medium: '' });
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
-    const [contatoFiltro, setContatoFiltro] = useState({ sim: false, nao: false });
-    const [saveError, setSaveError] = useState(null);
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+    // Mídia (Windsor → marketing_performance): dado muda 1×/dia, então não
+    // entra no polling de 10s — carrega no mount, ao voltar para a aba e no
+    // botão de refresh.
+    const [marketing, setMarketing] = useState([]);
+    const [marketingLoading, setMarketingLoading] = useState(true);
+    const [marketingError, setMarketingError] = useState(null);
 
     const prevTotal = useRef(0);
     const flashTimer = useRef(null);
@@ -257,11 +283,29 @@ function DashPage() {
         }
     }, []);
 
+    const loadMarketing = useCallback(async () => {
+        try {
+            const resp = await fetch('/api/marketing', { headers: { Accept: 'application/json' } });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const json = await resp.json();
+            setMarketing(Array.isArray(json.rows) ? json.rows : []);
+            setMarketingError(null);
+        } catch {
+            setMarketingError('Sem dados de mídia — a tabela marketing_performance ainda não existe ou o Windsor ainda não sincronizou.');
+        } finally {
+            setMarketingLoading(false);
+        }
+    }, []);
+
     useEffect(() => {
         load();
+        loadMarketing();
         const interval = setInterval(load, 10000);
         const onVisible = () => {
-            if (!document.hidden) load();
+            if (!document.hidden) {
+                load();
+                loadMarketing();
+            }
         };
         document.addEventListener('visibilitychange', onVisible);
         return () => {
@@ -269,47 +313,17 @@ function DashPage() {
             document.removeEventListener('visibilitychange', onVisible);
             if (flashTimer.current) clearTimeout(flashTimer.current);
         };
-    }, [load]);
+    }, [load, loadMarketing]);
 
     const setFilter = (key, value) => {
         setFilters((f) => ({ ...f, [key]: value }));
         setVisibleCount(PAGE_SIZE);
     };
 
-    // Marca/desmarca o contato do lead: atualiza na hora (otimista) e persiste
-    // na coluna "contato_realizado" do Supabase via PATCH /api/leads. Se o
-    // save falhar, reverte e avisa.
-    const toggleContato = useCallback(async (lead) => {
-        const next = !lead.contato_realizado;
-        setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, contato_realizado: next } : l)));
-        try {
-            const resp = await fetch('/api/leads', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: lead.id, contato_realizado: next }),
-            });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            setSaveError(null);
-        } catch {
-            setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, contato_realizado: !next } : l)));
-            setSaveError(
-                `Não foi possível salvar o contato de #${lead.id} (verifique se a coluna "contato_realizado" existe no Supabase). Tente novamente.`,
-            );
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!saveError) return undefined;
-        const t = setTimeout(() => setSaveError(null), 8000);
-        return () => clearTimeout(t);
-    }, [saveError]);
-
     const hasActiveFilters = Boolean(
         search.trim()
             || dateFrom
             || dateTo
-            || contatoFiltro.sim
-            || contatoFiltro.nao
             || filters.produto
             || filters.referrer
             || filters.ig
@@ -320,7 +334,6 @@ function DashPage() {
         setFilters({ produto: '', referrer: '', ig: '', utm_medium: '' });
         setDateFrom('');
         setDateTo('');
-        setContatoFiltro({ sim: false, nao: false });
         setVisibleCount(PAGE_SIZE);
     };
 
@@ -408,6 +421,69 @@ function DashPage() {
         return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     }, [filteredByDate]);
 
+    // --- Mídia (Windsor → marketing_performance) no período selecionado ---
+
+    const marketingByDate = useMemo(() => {
+        if (!dateFrom && !dateTo) return marketing;
+        return marketing.filter((row) => {
+            const d = dateOnly(row.date);
+            if (!d) return false;
+            if (dateFrom && d < dateFrom) return false;
+            if (dateTo && d > dateTo) return false;
+            return true;
+        });
+    }, [marketing, dateFrom, dateTo]);
+
+    const marketingTotals = useMemo(() => {
+        let spend = 0;
+        let clicks = 0;
+        marketingByDate.forEach((row) => {
+            spend += Number(row.spend) || 0;
+            clicks += Number(row.clicks) || 0;
+        });
+        return { spend, clicks };
+    }, [marketingByDate]);
+
+    // CPL médio (blended): investimento total ÷ leads do período. Não depende
+    // do casamento campanha ↔ utm_campaign, então funciona sempre.
+    const blendedCpl = metrics.total > 0 && marketingTotals.spend > 0
+        ? marketingTotals.spend / metrics.total
+        : null;
+
+    // Investimento por campanha no período + leads casados via utm_campaign
+    // (o Windsor traz o NOME da campanha; o lead traz o utm_campaign — só
+    // casam quando são o mesmo texto, depois de normalizados).
+    const campaigns = useMemo(() => {
+        const map = new Map();
+        marketingByDate.forEach((row) => {
+            const key = campaignKey(row.campaign);
+            if (!key) return;
+            const entry = map.get(key) || {
+                key,
+                campaign: row.campaign,
+                datasource: row.datasource || '—',
+                spend: 0,
+                clicks: 0,
+            };
+            entry.spend += Number(row.spend) || 0;
+            entry.clicks += Number(row.clicks) || 0;
+            map.set(key, entry);
+        });
+        const leadsByKey = new Map();
+        filteredByDate.forEach((lead) => {
+            const key = campaignKey(lead.utm_campaign);
+            if (key) leadsByKey.set(key, (leadsByKey.get(key) || 0) + 1);
+        });
+        return [...map.values()]
+            .map((entry) => {
+                const leads = leadsByKey.get(entry.key) || 0;
+                return { ...entry, leads, cpl: leads > 0 ? entry.spend / leads : null };
+            })
+            .sort((a, b) => b.spend - a.spend);
+    }, [marketingByDate, filteredByDate]);
+
+    const matchedCampaignLeads = campaigns.reduce((sum, c) => sum + c.leads, 0);
+
     const buildOptions = useCallback(
         (accessor) => {
             const map = new Map();
@@ -427,22 +503,18 @@ function DashPage() {
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        const filtroSoSim = contatoFiltro.sim && !contatoFiltro.nao;
-        const filtroSoNao = contatoFiltro.nao && !contatoFiltro.sim;
         return filteredByDate.filter((lead) => {
             if (q) {
                 const haystack = `${lead.id} ${lead.nome_completo || ''} ${lead.whatsapp || ''}`.toLowerCase();
                 if (!haystack.includes(q)) return false;
             }
-            if (filtroSoSim && !lead.contato_realizado) return false;
-            if (filtroSoNao && lead.contato_realizado) return false;
             if (filters.produto && parseProduto(lead.produto) !== filters.produto) return false;
             if (filters.referrer && refHost(lead.referrer) !== filters.referrer) return false;
             if (filters.ig && igValue(lead) !== filters.ig) return false;
             if (filters.utm_medium && (lead.utm_medium || '—') !== filters.utm_medium) return false;
             return true;
         });
-    }, [filteredByDate, search, filters, contatoFiltro]);
+    }, [filteredByDate, search, filters]);
 
     const visible = filtered.slice(0, visibleCount);
     const todayKey = dayKey(new Date());
@@ -501,7 +573,10 @@ function DashPage() {
                         </span>
                         <button
                             type="button"
-                            onClick={load}
+                            onClick={() => {
+                                load();
+                                loadMarketing();
+                            }}
                             title="Atualizar agora"
                             className="p-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:text-white hover:border-gray-500 transition"
                         >
@@ -689,6 +764,79 @@ function DashPage() {
                     </div>
                 </section>
 
+                {/* Mídia (Windsor → marketing_performance): investimento vs leads no período */}
+                <section className="space-y-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <MetricCard title="Investimento" value={fmtBRL(marketingTotals.spend)} icon={DollarSign} accent="text-yellow-400" />
+                        <MetricCard title="Cliques" value={Math.round(marketingTotals.clicks)} icon={MousePointerClick} accent="text-blue-400" />
+                        <MetricCard title="Leads (período)" value={metrics.total} icon={Users} accent="text-green-400" />
+                        <MetricCard title="CPL médio" value={blendedCpl != null ? fmtBRL(blendedCpl) : '—'} icon={TrendingUp} accent="text-purple-400" />
+                    </div>
+
+                    <div className="bg-gray-800 rounded-xl border border-gray-700">
+                        <div className="p-4 border-b border-gray-700 flex flex-wrap items-center justify-between gap-2">
+                            <h2 className="text-sm font-semibold text-gray-300">
+                                Investimento por campanha
+                                <span className="text-gray-500 font-normal"> · Windsor</span>
+                            </h2>
+                            {campaigns.length > 0 && matchedCampaignLeads === 0 && (
+                                <span className="text-xs text-gray-500">
+                                    Nenhuma campanha casa com o utm_campaign dos leads — o CPL por campanha fica
+                                    indisponível (o CPL médio acima sempre vale).
+                                </span>
+                            )}
+                        </div>
+                        {marketingLoading && marketing.length === 0 ? (
+                            <div className="p-4 space-y-2">
+                                {Array.from({ length: 3 }).map((_, i) => (
+                                    <div key={i} className="h-8 rounded bg-gray-700 animate-pulse" />
+                                ))}
+                            </div>
+                        ) : marketingError && marketing.length === 0 ? (
+                            <div className="px-4 py-6 text-sm text-gray-500 flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4 shrink-0" />
+                                {marketingError}
+                            </div>
+                        ) : campaigns.length === 0 ? (
+                            <div className="px-4 py-6 text-sm text-gray-500">
+                                Sem dados de mídia no período — aguardando o sync do Windsor na tabela
+                                marketing_performance.
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr className="text-left text-xs uppercase tracking-wider text-gray-400 border-b border-gray-700">
+                                            <th className="px-4 py-3 font-medium">Campanha</th>
+                                            <th className="px-4 py-3 font-medium">Fonte</th>
+                                            <th className="px-4 py-3 font-medium text-right">Investimento</th>
+                                            <th className="px-4 py-3 font-medium text-right">Cliques</th>
+                                            <th className="px-4 py-3 font-medium text-right">Leads</th>
+                                            <th className="px-4 py-3 font-medium text-right">CPL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {campaigns.map((c) => (
+                                            <tr key={c.key} className="border-b border-gray-800 hover:bg-gray-700/40 transition-colors">
+                                                <td className="px-4 py-3 font-medium text-white max-w-[320px] truncate" title={c.campaign}>
+                                                    {c.campaign}
+                                                </td>
+                                                <td className="px-4 py-3 text-gray-300 whitespace-nowrap">{c.datasource}</td>
+                                                <td className="px-4 py-3 text-right text-gray-200 whitespace-nowrap">{fmtBRL(c.spend)}</td>
+                                                <td className="px-4 py-3 text-right text-gray-300">{Math.round(c.clicks).toLocaleString('pt-BR')}</td>
+                                                <td className="px-4 py-3 text-right text-gray-300">{c.leads > 0 ? c.leads.toLocaleString('pt-BR') : '—'}</td>
+                                                <td className="px-4 py-3 text-right font-semibold text-habilitar-orange-light whitespace-nowrap">
+                                                    {c.cpl != null ? fmtBRL(c.cpl) : '—'}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
                 {/* Tabela de leads */}
                 <section className="bg-gray-800 rounded-xl border border-gray-700">
                     <div className="p-4 border-b border-gray-700 flex flex-wrap items-center gap-2">
@@ -711,35 +859,6 @@ function DashPage() {
                         <Combobox label="IG" value={filters.ig} onChange={(v) => setFilter('ig', v)} options={igOptions} />
                         <Combobox label="UTM Medium" value={filters.utm_medium} onChange={(v) => setFilter('utm_medium', v)} options={utmMediumOptions} />
 
-                        {/* Filtro de contato realizado (checkboxes) */}
-                        <div className="flex items-center gap-3 h-10 px-3 rounded-lg border border-gray-600 bg-gray-700 text-sm select-none">
-                            <span className="text-gray-400">Contato:</span>
-                            <label className="flex items-center gap-1.5 cursor-pointer text-gray-300 hover:text-white transition">
-                                <input
-                                    type="checkbox"
-                                    checked={contatoFiltro.sim}
-                                    onChange={(e) => {
-                                        setContatoFiltro((c) => ({ ...c, sim: e.target.checked }));
-                                        setVisibleCount(PAGE_SIZE);
-                                    }}
-                                    className="w-4 h-4 accent-habilitar-orange cursor-pointer"
-                                />
-                                Sim
-                            </label>
-                            <label className="flex items-center gap-1.5 cursor-pointer text-gray-300 hover:text-white transition">
-                                <input
-                                    type="checkbox"
-                                    checked={contatoFiltro.nao}
-                                    onChange={(e) => {
-                                        setContatoFiltro((c) => ({ ...c, nao: e.target.checked }));
-                                        setVisibleCount(PAGE_SIZE);
-                                    }}
-                                    className="w-4 h-4 accent-habilitar-orange cursor-pointer"
-                                />
-                                Não
-                            </label>
-                        </div>
-
                         {hasActiveFilters && (
                             <button
                                 type="button"
@@ -756,13 +875,6 @@ function DashPage() {
                         </span>
                     </div>
 
-                    {saveError && (
-                        <div className="mx-4 mt-3 flex items-center gap-2 bg-red-500/10 border border-red-500/40 text-red-400 rounded-lg px-3 py-2 text-xs">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            {saveError}
-                        </div>
-                    )}
-
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
@@ -771,7 +883,6 @@ function DashPage() {
                                     <th className="px-4 py-3 font-medium">Nome completo</th>
                                     <th className="px-4 py-3 font-medium">WhatsApp</th>
                                     <th className="px-4 py-3 font-medium">Produto</th>
-                                    <th className="px-4 py-3 font-medium text-center">Contato</th>
                                     <th className="px-4 py-3 font-medium">Referrer</th>
                                     <th className="px-4 py-3 font-medium">IG</th>
                                     <th className="px-4 py-3 font-medium">UTM Medium</th>
@@ -782,7 +893,7 @@ function DashPage() {
                                 {loading && leads.length === 0
                                     ? Array.from({ length: 6 }).map((_, i) => (
                                           <tr key={i} className="border-b border-gray-800">
-                                              <td colSpan={9} className="px-4 py-3.5">
+                                              <td colSpan={8} className="px-4 py-3.5">
                                                   <div className="h-4 rounded bg-gray-700 animate-pulse" />
                                               </td>
                                           </tr>
@@ -814,18 +925,6 @@ function DashPage() {
                                                       <span className="inline-block px-2.5 py-1 rounded-full bg-habilitar-orange/15 text-habilitar-orange-light text-xs font-semibold">
                                                           {parseProduto(lead.produto)}
                                                       </span>
-                                                  </td>
-                                                  <td className="px-4 py-3 whitespace-nowrap text-center">
-                                                      <input
-                                                          type="checkbox"
-                                                          checked={Boolean(lead.contato_realizado)}
-                                                          onChange={() => toggleContato(lead)}
-                                                          title={lead.contato_realizado
-                                                              ? 'Contato realizado — clique para desmarcar'
-                                                              : 'Marcar contato como realizado'}
-                                                          aria-label={`Contato realizado de ${lead.nome_completo || `lead ${lead.id}`}`}
-                                                          className="w-5 h-5 accent-habilitar-orange cursor-pointer"
-                                                      />
                                                   </td>
                                                   <td className="px-4 py-3 text-gray-300 whitespace-nowrap" title={lead.referrer || ''}>
                                                       {refHost(lead.referrer)}

@@ -6,9 +6,9 @@ import os from 'os';
 import path from 'path';
 
 const BASE = process.argv[2] || 'http://localhost:5175';
-const NOME = 'Teste Negociando Zap';
-const PHONE_DIGITS = '65909998877';
-const EMAIL = 'negociando.teste@exemplo.com';
+const NOME = 'Teste Contact Falazapp';
+const PHONE_DIGITS = '65907776655';
+const EMAIL = 'contact.falazapp@exemplo.com';
 // Valor exato de uma <option> do <select> (arquivo é UTF-8, então acentos OK —
 // não passar por argv no Windows, que pode corromper a codificação).
 const CATEGORIA = 'Adição Carro [B]';

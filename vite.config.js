@@ -142,7 +142,49 @@ function devApiFalazapp({ falazappApiUrl, falazappToken, supabaseUrl, serviceRol
 }
 
 // Middleware de desenvolvimento que replica a função serverless
-// /api/falazapp-ticket (api/falazapp-ticket.js) — mesmo motivo dos dois
+// /api/marketing (api/marketing.js) no dev server do Vite — mesmo motivo do
+// devApiLeads acima. O painel de mídia do /dash lê a tabela
+// "marketing_performance" (destino do Windsor.ai) via service_role.
+function devApiMarketing({ supabaseUrl, serviceRoleKey }) {
+    return {
+        name: 'dev-api-marketing',
+        apply: 'serve',
+        configureServer(server) {
+            server.middlewares.use('/api/marketing', async (req, res) => {
+                const send = (status, payload) => {
+                    res.statusCode = status
+                    res.setHeader('Content-Type', 'application/json')
+                    res.end(JSON.stringify(payload))
+                }
+                try {
+                    if (!supabaseUrl || !serviceRoleKey) {
+                        throw new Error('PUBLIC_SUPABASE_URL ou service_role ausente no .env')
+                    }
+                    if (req.method !== 'GET') {
+                        return send(405, { error: 'Método não permitido' })
+                    }
+                    const rest = await fetch(
+                        `${supabaseUrl}/rest/v1/marketing_performance?select=*&order=date.desc&limit=5000`,
+                        {
+                            headers: {
+                                apikey: serviceRoleKey,
+                                Authorization: `Bearer ${serviceRoleKey}`,
+                            },
+                        },
+                    )
+                    if (!rest.ok) throw new Error(`Supabase respondeu ${rest.status}`)
+                    const rows = await rest.json()
+                    send(200, { rows, updatedAt: new Date().toISOString() })
+                } catch (err) {
+                    send(502, { error: 'Falha ao consultar o Supabase', detail: err.message })
+                }
+            })
+        },
+    }
+}
+
+// Middleware de desenvolvimento que replica a função serverless
+// /api/falazapp-ticket (api/falazapp-ticket.js) — mesmo motivo dos três
 // acima. O clique da coluna WhatsApp do /dash redireciona para o ticket no
 // painel da FalazApp (fallback: wa.me).
 function devApiFalazappTicket({ falazappApiUrl, falazappPanelUrl, falazappToken }) {
@@ -183,6 +225,10 @@ export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as
         plugins: [
             react(),
             devApiLeads({
+                supabaseUrl: env.PUBLIC_SUPABASE_URL,
+                serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.service_role,
+            }),
+            devApiMarketing({
                 supabaseUrl: env.PUBLIC_SUPABASE_URL,
                 serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.service_role,
             }),
