@@ -14,6 +14,13 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Variável `SUPABASE_SERVICE_ROLE_KEY` (Secret) configurada na Vercel para o ambiente de Production.
 - `vite.config.js`: middleware de desenvolvimento que replica o `GET /api/leads` no `npm run dev` (consulta o Supabase com a service_role do `.env`, apenas no processo do dev server) — o `/dash` no localhost agora carrega dados reais e em tempo real, sem precisar do `vercel dev`.
 
+## [1.4.0] - 2026-09-01
+### Adicionado
+- Filtro por período (data de início e fim) na tabela de leads do `/dash`.
+- Coluna "Contato" com checkbox na tabela: marca se o contato foi feito e persiste na coluna `contato_realizado` do Supabase via `PATCH /api/leads` (atualização otimista na interface; reverte e exibe aviso se o save falhar, ex.: coluna ainda inexistente).
+- Filtro "Contato" com checkboxes (Sim/Não) na barra de filtros da tabela — um marcado filtra, os dois equivalem a todos.
+- Middleware de dev (`vite.config.js`) também responde ao `PATCH /api/leads`, mantendo o localhost idêntico à produção.
+
 ## [1.2.0] - 2026-08-31
 ### Adicionado
 - Página de webinar em `/webinar`: landing com selo "Mega Oferta ao Vivo — dias 04 e 05 de setembro", countdown real até a virada do dia 04/09/2026 (evento o dia todo, sem horário fixo) e CTA de WhatsApp com mensagem pré-preenchida.

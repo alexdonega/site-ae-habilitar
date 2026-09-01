@@ -203,6 +203,10 @@ function DashPage() {
 
     const [search, setSearch] = useState('');
     const [filters, setFilters] = useState({ produto: '', referrer: '', ig: '', utm_medium: '' });
+    const [dateFrom, setDateFrom] = useState('');
+    const [dateTo, setDateTo] = useState('');
+    const [contatoFiltro, setContatoFiltro] = useState({ sim: false, nao: false });
+    const [saveError, setSaveError] = useState(null);
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
     const prevTotal = useRef(0);
@@ -253,10 +257,51 @@ function DashPage() {
         setVisibleCount(PAGE_SIZE);
     };
 
-    const hasActiveFilters = Boolean(search.trim() || filters.produto || filters.referrer || filters.ig || filters.utm_medium);
+    // Marca/desmarca o contato do lead: atualiza na hora (otimista) e persiste
+    // na coluna "contato_realizado" do Supabase via PATCH /api/leads. Se o
+    // save falhar, reverte e avisa.
+    const toggleContato = useCallback(async (lead) => {
+        const next = !lead.contato_realizado;
+        setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, contato_realizado: next } : l)));
+        try {
+            const resp = await fetch('/api/leads', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: lead.id, contato_realizado: next }),
+            });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            setSaveError(null);
+        } catch {
+            setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, contato_realizado: !next } : l)));
+            setSaveError(
+                `Não foi possível salvar o contato de #${lead.id} (verifique se a coluna "contato_realizado" existe no Supabase). Tente novamente.`,
+            );
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!saveError) return undefined;
+        const t = setTimeout(() => setSaveError(null), 8000);
+        return () => clearTimeout(t);
+    }, [saveError]);
+
+    const hasActiveFilters = Boolean(
+        search.trim()
+            || dateFrom
+            || dateTo
+            || contatoFiltro.sim
+            || contatoFiltro.nao
+            || filters.produto
+            || filters.referrer
+            || filters.ig
+            || filters.utm_medium,
+    );
     const clearFilters = () => {
         setSearch('');
         setFilters({ produto: '', referrer: '', ig: '', utm_medium: '' });
+        setDateFrom('');
+        setDateTo('');
+        setContatoFiltro({ sim: false, nao: false });
         setVisibleCount(PAGE_SIZE);
     };
 
@@ -332,18 +377,27 @@ function DashPage() {
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
+        const from = dateFrom ? new Date(`${dateFrom}T00:00:00`) : null;
+        const to = dateTo ? new Date(`${dateTo}T23:59:59.999`) : null;
+        const filtroSoSim = contatoFiltro.sim && !contatoFiltro.nao;
+        const filtroSoNao = contatoFiltro.nao && !contatoFiltro.sim;
         return leads.filter((lead) => {
+            const created = new Date(lead.created_at);
             if (q) {
                 const haystack = `${lead.id} ${lead.nome_completo || ''} ${lead.whatsapp || ''}`.toLowerCase();
                 if (!haystack.includes(q)) return false;
             }
+            if (from && created < from) return false;
+            if (to && created > to) return false;
+            if (filtroSoSim && !lead.contato_realizado) return false;
+            if (filtroSoNao && lead.contato_realizado) return false;
             if (filters.produto && parseProduto(lead.produto) !== filters.produto) return false;
             if (filters.referrer && refHost(lead.referrer) !== filters.referrer) return false;
             if (filters.ig && igValue(lead) !== filters.ig) return false;
             if (filters.utm_medium && (lead.utm_medium || '—') !== filters.utm_medium) return false;
             return true;
         });
-    }, [leads, search, filters]);
+    }, [leads, search, filters, dateFrom, dateTo, contatoFiltro]);
 
     const visible = filtered.slice(0, visibleCount);
     const todayKey = dayKey(new Date());
@@ -514,6 +568,65 @@ function DashPage() {
                         <Combobox label="IG" value={filters.ig} onChange={(v) => setFilter('ig', v)} options={igOptions} />
                         <Combobox label="UTM Medium" value={filters.utm_medium} onChange={(v) => setFilter('utm_medium', v)} options={utmMediumOptions} />
 
+                        {/* Filtro por período (data de início e fim) */}
+                        <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-gray-600 bg-gray-700 text-sm">
+                            <CalendarDays className="w-4 h-4 text-gray-400 shrink-0" />
+                            <input
+                                type="date"
+                                value={dateFrom}
+                                max={dateTo || undefined}
+                                onChange={(e) => {
+                                    setDateFrom(e.target.value);
+                                    setVisibleCount(PAGE_SIZE);
+                                }}
+                                aria-label="Data inicial"
+                                title="Data inicial"
+                                className="bg-transparent text-white placeholder-gray-500 [color-scheme:dark] focus:outline-none cursor-pointer"
+                            />
+                            <span className="text-gray-500">—</span>
+                            <input
+                                type="date"
+                                value={dateTo}
+                                min={dateFrom || undefined}
+                                onChange={(e) => {
+                                    setDateTo(e.target.value);
+                                    setVisibleCount(PAGE_SIZE);
+                                }}
+                                aria-label="Data final"
+                                title="Data final"
+                                className="bg-transparent text-white placeholder-gray-500 [color-scheme:dark] focus:outline-none cursor-pointer"
+                            />
+                        </div>
+
+                        {/* Filtro de contato realizado (checkboxes) */}
+                        <div className="flex items-center gap-3 h-10 px-3 rounded-lg border border-gray-600 bg-gray-700 text-sm select-none">
+                            <span className="text-gray-400">Contato:</span>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-gray-300 hover:text-white transition">
+                                <input
+                                    type="checkbox"
+                                    checked={contatoFiltro.sim}
+                                    onChange={(e) => {
+                                        setContatoFiltro((c) => ({ ...c, sim: e.target.checked }));
+                                        setVisibleCount(PAGE_SIZE);
+                                    }}
+                                    className="w-4 h-4 accent-habilitar-orange cursor-pointer"
+                                />
+                                Sim
+                            </label>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-gray-300 hover:text-white transition">
+                                <input
+                                    type="checkbox"
+                                    checked={contatoFiltro.nao}
+                                    onChange={(e) => {
+                                        setContatoFiltro((c) => ({ ...c, nao: e.target.checked }));
+                                        setVisibleCount(PAGE_SIZE);
+                                    }}
+                                    className="w-4 h-4 accent-habilitar-orange cursor-pointer"
+                                />
+                                Não
+                            </label>
+                        </div>
+
                         {hasActiveFilters && (
                             <button
                                 type="button"
@@ -530,6 +643,13 @@ function DashPage() {
                         </span>
                     </div>
 
+                    {saveError && (
+                        <div className="mx-4 mt-3 flex items-center gap-2 bg-red-500/10 border border-red-500/40 text-red-400 rounded-lg px-3 py-2 text-xs">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
+                            {saveError}
+                        </div>
+                    )}
+
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
@@ -537,6 +657,7 @@ function DashPage() {
                                     <th className="px-4 py-3 font-medium">ID</th>
                                     <th className="px-4 py-3 font-medium">Nome completo</th>
                                     <th className="px-4 py-3 font-medium">WhatsApp</th>
+                                    <th className="px-4 py-3 font-medium text-center">Contato</th>
                                     <th className="px-4 py-3 font-medium">Produto</th>
                                     <th className="px-4 py-3 font-medium">Referrer</th>
                                     <th className="px-4 py-3 font-medium">IG</th>
@@ -548,7 +669,7 @@ function DashPage() {
                                 {loading && leads.length === 0
                                     ? Array.from({ length: 6 }).map((_, i) => (
                                           <tr key={i} className="border-b border-gray-800">
-                                              <td colSpan={8} className="px-4 py-3.5">
+                                              <td colSpan={9} className="px-4 py-3.5">
                                                   <div className="h-4 rounded bg-gray-700 animate-pulse" />
                                               </td>
                                           </tr>
@@ -576,6 +697,18 @@ function DashPage() {
                                                       ) : (
                                                           '—'
                                                       )}
+                                                  </td>
+                                                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                                                      <input
+                                                          type="checkbox"
+                                                          checked={Boolean(lead.contato_realizado)}
+                                                          onChange={() => toggleContato(lead)}
+                                                          title={lead.contato_realizado
+                                                              ? 'Contato realizado — clique para desmarcar'
+                                                              : 'Marcar contato como realizado'}
+                                                          aria-label={`Contato realizado de ${lead.nome_completo || `lead ${lead.id}`}`}
+                                                          className="w-5 h-5 accent-habilitar-orange cursor-pointer"
+                                                      />
                                                   </td>
                                                   <td className="px-4 py-3 whitespace-nowrap">
                                                       <span className="inline-block px-2.5 py-1 rounded-full bg-habilitar-orange/15 text-habilitar-orange-light text-xs font-semibold">
