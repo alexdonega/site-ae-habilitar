@@ -38,6 +38,7 @@ export function normalizeWhatsapp(whatsapp) {
 // Metadados de rastreamento enviados junto com o lead e gravados no contato
 // como "informações extras" (extraInfo). Campos vazios/nulos são ignorados.
 const EXTRA_INFO_FIELDS = [
+    'produto',
     'page_url',
     'page_title',
     'referrer',

@@ -135,6 +135,7 @@ function AutoescolaHabilitarLanding() {
                 nome_completo: payload.nome_completo,
                 whatsapp: payload.whatsapp,
                 email: payload.email,
+                produto: payload.categoria_desejada,
                 formulario: 'pre_matricula_home',
                 ...leadMeta
             })

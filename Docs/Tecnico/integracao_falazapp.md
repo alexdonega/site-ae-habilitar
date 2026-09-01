@@ -45,7 +45,7 @@ Base: `https://back.falazapp.com.br` · Auth: `Authorization: Bearer <FALAZAPP_A
 | `cidade` | fixo `Sorriso` | |
 | `referencia` | fixo `Meteórico Setembro/2026` | Atualizar a cada nova campanha em `api/_falazapp.js` (`FIXED_FIELDS`) |
 | `carteiraId` | fixo `254` | Atendente responsável — sem carteira o contato não aparece na listagem padrão do painel |
-| `extraInfo` | metadados do envio | Lista `{name, value}` com `page_url`, `page_title`, `referrer`, todas as UTMs e `formulario` (campos vazios são omitidos) — mesmos dados gravados no Supabase pelo `buildLeadMeta()` |
+| `extraInfo` | metadados do envio | Lista `{name, value}` com `produto` (categoria escolhida), `page_url`, `page_title`, `referrer`, todas as UTMs e `formulario` (campos vazios são omitidos) — mesmos dados gravados no Supabase pelo `buildLeadMeta()` |
 
 ## Nossos arquivos
 
