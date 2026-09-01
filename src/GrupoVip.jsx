@@ -5,7 +5,7 @@ function GrupoVip() {
     const [redirectCountdown, setRedirectCountdown] = useState(5);
     const whatsappNumber = "556699630260";
     const lead = useLocation().state;
-    let whatsappMessage = "Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 03 de setembro";
+    let whatsappMessage = "Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 04 de setembro";
     if (lead?.nome || lead?.categoria) {
         const dados = [];
         if (lead?.nome) dados.push(`Nome: ${lead.nome}`);
@@ -62,7 +62,7 @@ function GrupoVip() {
                             </h1>
                             <p className="text-gray-300 text-lg md:text-2xl max-w-2xl mx-auto leading-relaxed mb-4">
                                 As condições especiais de lançamento serão liberadas no dia <strong className="text-white">03 de setembro de 2026</strong>,
-                                apenas para quem enviar a mensagem <strong className="text-green-400">"Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 03 de setembro"</strong>.
+                                apenas para quem enviar a mensagem <strong className="text-green-400">"Quero receber a Mega Oferta da CNH da Autoescola Habilitar no dia 04 de setembro"</strong>.
                             </p>
                             <p className="text-habilitar-orange font-semibold text-base md:text-xl mb-8">CNH do Brasil, sua liberdade começa agora.</p>
                         </div>
