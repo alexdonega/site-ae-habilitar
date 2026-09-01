@@ -39,6 +39,8 @@ export function normalizeWhatsapp(whatsapp) {
 // como "informações extras" (extraInfo). Campos vazios/nulos são ignorados.
 const EXTRA_INFO_FIELDS = [
     'produto',
+    'created_at',
+    'updated_at',
     'page_url',
     'page_title',
     'referrer',

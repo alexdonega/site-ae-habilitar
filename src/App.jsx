@@ -136,6 +136,10 @@ function AutoescolaHabilitarLanding() {
                 whatsapp: payload.whatsapp,
                 email: payload.email,
                 produto: payload.categoria_desejada,
+                // Mesmo instante do insert no Supabase (created_at = updated_at
+                // na criação, como a tabela "leads" faz automaticamente).
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
                 formulario: 'pre_matricula_home',
                 ...leadMeta
             })
