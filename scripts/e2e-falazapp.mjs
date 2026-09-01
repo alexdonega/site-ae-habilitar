@@ -6,9 +6,9 @@ import os from 'os';
 import path from 'path';
 
 const BASE = process.argv[2] || 'http://localhost:5175';
-const NOME = 'Usuario Teste E2E';
-const PHONE_DIGITS = '65988887777';
-const EMAIL = 'usuario.teste@exemplo.com';
+const NOME = 'Teste Mensagem Zap';
+const PHONE_DIGITS = '65911110000';
+const EMAIL = 'mensagem.zap@exemplo.com';
 
 const browser = await puppeteer.launch({
     executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -29,7 +29,7 @@ page.on('response', r => {
     }
 });
 
-await page.goto(BASE + '/', { waitUntil: 'networkidle2' });
+await page.goto(BASE.includes('?') ? BASE : BASE + '/', { waitUntil: 'networkidle2' });
 
 // Digita como usuário (eventos de teclado reais → onChange do React roda)
 await page.click('#full_name');
@@ -55,8 +55,9 @@ await Promise.all([
     page.click('button[type="submit"]'),
 ]);
 
-// Espera os envios em background (Supabase, FalazApp, Sheets, Novo Envio)
-await new Promise(r => setTimeout(r, 5000));
+// Espera os envios em background (Supabase, FalazApp contato+mensagem, Sheets,
+// Novo Envio) — a função da FalazApp leva ~5s por fazer 2 chamadas sequenciais.
+await new Promise(r => setTimeout(r, 10000));
 
 console.log('URL final:', page.url());
 console.log('--- Console da página ---');
