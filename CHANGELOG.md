@@ -5,6 +5,19 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-09-01
+### Adicionado
+- Dashboard completa de mídia em `/meta-ads` (`src/MetaAds.jsx`): 8 KPIs (Investimento, Leads CRM, CPL médio, Cliques, CTR, CPC, CPM, Impressões), chips complementares (alcance, frequência, views de página, leads Meta, cadastros no pixel, conversas WhatsApp), gráficos de investimento e leads por dia e tabelas por Campanha/Conjunto/Anúncio com CTR/CPC/CPM/CPL. Presets de período (Tudo/Hoje/7/14/30 dias) + intervalo custom. Reusa `/api/marketing` e `/api/leads`.
+- Tabela `marketing_performance` expandida para o schema completo de 33 colunas (fato anúncio × dia: dimensões de conta/campanha/conjunto/anúncio + métricas impressions/reach/clicks/CTR-base/spend/cpc/cpm/actions_*/cost_per_*) — DDL executado no SQL Editor do Supabase e versionado em `supabase/sql/2026-09-01-windsor-marketing-performance.sql` (idempotente, com RLS sem policies, índices em date/campaign_id e views `v_meta_ads_diario`, `v_meta_ads_campanha`, `v_meta_ads_conjunto`, `v_meta_ads_anuncio`, `v_cpl_campanha`).
+- Runbook do Windsor atualizado com a lista das 33 colunas a selecionar na destination task e a nova chave de upsert `date,datasource,account_id,ad_id` (granularidade anúncio × dia).
+
+## [1.5.0] - 2026-09-01
+### Adicionado
+- Integração Windsor.ai → Supabase: o Windsor passa a gravar a performance diária de mídia (date, datasource, account_name, source, campaign, clicks, spend) na tabela `marketing_performance` do projeto `site-alex-donega` (mesmo do app), como destination task `marketing-performance-diario` (sync diário 07:00 UTC, upsert pela chave composta dia+fonte+conta+campanha). A tabela é criada pelo próprio Windsor no primeiro sync. Runbook em `Docs/Tecnico/integracao_windsor.md`.
+- Função serverless `GET /api/marketing` (`api/marketing.js`): linhas de `marketing_performance` via `service_role`, mesmo padrão do `/api/leads`; middleware `devApiMarketing` no `vite.config.js` replica o endpoint no `npm run dev`.
+- Painel de mídia no `/dash` (`src/Dash.jsx`): cards Investimento / Cliques / Leads / CPL médio (investimento ÷ leads do período) e tabela por campanha com CPL via casamento `campaign` ↔ `utm_campaign`; respeita o filtro de período, carrega no mount/refresh (fora do polling de 10s) e degrada com aviso enquanto a tabela não existe.
+- `supabase/sql/2026-09-01-windsor-marketing-performance.sql` (primeiro SQL versionado do repo): RLS sem policies na tabela (anon key não lê investimento), índice em `date` e view `v_cpl_campanha` com CPL por dia/campanha (`security_invoker`) — rodar no SQL Editor após o primeiro sync.
+
 ## [1.3.0] - 2026-09-01
 ### Adicionado
 - Dashboard pública de leads em tempo real em `/dash` (`src/Dash.jsx`), lendo a tabela `leads` do Supabase: KPIs (total, hoje, últimos 7 e 30 dias), gráfico de leads/dia (14 dias), ranking por categoria e tabela completa (ID, nome, WhatsApp com link `wa.me`, produto — exibindo apenas o trecho entre parênteses, ex. `Moto [A]` —, referrer, IG, UTM medium, criado em).

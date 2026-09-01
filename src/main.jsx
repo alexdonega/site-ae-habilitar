@@ -9,6 +9,7 @@ import Leads from './Leads.jsx'
 import LeadDetail from './LeadDetail.jsx'
 import Studio from './Studio.jsx'
 import Dash from './Dash.jsx'
+import MetaAds from './MetaAds.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -24,6 +25,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <Route path="/lead/:id" element={<LeadDetail />} />
                 <Route path="/studio" element={<Studio />} />
                 <Route path="/dash" element={<Dash />} />
+                <Route path="/meta-ads" element={<MetaAds />} />
             </Routes>
         </BrowserRouter>
     </React.StrictMode>,
