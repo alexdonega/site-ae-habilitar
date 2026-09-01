@@ -27,6 +27,8 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Clicar em qualquer ponto do campo de data (início ou fim) agora abre o calendário (`showPicker()`).
 - O filtro de período passou a refletir em TODA a dashboard: KPIs, gráfico por dia, ranking por categoria e tabela.
 - Gráfico "Leads por dia" passa a começar na data do primeiro lead (ex.: 01/09), respeitando o período filtrado (máx. 31 barras); o título mostra o intervalo exibido.
+- Gráfico "Leads por dia" com janela fixa de 7 dias a partir do início do período (ex.: 01/09–07/09), exibindo dias futuros vazios.
+- Tabela com scroll infinito: renderiza 20 linhas por vez e carrega mais conforme o scroll (IntersectionObserver), com botão "Mostrar mais" e contador como fallback — preparada para centenas de leads.
 
 ## [1.2.0] - 2026-08-31
 ### Adicionado

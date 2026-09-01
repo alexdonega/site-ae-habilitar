@@ -190,7 +190,8 @@ function Combobox({ label, value, onChange, options }) {
     );
 }
 
-const PAGE_SIZE = 100;
+// Quantidade de linhas carregadas por vez na tabela (scroll infinito).
+const PAGE_SIZE = 20;
 
 // Atalhos para o Gerenciador de Anúncios da Meta (abrem em nova aba),
 // já filtrados pela campanha ativa da Autoescola Habilitar.
@@ -362,30 +363,24 @@ function DashPage() {
         return { total: filteredByDate.length, today: countToday, week: countWeek, month: countMonth };
     }, [filteredByDate]);
 
-    // Gráfico por dia: o eixo começa na data do primeiro lead (não temos
-    // dados antes disso) ou no período filtrado, até hoje/fim do período.
-    // Sem filtro e sem histórico, cai nos "últimos 14 dias". Períodos muito
-    // longos são limitados às últimas 31 barras.
+    // Gráfico por dia: janela fixa de 7 dias a partir da data do primeiro
+    // lead (ex.: 01/09–07/09), mesmo que os dias futuros ainda não tenham
+    // dados. O início do período filtrado tem prioridade sobre o 1º lead.
     const daily = useMemo(() => {
         const source = filteredByDate;
         const today = new Date();
         const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const end = dateTo ? startOfDay(new Date(`${dateTo}T00:00:00`)) : startOfDay(today);
 
         let start;
         if (dateFrom) {
             start = startOfDay(new Date(`${dateFrom}T00:00:00`));
         } else if (source.length > 0) {
-            const oldest = new Date(source[source.length - 1].created_at); // lista é desc
-            const oldestDay = startOfDay(oldest);
-            const fourteenAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13);
-            start = oldestDay > fourteenAgo ? oldestDay : fourteenAgo;
+            start = startOfDay(new Date(source[source.length - 1].created_at)); // lista é desc
         } else {
-            start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 13);
+            start = startOfDay(today);
         }
-
-        const maxStart = new Date(end.getFullYear(), end.getMonth(), end.getDate() - 30);
-        if (start < maxStart) start = maxStart;
+        const end = new Date(start);
+        end.setDate(end.getDate() + 6);
 
         const counts = new Map();
         const buckets = [];
@@ -402,7 +397,7 @@ function DashPage() {
             b.count = counts.get(b.key);
         });
         return { buckets, max: Math.max(1, ...buckets.map((b) => b.count)) };
-    }, [filteredByDate, dateFrom, dateTo]);
+    }, [filteredByDate, dateFrom]);
 
     const categorias = useMemo(() => {
         const map = new Map();
@@ -451,6 +446,25 @@ function DashPage() {
 
     const visible = filtered.slice(0, visibleCount);
     const todayKey = dayKey(new Date());
+
+    // Scroll infinito: quando o "sentinela" no fim da tabela entra na tela,
+    // revela mais PAGE_SIZE linhas (a lista completa já está em memória —
+    // limitar a renderização evita sobrecarregar o navegador).
+    const sentinelRef = useRef(null);
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el || typeof IntersectionObserver === 'undefined') return undefined;
+        const io = new IntersectionObserver(
+            (entries) => {
+                if (entries.some((entry) => entry.isIntersecting)) {
+                    setVisibleCount((c) => c + PAGE_SIZE);
+                }
+            },
+            { rootMargin: '300px' },
+        );
+        io.observe(el);
+        return () => io.disconnect();
+    }, [filtered.length, visibleCount, loading]);
 
     return (
         <div className="min-h-screen bg-gray-900 text-white font-sans">
@@ -845,8 +859,13 @@ function DashPage() {
                         </div>
                     )}
 
-                    {filtered.length > visibleCount && (
-                        <div className="p-4 border-t border-gray-700 text-center">
+                    {/* Sentinela do scroll infinito + status de linhas carregadas */}
+                    <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+                    {filtered.length > visible.length && (
+                        <div className="px-4 py-3 border-t border-gray-700 text-center space-y-2">
+                            <p className="text-xs text-gray-500">
+                                Mostrando {visible.length.toLocaleString('pt-BR')} de {filtered.length.toLocaleString('pt-BR')} leads — role para carregar mais
+                            </p>
                             <button
                                 type="button"
                                 onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
