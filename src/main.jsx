@@ -8,6 +8,7 @@ import Login from './Login.jsx'
 import Leads from './Leads.jsx'
 import LeadDetail from './LeadDetail.jsx'
 import Studio from './Studio.jsx'
+import Dash from './Dash.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 <Route path="/lead" element={<Leads />} />
                 <Route path="/lead/:id" element={<LeadDetail />} />
                 <Route path="/studio" element={<Studio />} />
+                <Route path="/dash" element={<Dash />} />
             </Routes>
         </BrowserRouter>
     </React.StrictMode>,

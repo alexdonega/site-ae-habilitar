@@ -5,6 +5,14 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-09-01
+### Adicionado
+- Dashboard pública de leads em tempo real em `/dash` (`src/Dash.jsx`), lendo a tabela `leads` do Supabase: KPIs (total, hoje, últimos 7 e 30 dias), gráfico de leads/dia (14 dias), ranking por categoria e tabela completa (ID, nome, WhatsApp com link `wa.me`, produto — exibindo apenas o trecho entre parênteses, ex. `Moto [A]` —, referrer, IG, UTM medium, criado em).
+- Função serverless `GET /api/leads` (`api/leads.js`): retorna todos os leads via `service_role` (o RLS bloqueia a leitura com a anon key). A página faz polling a cada 10s e ao voltar para a aba, com aviso flutuante quando chega lead novo.
+- Filtros de tabela com combobox pesquisável (Produto, Referrer, IG, UTM Medium) + busca global por nome/WhatsApp/ID.
+- Coluna "IG" mostra `ig` quando a coluna existir; hoje exibe o `utm_source` (valor `ig`).
+- Variável `SUPABASE_SERVICE_ROLE_KEY` (Secret) configurada na Vercel para o ambiente de Production.
+
 ## [1.2.0] - 2026-08-31
 ### Adicionado
 - Página de webinar em `/webinar`: landing com selo "Mega Oferta ao Vivo — dias 04 e 05 de setembro", countdown real até a virada do dia 04/09/2026 (evento o dia todo, sem horário fixo) e CTA de WhatsApp com mensagem pré-preenchida.
