@@ -139,7 +139,7 @@ function AutoescolaHabilitarLanding() {
                         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
                             <div className="space-y-4 md:space-y-6 text-center lg:text-left">
                                 <span className="inline-block bg-yellow-500 text-black font-bold px-4 py-1.5 rounded-full text-xs sm:text-sm md:text-base animate-pulse">
-                                    🔴 MEGA OFERTA AO VIVO — DIAS 04 E 05 DE SETEMBRO
+                                    MEGA OFERTA — DIAS 04 E 05 DE SETEMBRO
                                 </span>
                                 <h1 className="text-[clamp(1.625rem,7vw,3rem)] lg:text-[clamp(2.25rem,3.5vw,3.5rem)] font-black leading-tight">
                                     <span className="text-white whitespace-nowrap">A NOVA CNH DO BRASIL</span><br />
