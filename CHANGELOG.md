@@ -22,6 +22,9 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Filtro "Contato" com checkboxes (Sim/Não) na barra de filtros da tabela — um marcado filtra, os dois equivalem a todos.
 - Middleware de dev (`vite.config.js`) também responde ao `PATCH /api/leads`, mantendo o localhost idêntico à produção.
 
+### Alterado
+- Layout do `/dash`: filtro de período e atalhos Meta Ads passaram a ficar em uma barra acima dos cartões de métricas (com botão "Limpar período"); coluna "Contato" movida para depois de "Produto".
+
 ## [1.2.0] - 2026-08-31
 ### Adicionado
 - Página de webinar em `/webinar`: landing com selo "Mega Oferta ao Vivo — dias 04 e 05 de setembro", countdown real até a virada do dia 04/09/2026 (evento o dia todo, sem horário fixo) e CTA de WhatsApp com mensagem pré-preenchida.

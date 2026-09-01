@@ -490,6 +490,69 @@ function DashPage() {
                     </div>
                 ) : null}
 
+                {/* Barra de período + atalhos Meta Ads (acima das métricas) */}
+                <section className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-gray-600 bg-gray-700 text-sm">
+                        <CalendarDays className="w-4 h-4 text-gray-400 shrink-0" />
+                        <span className="text-gray-400 hidden sm:inline">Período:</span>
+                        <input
+                            type="date"
+                            value={dateFrom}
+                            max={dateTo || undefined}
+                            onChange={(e) => {
+                                setDateFrom(e.target.value);
+                                setVisibleCount(PAGE_SIZE);
+                            }}
+                            aria-label="Data inicial"
+                            title="Data inicial"
+                            className="bg-transparent text-white placeholder-gray-500 [color-scheme:dark] focus:outline-none cursor-pointer"
+                        />
+                        <span className="text-gray-500">—</span>
+                        <input
+                            type="date"
+                            value={dateTo}
+                            min={dateFrom || undefined}
+                            onChange={(e) => {
+                                setDateTo(e.target.value);
+                                setVisibleCount(PAGE_SIZE);
+                            }}
+                            aria-label="Data final"
+                            title="Data final"
+                            className="bg-transparent text-white placeholder-gray-500 [color-scheme:dark] focus:outline-none cursor-pointer"
+                        />
+                    </div>
+                    {(dateFrom || dateTo) && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setDateFrom('');
+                                setDateTo('');
+                                setVisibleCount(PAGE_SIZE);
+                            }}
+                            className="flex items-center gap-1.5 h-10 px-3 rounded-lg border border-gray-600 text-sm text-gray-300 hover:text-white hover:border-gray-500 transition"
+                        >
+                            <X className="w-4 h-4" />
+                            Limpar período
+                        </button>
+                    )}
+                    <div className="ml-auto flex items-center gap-1.5">
+                        <span className="text-xs text-gray-400 shrink-0">Meta Ads:</span>
+                        {META_ADS_LINKS.map(({ label, url }) => (
+                            <a
+                                key={label}
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={`Abrir ${label} no Meta Ads`}
+                                className="flex items-center gap-1.5 h-10 px-3 rounded-lg border border-blue-500/40 bg-blue-600/10 text-blue-300 text-sm hover:bg-blue-600/25 hover:text-blue-200 transition shrink-0"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                                {label}
+                            </a>
+                        ))}
+                    </div>
+                </section>
+
                 {/* Métricas */}
                 <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <MetricCard title="Total de leads" value={metrics.total} icon={Users} accent="text-blue-400" />
@@ -586,36 +649,6 @@ function DashPage() {
                         <Combobox label="IG" value={filters.ig} onChange={(v) => setFilter('ig', v)} options={igOptions} />
                         <Combobox label="UTM Medium" value={filters.utm_medium} onChange={(v) => setFilter('utm_medium', v)} options={utmMediumOptions} />
 
-                        {/* Filtro por período (data de início e fim) */}
-                        <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-gray-600 bg-gray-700 text-sm">
-                            <CalendarDays className="w-4 h-4 text-gray-400 shrink-0" />
-                            <input
-                                type="date"
-                                value={dateFrom}
-                                max={dateTo || undefined}
-                                onChange={(e) => {
-                                    setDateFrom(e.target.value);
-                                    setVisibleCount(PAGE_SIZE);
-                                }}
-                                aria-label="Data inicial"
-                                title="Data inicial"
-                                className="bg-transparent text-white placeholder-gray-500 [color-scheme:dark] focus:outline-none cursor-pointer"
-                            />
-                            <span className="text-gray-500">—</span>
-                            <input
-                                type="date"
-                                value={dateTo}
-                                min={dateFrom || undefined}
-                                onChange={(e) => {
-                                    setDateTo(e.target.value);
-                                    setVisibleCount(PAGE_SIZE);
-                                }}
-                                aria-label="Data final"
-                                title="Data final"
-                                className="bg-transparent text-white placeholder-gray-500 [color-scheme:dark] focus:outline-none cursor-pointer"
-                            />
-                        </div>
-
                         {/* Filtro de contato realizado (checkboxes) */}
                         <div className="flex items-center gap-3 h-10 px-3 rounded-lg border border-gray-600 bg-gray-700 text-sm select-none">
                             <span className="text-gray-400">Contato:</span>
@@ -643,24 +676,6 @@ function DashPage() {
                                 />
                                 Não
                             </label>
-                        </div>
-
-                        {/* Atalhos Meta Ads (abrem em nova aba) */}
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-xs text-gray-400 shrink-0">Meta Ads:</span>
-                            {META_ADS_LINKS.map(({ label, url }) => (
-                                <a
-                                    key={label}
-                                    href={url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    title={`Abrir ${label} no Meta Ads`}
-                                    className="flex items-center gap-1.5 h-10 px-3 rounded-lg border border-blue-500/40 bg-blue-600/10 text-blue-300 text-sm hover:bg-blue-600/25 hover:text-blue-200 transition shrink-0"
-                                >
-                                    <ExternalLink className="w-4 h-4" />
-                                    {label}
-                                </a>
-                            ))}
                         </div>
 
                         {hasActiveFilters && (
@@ -693,8 +708,8 @@ function DashPage() {
                                     <th className="px-4 py-3 font-medium">ID</th>
                                     <th className="px-4 py-3 font-medium">Nome completo</th>
                                     <th className="px-4 py-3 font-medium">WhatsApp</th>
-                                    <th className="px-4 py-3 font-medium text-center">Contato</th>
                                     <th className="px-4 py-3 font-medium">Produto</th>
+                                    <th className="px-4 py-3 font-medium text-center">Contato</th>
                                     <th className="px-4 py-3 font-medium">Referrer</th>
                                     <th className="px-4 py-3 font-medium">IG</th>
                                     <th className="px-4 py-3 font-medium">UTM Medium</th>
@@ -734,6 +749,11 @@ function DashPage() {
                                                           '—'
                                                       )}
                                                   </td>
+                                                  <td className="px-4 py-3 whitespace-nowrap">
+                                                      <span className="inline-block px-2.5 py-1 rounded-full bg-habilitar-orange/15 text-habilitar-orange-light text-xs font-semibold">
+                                                          {parseProduto(lead.produto)}
+                                                      </span>
+                                                  </td>
                                                   <td className="px-4 py-3 whitespace-nowrap text-center">
                                                       <input
                                                           type="checkbox"
@@ -745,11 +765,6 @@ function DashPage() {
                                                           aria-label={`Contato realizado de ${lead.nome_completo || `lead ${lead.id}`}`}
                                                           className="w-5 h-5 accent-habilitar-orange cursor-pointer"
                                                       />
-                                                  </td>
-                                                  <td className="px-4 py-3 whitespace-nowrap">
-                                                      <span className="inline-block px-2.5 py-1 rounded-full bg-habilitar-orange/15 text-habilitar-orange-light text-xs font-semibold">
-                                                          {parseProduto(lead.produto)}
-                                                      </span>
                                                   </td>
                                                   <td className="px-4 py-3 text-gray-300 whitespace-nowrap" title={lead.referrer || ''}>
                                                       {refHost(lead.referrer)}
