@@ -5,6 +5,10 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.1] - 2026-09-03
+### Alterado
+- Botão **"Adicionar mensagem"** do editor de mensagens (`/mensagens/:id`) passou a aparecer em **qualquer mensagem**, não só nas de categoria Orçamentos — toda mensagem pode ter as duas caixas (1ª mensagem/abertura + a principal). Rótulos genéricos fora dos orçamentos: a 2ª caixa mostra "a principal" em vez de "o orçamento"; nos orçamentos as 9 linhas já saem de fábrica com a abertura MEGA OFERTA anexada.
+
 ## [1.15.0] - 2026-09-03
 ### Adicionado
 - **Abertura nos orçamentos do `/mensagens`** — o atendimento de orçamento sai em 2 mensagens: primeiro a abertura (a MEGA OFERTA "Abertura do carrinho" — "as condições completas eu já te mando agora 👇"), logo depois o orçamento em si. No editor (`/mensagens/:id`) das mensagens de categoria Orçamentos, botão **"Adicionar mensagem"** abre o campo da abertura **pré-preenchido com a "Abertura do carrinho" da biblioteca** (quando existe), com "Copiar abertura" próprio e botão de remover; o mockup do celular passa a mostrar as **duas bolhas na ordem de envio**, atualizando ao vivo como sempre.

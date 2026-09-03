@@ -9,10 +9,11 @@
 //  volta para /mensagens; Excluir (só quando editando) apaga a linha após
 //  confirmação. Helpers e o mockup vêm de ./Mensagens.jsx.
 //
-//  Mensagens de categoria Orçamentos têm o botão "Adicionar mensagem": abre o
-//  campo da ABERTURA — a 1ª mensagem do atendimento (ex.: a MEGA OFERTA de
-//  "Abertura do carrinho", pré-preenchida), com o orçamento vindo logo
-//  depois como 2ª mensagem. O mockup mostra as duas bolhas na ordem de envio.
+//  Qualquer mensagem tem o botão "Adicionar mensagem": abre o campo da
+//  ABERTURA — a 1ª mensagem do envio (ex.: a MEGA OFERTA antes do orçamento,
+//  pré-preenchida com a "Abertura do carrinho" da biblioteca), com a mensagem
+//  principal vindo logo depois como 2ª mensagem. O mockup mostra as duas
+//  bolhas na ordem de envio.
 // =============================================================================
 
 import { useEffect, useState } from 'react'
@@ -134,8 +135,8 @@ export default function MensagensEditar() {
     const copiado = copiadoKey === 'form-conteudo'
     const copiadoAbertura = copiadoKey === 'form-abertura'
 
-    // Botão "Adicionar mensagem" só faz sentido para orçamentos (a abertura
-    // acompanha o orçamento no mesmo atendimento).
+    // "Adicionar mensagem" aparece em qualquer mensagem; a categoria só ajusta
+    // o rótulo da 2ª caixa ("o orçamento" vs. "a principal").
     const isOrcamento = semAcento(categoria).includes('orcamento')
 
     const adicionarAbertura = () => {
@@ -209,7 +210,7 @@ export default function MensagensEditar() {
                             </PhoneMockup>
                             <p className="text-center text-xs text-gray-500">
                                 Preview ao vivo — como {mode === 'recebida' ? 'o lead recebe' : 'você envia'}
-                                {aberturaAberta && abertura.trim() && ' (abertura + orçamento)'}
+                                {aberturaAberta && abertura.trim() && ' (2 mensagens)'}
                             </p>
                         </div>
 
@@ -253,10 +254,10 @@ export default function MensagensEditar() {
                                 </div>
                             </div>
 
-                            {/* Abertura — nos orçamentos, o atendimento sai em 2
-                                mensagens: ela primeiro ("…te mando agora 👇") e
-                                o orçamento logo abaixo logo depois. */}
-                            {!aberturaAberta && isOrcamento && (
+                            {/* Abertura — o envio pode sair em 2 mensagens: ela
+                                primeiro ("…te mando agora 👇") e a mensagem
+                                principal logo abaixo logo depois. */}
+                            {!aberturaAberta && (
                                 <div>
                                     <button
                                         type="button"
@@ -267,9 +268,10 @@ export default function MensagensEditar() {
                                         Adicionar mensagem
                                     </button>
                                     <p className="mt-1 text-[11px] leading-relaxed text-gray-500">
-                                        A abertura que vai antes do orçamento (ex.: a MEGA OFERTA) —
-                                        pré-preenchida com a “Abertura do carrinho” da biblioteca, o
-                                        envio vira 2 mensagens na ordem do mockup.
+                                        A 1ª mensagem do envio, que vai antes desta (ex.: a MEGA
+                                        OFERTA antes do orçamento) — pré-preenchida com a “Abertura
+                                        do carrinho” da biblioteca; o envio vira 2 mensagens na
+                                        ordem do mockup.
                                     </p>
                                 </div>
                             )}
@@ -317,8 +319,8 @@ export default function MensagensEditar() {
                                         placeholder={'{primeiro-nome} está liberado a *MEGA OFERTA*…\nas condições completas eu já te mando agora 👇'}
                                     />
                                     <p className="text-[11px] text-gray-500">
-                                        Formatação WhatsApp (*negrito*, _itálico_) · o orçamento embaixo
-                                        vai logo depois — é o “👇” desta abertura.
+                                        Formatação WhatsApp (*negrito*, _itálico_) · a mensagem
+                                        embaixo vai logo depois — é o “👇” desta abertura.
                                     </p>
                                 </div>
                             )}
@@ -326,7 +328,11 @@ export default function MensagensEditar() {
                             <div>
                                 <div className="mb-1 flex items-center justify-between gap-2">
                                     <label className={`${labelClass} mb-0`} htmlFor="edit-conteudo">
-                                        Mensagem{aberturaAberta ? ' — o orçamento (2ª mensagem)' : ' (formatação WhatsApp: *negrito*, _itálico_, ~riscado~)'}
+                                        Mensagem{aberturaAberta
+                                            ? isOrcamento
+                                                ? ' — o orçamento (2ª mensagem)'
+                                                : ' — a principal (2ª mensagem)'
+                                            : ' (formatação WhatsApp: *negrito*, _itálico_, ~riscado~)'}
                                     </label>
                                     <button
                                         type="button"
