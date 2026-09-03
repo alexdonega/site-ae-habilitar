@@ -2,6 +2,10 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { createContactAndNotify, findLatestTicketUrl, normalizeWhatsapp } from './api/_falazapp.js'
 import { syncMarketingPerformance } from './api/_windsor.js'
+import produtosHandler from './api/produtos.js'
+import fotosPerfilHandler from './api/fotos-perfil.js'
+import criativosHandler from './api/criativos.js'
+import mensagensHandler from './api/mensagens.js'
 
 // Lê o corpo da requisição no middleware de desenvolvimento (connect não
 // faz parse de JSON sozinho).
@@ -146,7 +150,9 @@ function devApiFalazapp({ falazappApiUrl, falazappToken, supabaseUrl, serviceRol
 // /api/marketing (api/marketing.js) no dev server do Vite — mesmo motivo do
 // devApiLeads acima. O painel de mídia do /dash lê a tabela
 // "marketing_performance" (destino do Windsor.ai) via service_role.
-function devApiMarketing({ supabaseUrl, serviceRoleKey }) {
+function devApiMarketing({ supabaseUrl, serviceRoleKey, windsorApiKey }) {
+    // Throttle do ?sync=1 — mesmo comportamento de api/marketing.js em produção.
+    let lastSyncAt = 0
     return {
         name: 'dev-api-marketing',
         apply: 'serve',
@@ -164,17 +170,35 @@ function devApiMarketing({ supabaseUrl, serviceRoleKey }) {
                     if (req.method !== 'GET') {
                         return send(405, { error: 'Método não permitido' })
                     }
-                    const rest = await fetch(
-                        `${supabaseUrl}/rest/v1/marketing_performance?select=*&order=date.desc&limit=5000`,
-                        {
-                            headers: {
-                                apikey: serviceRoleKey,
-                                Authorization: `Bearer ${serviceRoleKey}`,
+                    const query = new URL(req.url || '', 'http://localhost').searchParams
+                    if (query.get('sync') === '1' && Date.now() - lastSyncAt > 10 * 60 * 1000) {
+                        lastSyncAt = Date.now()
+                        try {
+                            await syncMarketingPerformance({
+                                days: 1,
+                                timeoutMs: 20000,
+                                config: { apiKey: windsorApiKey, supabaseUrl, serviceRoleKey },
+                            })
+                        } catch { /* Windsor offline — segue com o que há no banco */ }
+                    }
+                    // PostgREST entrega no máx. 1000 linhas por resposta —
+                    // pagina até esgotar (mesma lógica de api/marketing.js).
+                    let rows = []
+                    for (let offset = 0; offset < 20000; offset += 1000) {
+                        const rest = await fetch(
+                            `${supabaseUrl}/rest/v1/marketing_performance?select=*&order=date.desc&limit=1000&offset=${offset}`,
+                            {
+                                headers: {
+                                    apikey: serviceRoleKey,
+                                    Authorization: `Bearer ${serviceRoleKey}`,
+                                },
                             },
-                        },
-                    )
-                    if (!rest.ok) throw new Error(`Supabase respondeu ${rest.status}`)
-                    const rows = await rest.json()
+                        )
+                        if (!rest.ok) throw new Error(`Supabase respondeu ${rest.status}`)
+                        const page = await rest.json()
+                        rows = rows.concat(page)
+                        if (!page || page.length < 1000) break
+                    }
                     send(200, { rows, updatedAt: new Date().toISOString() })
                 } catch (err) {
                     send(502, { error: 'Falha ao consultar o Supabase', detail: err.message })
@@ -258,6 +282,44 @@ function devApiWindsorSync({ supabaseUrl, serviceRoleKey, windsorApiKey }) {
     }
 }
 
+// Middleware de desenvolvimento que replica os endpoints de CRUD com imagem
+// (/api/produtos e /api/fotos-perfil). Em vez de duplicar a lógica (Storage +
+// PostgREST), ele chama o próprio handler da Vercel (api/*.js) com um shim
+// mínimo: o handler estilo Express só precisa de res.status/res.json e do
+// body JSON já parseado em req.body. As credenciais do .env (carregadas via
+// loadEnv, que não popula process.env) são injetadas antes da chamada.
+function devApiImagens({ name, path, handler, env }) {
+    return {
+        name,
+        apply: 'serve',
+        configureServer(server) {
+            server.middlewares.use(path, async (req, res) => {
+                for (const key of ['PUBLIC_SUPABASE_URL', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'service_role']) {
+                    if (env[key] && !process.env[key]) process.env[key] = env[key]
+                }
+                res.status = (code) => { res.statusCode = code; return res }
+                res.json = (payload) => {
+                    res.setHeader('Content-Type', 'application/json')
+                    res.end(JSON.stringify(payload))
+                }
+                try {
+                    if (req.method === 'POST' || req.method === 'PATCH') {
+                        const raw = await readBody(req)
+                        req.body = raw ? JSON.parse(raw) : {}
+                    }
+                    await handler(req, res)
+                } catch (err) {
+                    if (!res.writableEnded) {
+                        res.statusCode = 500
+                        res.setHeader('Content-Type', 'application/json')
+                        res.end(JSON.stringify({ error: 'Erro interno', detail: err.message }))
+                    }
+                }
+            })
+        },
+    }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as variáveis do .env (inclusive as sem
     // prefixo, como service_role) — mas só para uso do dev server acima.
@@ -273,6 +335,7 @@ export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as
             devApiMarketing({
                 supabaseUrl: env.PUBLIC_SUPABASE_URL,
                 serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.service_role,
+                windsorApiKey: env.WINDSOR_API_KEY,
             }),
             devApiFalazapp({
                 falazappApiUrl: env.FALAZAPP_API_URL,
@@ -289,6 +352,30 @@ export default defineConfig(({ mode }) => {    // Prefixo vazio carrega TODAS as
                 supabaseUrl: env.PUBLIC_SUPABASE_URL,
                 serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY || env.service_role,
                 windsorApiKey: env.WINDSOR_API_KEY,
+            }),
+            devApiImagens({
+                name: 'dev-api-mensagens',
+                path: '/api/mensagens',
+                handler: mensagensHandler,
+                env,
+            }),
+            devApiImagens({
+                name: 'dev-api-produtos',
+                path: '/api/produtos',
+                handler: produtosHandler,
+                env,
+            }),
+            devApiImagens({
+                name: 'dev-api-fotos-perfil',
+                path: '/api/fotos-perfil',
+                handler: fotosPerfilHandler,
+                env,
+            }),
+            devApiImagens({
+                name: 'dev-api-criativos',
+                path: '/api/criativos',
+                handler: criativosHandler,
+                env,
             }),
         ],
         // Aceita variáveis com prefixo VITE_ e PUBLIC_ (mesma convenção do

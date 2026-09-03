@@ -12,21 +12,27 @@ import {
     MessageCircle,
     AlertCircle,
     Filter,
-    ExternalLink,
     DollarSign,
     MousePointerClick,
 } from 'lucide-react';
+import usePageTitle from './lib/usePageTitle';
 
 // =============================================================================
-//  /dash — Dashboard pública de leads em tempo real (fonte: Supabase, tabela
-//  "leads"). Os dados vêm do endpoint /api/leads (serverless, service_role),
-//  porque o RLS da tabela bloqueia a leitura direta pelo browser. A página
-//  faz polling a cada 10s e também ao voltar para a aba — novo lead aparece
-//  sozinho, com aviso flutuante.
+//  /lead — Dashboard pública de leads em tempo real (fonte: Supabase, tabela
+//  "leads"; rota antiga /dash redireciona para cá). Os dados vêm do endpoint
+//  /api/leads (serverless, service_role), porque o RLS da tabela bloqueia a
+//  leitura direta pelo browser. A página faz polling a cada 10s e também ao
+//  voltar para a aba — novo lead aparece sozinho, com aviso flutuante.
 //
-//  Inclui o painel de mídia (investimento/cliques/CPL por campanha), lido da
-//  tabela "marketing_performance" — destino diário do Windsor.ai — via
-//  /api/marketing (mesmo padrão: service_role só no servidor).
+//  Inclui KPIs de mídia (investimento/cliques/CPL médio), lidos da tabela
+//  "marketing_performance" — destino diário do Windsor.ai — via /api/marketing
+//  (mesmo padrão: service_role só no servidor). O detalhamento por campanha,
+//  conjunto e anúncio fica na página /meta-ads.
+//
+//  CRITÉRIO DE DIA: todos os limites ("Hoje", 7/30 dias, período, gráfico,
+//  coluna "Criado") usam o dia UTC — exatamente o que o editor do Supabase
+//  mostra para created_at (timestamptz). Assim os números da dashboard sempre
+//  batem com a tabela no Supabase, independente do fuso do dispositivo.
 // =============================================================================
 
 // --- Utilitários -------------------------------------------------------------
@@ -61,6 +67,7 @@ const falazappTicketLink = (whatsapp) =>
 const formatDate = (dateString) => {
     if (!dateString) return '—';
     return new Date(dateString).toLocaleDateString('pt-BR', {
+        timeZone: 'UTC',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -69,8 +76,17 @@ const formatDate = (dateString) => {
     });
 };
 
+// Todos os limites de dia da dashboard usam o dia UTC — o mesmo critério do
+// editor do Supabase, que renderiza created_at (timestamptz) em UTC. Se o
+// "hoje" fosse calculado no fuso do navegador, leads enviados entre 21h e
+// 23h59 (BRT) cairiam no dia seguinte e os números não bateriam com o
+// Supabase (ex.: "Hoje" mostrando 4 quando o editor lista 7).
 const dayKey = (d) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+
+// Meia-noite UTC do dia de uma data (para janelas "hoje"/7 dias/30 dias).
+const startOfUtcDay = (d) =>
+    new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
 // "2026-09-01" ou "2026-09-01T00:00:00+00:00" → "2026-09-01" (coluna date da
 // tabela marketing_performance, comparável com os inputs de período).
@@ -79,10 +95,6 @@ const dateOnly = (value) => String(value || '').slice(0, 10);
 // 1234.5 → "R$ 1.234,50"
 const fmtBRL = (value) =>
     Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-// Chave de casamento entre o nome da campanha (Windsor) e o utm_campaign dos
-// leads — só representam a mesma campanha quando batem normalizados.
-const campaignKey = (name) => String(name || '').trim().toLowerCase();
 
 // --- Componentes internos ----------------------------------------------------
 
@@ -214,26 +226,10 @@ function Combobox({ label, value, onChange, options }) {
 // Quantidade de linhas carregadas por vez na tabela (scroll infinito).
 const PAGE_SIZE = 20;
 
-// Atalhos para o Gerenciador de Anúncios da Meta (abrem em nova aba),
-// já filtrados pela campanha ativa da Autoescola Habilitar.
-const META_ADS_LINKS = [
-    {
-        label: 'Campanha',
-        url: 'https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&comparison_date=&insights_date=2023-12-18_2026-09-02%2Cmaximum&insights_comparison_date=&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407',
-    },
-    {
-        label: 'Conjunto',
-        url: 'https://adsmanager.facebook.com/adsmanager/manage/adsets?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&insights_date=2023-12-18_2026-09-02%2Cmaximum&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407',
-    },
-    {
-        label: 'Anúncio',
-        url: 'https://adsmanager.facebook.com/adsmanager/manage/ads?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&insights_date=2023-12-18_2026-09-02%2Cmaximum&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407&selected_adset_ids=120248846626200407%2C120248846618430407%2C120248846513220407%2C120248846501130407%2C120248846378430407%2C120248846331900407%2C120248846128840407',
-    },
-];
-
 // --- Página ------------------------------------------------------------------
 
 function DashPage() {
+    usePageTitle('Lead');
     const [leads, setLeads] = useState([]);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
@@ -251,7 +247,6 @@ function DashPage() {
     // entra no polling de 10s — carrega no mount, ao voltar para a aba e no
     // botão de refresh.
     const [marketing, setMarketing] = useState([]);
-    const [marketingLoading, setMarketingLoading] = useState(true);
     const [marketingError, setMarketingError] = useState(null);
 
     const prevTotal = useRef(0);
@@ -292,8 +287,6 @@ function DashPage() {
             setMarketingError(null);
         } catch {
             setMarketingError('Sem dados de mídia — a tabela marketing_performance ainda não existe ou o Windsor ainda não sincronizou.');
-        } finally {
-            setMarketingLoading(false);
         }
     }, []);
 
@@ -341,8 +334,9 @@ function DashPage() {
     // KPIs, gráfico por dia, categorias e tabela). Sem datas = tudo. ---
 
     const filteredByDate = useMemo(() => {
-        const from = dateFrom ? new Date(`${dateFrom}T00:00:00`) : null;
-        const to = dateTo ? new Date(`${dateTo}T23:59:59.999`) : null;
+        // Limite do período em UTC (mesmo critério do editor do Supabase).
+        const from = dateFrom ? new Date(`${dateFrom}T00:00:00Z`) : null;
+        const to = dateTo ? new Date(`${dateTo}T23:59:59.999Z`) : null;
         if (!from && !to) return leads;
         return leads.filter((lead) => {
             const created = new Date(lead.created_at);
@@ -355,10 +349,11 @@ function DashPage() {
     // --- Métricas (sobre o período selecionado) ---
 
     const metrics = useMemo(() => {
+        // Janelas "hoje"/7/30 dias abertas na meia-noite UTC (dia do Supabase).
         const now = new Date();
         const startOf = (daysAgo) => {
-            const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            if (daysAgo) d.setDate(d.getDate() - daysAgo);
+            const d = startOfUtcDay(now);
+            if (daysAgo) d.setUTCDate(d.getUTCDate() - daysAgo);
             return d;
         };
         const today = startOf(0);
@@ -381,23 +376,18 @@ function DashPage() {
     // dados. O início do período filtrado tem prioridade sobre o 1º lead.
     const daily = useMemo(() => {
         const source = filteredByDate;
-        const today = new Date();
-        const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const start = (() => {
+            if (dateFrom) return startOfUtcDay(new Date(`${dateFrom}T00:00:00Z`));
+            if (source.length > 0) return startOfUtcDay(new Date(source[source.length - 1].created_at)); // lista é desc
+            return startOfUtcDay(new Date());
+        })();
 
-        let start;
-        if (dateFrom) {
-            start = startOfDay(new Date(`${dateFrom}T00:00:00`));
-        } else if (source.length > 0) {
-            start = startOfDay(new Date(source[source.length - 1].created_at)); // lista é desc
-        } else {
-            start = startOfDay(today);
-        }
         const end = new Date(start);
-        end.setDate(end.getDate() + 6);
+        end.setUTCDate(end.getUTCDate() + 6);
 
         const counts = new Map();
         const buckets = [];
-        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
             const key = dayKey(d);
             counts.set(key, 0);
             buckets.push({ key, date: new Date(d), count: 0 });
@@ -449,40 +439,6 @@ function DashPage() {
     const blendedCpl = metrics.total > 0 && marketingTotals.spend > 0
         ? marketingTotals.spend / metrics.total
         : null;
-
-    // Investimento por campanha no período + leads casados via utm_campaign
-    // (o Windsor traz o NOME da campanha; o lead traz o utm_campaign — só
-    // casam quando são o mesmo texto, depois de normalizados).
-    const campaigns = useMemo(() => {
-        const map = new Map();
-        marketingByDate.forEach((row) => {
-            const key = campaignKey(row.campaign);
-            if (!key) return;
-            const entry = map.get(key) || {
-                key,
-                campaign: row.campaign,
-                datasource: row.datasource || '—',
-                spend: 0,
-                clicks: 0,
-            };
-            entry.spend += Number(row.spend) || 0;
-            entry.clicks += Number(row.clicks) || 0;
-            map.set(key, entry);
-        });
-        const leadsByKey = new Map();
-        filteredByDate.forEach((lead) => {
-            const key = campaignKey(lead.utm_campaign);
-            if (key) leadsByKey.set(key, (leadsByKey.get(key) || 0) + 1);
-        });
-        return [...map.values()]
-            .map((entry) => {
-                const leads = leadsByKey.get(entry.key) || 0;
-                return { ...entry, leads, cpl: leads > 0 ? entry.spend / leads : null };
-            })
-            .sort((a, b) => b.spend - a.spend);
-    }, [marketingByDate, filteredByDate]);
-
-    const matchedCampaignLeads = campaigns.reduce((sum, c) => sum + c.leads, 0);
 
     const buildOptions = useCallback(
         (accessor) => {
@@ -571,6 +527,13 @@ function DashPage() {
                         <span className="text-xs text-gray-400 hidden sm:block">
                             {lastUpdated ? `Atualizado às ${lastUpdated.toLocaleTimeString('pt-BR')}` : 'Carregando...'}
                         </span>
+                        <a
+                            href="/criativos"
+                            title="Biblioteca de criativos para o gestor de tráfego"
+                            className="hidden sm:flex items-center h-9 px-3 rounded-lg border border-gray-600 bg-gray-700 text-xs text-gray-300 hover:text-white hover:border-gray-500 transition"
+                        >
+                            Criativos
+                        </a>
                         <button
                             type="button"
                             onClick={() => {
@@ -611,7 +574,7 @@ function DashPage() {
                     </div>
                 ) : null}
 
-                {/* Barra de período + atalhos Meta Ads (acima das métricas) */}
+                {/* Barra de período (acima das métricas) */}
                 <section className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-gray-600 bg-gray-700 text-sm">
                         <CalendarDays className="w-4 h-4 text-gray-400 shrink-0" />
@@ -662,22 +625,6 @@ function DashPage() {
                             Limpar período
                         </button>
                     )}
-                    <div className="ml-auto flex items-center gap-1.5">
-                        <span className="text-xs text-gray-400 shrink-0">Meta Ads:</span>
-                        {META_ADS_LINKS.map(({ label, url }) => (
-                            <a
-                                key={label}
-                                href={url}
-                                target="_blank"
-                                rel="noreferrer"
-                                title={`Abrir ${label} no Meta Ads`}
-                                className="flex items-center gap-1.5 h-10 px-3 rounded-lg border border-blue-500/40 bg-blue-600/10 text-blue-300 text-sm hover:bg-blue-600/25 hover:text-blue-200 transition shrink-0"
-                            >
-                                <ExternalLink className="w-4 h-4" />
-                                {label}
-                            </a>
-                        ))}
-                    </div>
                 </section>
 
                 {/* Métricas */}
@@ -696,9 +643,9 @@ function DashPage() {
                             {daily.buckets.length > 0 && (
                                 <span className="text-gray-500 font-normal">
                                     {' · '}
-                                    {daily.buckets[0].date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                    {daily.buckets[0].date.toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}
                                     {' – '}
-                                    {daily.buckets[daily.buckets.length - 1].date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                                    {daily.buckets[daily.buckets.length - 1].date.toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}
                                 </span>
                             )}
                         </h2>
@@ -710,7 +657,7 @@ function DashPage() {
                                     <div
                                         key={b.key}
                                         className="flex-1 h-full flex flex-col items-center justify-end gap-1 group"
-                                        title={`${b.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}: ${b.count} lead${b.count === 1 ? '' : 's'}`}
+                                        title={`${b.date.toLocaleDateString('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}: ${b.count} lead${b.count === 1 ? '' : 's'}`}
                                     >
                                         {b.count > 0 && (
                                             <span className={`text-[10px] ${isToday ? 'text-habilitar-orange font-bold' : 'text-gray-400'}`}>
@@ -726,7 +673,7 @@ function DashPage() {
                                             style={{ height: `${height}%` }}
                                         />
                                         <span className={`text-[10px] ${isToday ? 'text-gray-300 font-semibold' : 'text-gray-500'}`}>
-                                            {b.date.getDate()}/{b.date.getMonth() + 1}
+                                            {b.date.getUTCDate()}/{b.date.getUTCMonth() + 1}
                                         </span>
                                     </div>
                                 );
@@ -764,7 +711,8 @@ function DashPage() {
                     </div>
                 </section>
 
-                {/* Mídia (Windsor → marketing_performance): investimento vs leads no período */}
+                {/* Mídia (Windsor → marketing_performance): investimento vs leads no período.
+                    O detalhamento por campanha vive na página /meta-ads. */}
                 <section className="space-y-4">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         <MetricCard title="Investimento" value={fmtBRL(marketingTotals.spend)} icon={DollarSign} accent="text-yellow-400" />
@@ -772,69 +720,12 @@ function DashPage() {
                         <MetricCard title="Leads (período)" value={metrics.total} icon={Users} accent="text-green-400" />
                         <MetricCard title="CPL médio" value={blendedCpl != null ? fmtBRL(blendedCpl) : '—'} icon={TrendingUp} accent="text-purple-400" />
                     </div>
-
-                    <div className="bg-gray-800 rounded-xl border border-gray-700">
-                        <div className="p-4 border-b border-gray-700 flex flex-wrap items-center justify-between gap-2">
-                            <h2 className="text-sm font-semibold text-gray-300">
-                                Investimento por campanha
-                                <span className="text-gray-500 font-normal"> · Windsor</span>
-                            </h2>
-                            {campaigns.length > 0 && matchedCampaignLeads === 0 && (
-                                <span className="text-xs text-gray-500">
-                                    Nenhuma campanha casa com o utm_campaign dos leads — o CPL por campanha fica
-                                    indisponível (o CPL médio acima sempre vale).
-                                </span>
-                            )}
-                        </div>
-                        {marketingLoading && marketing.length === 0 ? (
-                            <div className="p-4 space-y-2">
-                                {Array.from({ length: 3 }).map((_, i) => (
-                                    <div key={i} className="h-8 rounded bg-gray-700 animate-pulse" />
-                                ))}
-                            </div>
-                        ) : marketingError && marketing.length === 0 ? (
-                            <div className="px-4 py-6 text-sm text-gray-500 flex items-center gap-2">
-                                <AlertCircle className="w-4 h-4 shrink-0" />
-                                {marketingError}
-                            </div>
-                        ) : campaigns.length === 0 ? (
-                            <div className="px-4 py-6 text-sm text-gray-500">
-                                Sem dados de mídia no período — aguardando o sync do Windsor na tabela
-                                marketing_performance.
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                    <thead>
-                                        <tr className="text-left text-xs uppercase tracking-wider text-gray-400 border-b border-gray-700">
-                                            <th className="px-4 py-3 font-medium">Campanha</th>
-                                            <th className="px-4 py-3 font-medium">Fonte</th>
-                                            <th className="px-4 py-3 font-medium text-right">Investimento</th>
-                                            <th className="px-4 py-3 font-medium text-right">Cliques</th>
-                                            <th className="px-4 py-3 font-medium text-right">Leads</th>
-                                            <th className="px-4 py-3 font-medium text-right">CPL</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {campaigns.map((c) => (
-                                            <tr key={c.key} className="border-b border-gray-800 hover:bg-gray-700/40 transition-colors">
-                                                <td className="px-4 py-3 font-medium text-white max-w-[320px] truncate" title={c.campaign}>
-                                                    {c.campaign}
-                                                </td>
-                                                <td className="px-4 py-3 text-gray-300 whitespace-nowrap">{c.datasource}</td>
-                                                <td className="px-4 py-3 text-right text-gray-200 whitespace-nowrap">{fmtBRL(c.spend)}</td>
-                                                <td className="px-4 py-3 text-right text-gray-300">{Math.round(c.clicks).toLocaleString('pt-BR')}</td>
-                                                <td className="px-4 py-3 text-right text-gray-300">{c.leads > 0 ? c.leads.toLocaleString('pt-BR') : '—'}</td>
-                                                <td className="px-4 py-3 text-right font-semibold text-habilitar-orange-light whitespace-nowrap">
-                                                    {c.cpl != null ? fmtBRL(c.cpl) : '—'}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
+                    {marketingError && marketing.length === 0 && (
+                        <p className="text-xs text-gray-500 flex items-center gap-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            {marketingError}
+                        </p>
+                    )}
                 </section>
 
                 {/* Tabela de leads */}

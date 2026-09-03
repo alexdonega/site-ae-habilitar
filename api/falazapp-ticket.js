@@ -3,7 +3,7 @@
 // =============================================================================
 //  GET /api/falazapp-ticket?whatsapp=(65) 99999-9999
 //    → 302 para https://app.falazapp.com.br/tickets/{uuid} do ticket mais
-//      recente do contato (coluna WhatsApp do /dash).
+//      recente do contato (coluna WhatsApp do /lead).
 //    → sem ticket (ou qualquer falha): 302 para o wa.me do número, que era o
 //      comportamento antigo do link — o clique nunca abre página quebrada.
 // =============================================================================

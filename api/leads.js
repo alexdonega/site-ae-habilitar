@@ -1,8 +1,8 @@
 // =============================================================================
-//  /api/leads — Dashboard em tempo real (/dash)
+//  /api/leads — Dashboard em tempo real (/lead; antiga /dash)
 // =============================================================================
 //  GET   → todos os leads da tabela "leads", do mais recente para o mais
-//          antigo. A página /dash faz polling a cada 10s (e ao voltar para a
+//          antigo. A página /lead faz polling a cada 10s (e ao voltar para a
 //          aba) para se manter atualizada.
 //
 //  Usa a service_role key EXCLUSIVAMENTE aqui no servidor: o RLS da tabela

@@ -15,6 +15,7 @@ import {
     ArrowLeft,
     Clock,
 } from 'lucide-react';
+import usePageTitle from './lib/usePageTitle';
 
 // -----------------------------------------------------------------------------
 // AE Studio — geração de imagens (GLM-Image) e vídeos (CogVideoX-3) via Z.ai
@@ -331,6 +332,7 @@ function TaskCard({ task, onRemove }) {
 // --- Página principal --------------------------------------------------------
 
 function StudioPage() {
+    usePageTitle('AE Studio');
     const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) || '');
     const [tab, setTab] = useState('image');
     const [tasks, setTasks] = useState(loadHistory);

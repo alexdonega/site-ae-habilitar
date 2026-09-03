@@ -15,7 +15,9 @@ import {
     AlertCircle,
     CalendarDays,
     Info,
+    ExternalLink,
 } from 'lucide-react';
+import usePageTitle from './lib/usePageTitle';
 
 // =============================================================================
 //  /meta-ads — Dashboard de mídia paga (Meta Ads via Windsor.ai → Supabase).
@@ -48,9 +50,13 @@ const fmtNum = (value, decimals = 2) =>
         maximumFractionDigits: decimals,
     });
 
-// Chave de casamento entre o nome da campanha (Windsor) e o utm_campaign dos
-// leads — só representam a mesma campanha quando batem normalizados.
+// Chave de casamento entre a campanha (Windsor) e o utm_campaign dos leads.
+// Os anúncios desta operação usam o ID da campanha como utm_campaign (ex.:
+// 120248846128830407), então casamos por campaign_id OU pelo nome normalizado.
 const campaignKey = (name) => String(name || '').trim().toLowerCase();
+// Chave agressiva (só alfanuméricos) para casar slugs com nomes de campanha:
+// "[Conversao][Meteorico Set-26]" ↔ "conversao-meteorico-set-26".
+const slugKey = (name) => String(name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
 const dayKeyLocal = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -92,9 +98,27 @@ const PERIOD_PRESETS = [
     { id: '30', label: '30 dias' },
 ];
 
+// Atalhos para o Gerenciador de Anúncios da Meta (abrem em nova aba),
+// já filtrados pela campanha ativa da Autoescola Habilitar.
+const META_ADS_LINKS = [
+    {
+        label: 'Campanha',
+        url: 'https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&comparison_date=&insights_date=2023-12-18_2026-09-02%2Cmaximum&insights_comparison_date=&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407',
+    },
+    {
+        label: 'Conjunto',
+        url: 'https://adsmanager.facebook.com/adsmanager/manage/adsets?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&insights_date=2023-12-18_2026-09-02%2Cmaximum&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407',
+    },
+    {
+        label: 'Anúncio',
+        url: 'https://adsmanager.facebook.com/adsmanager/manage/ads?act=372479995297951&business_id=130028894831471&global_scope_id=130028894831471&columns=name%2Cdelivery%2Crecommendations_guidance%2Cresults%2Ccost_per_result%2Cbudget%2Cspend%2Cimpressions%2Creach%2Cactions%3Aonsite_conversion.total_messaging_connection%2Cactions%3Aonsite_conversion.messaging_first_reply%2Cactions%3Aomni_purchase%2Cschedule%2Cend_time%2Cattribution_setting%2Cbid%2Clast_significant_edit%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Ccampaign_name%2Ccost_per_action_type%3Aomni_purchase&attribution_windows=default&date=2023-12-18_2026-09-02%2Cmaximum&insights_date=2023-12-18_2026-09-02%2Cmaximum&filter_set=CAMPAIGN_GROUP_SELECTED-STRING_SET%1EIN%1E[%22120248846128830407%22]&selected_campaign_ids=120248846128830407&selected_adset_ids=120248846626200407%2C120248846618430407%2C120248846513220407%2C120248846501130407%2C120248846378430407%2C120248846331900407%2C120248846128840407',
+    },
+];
+
 // --- Página ------------------------------------------------------------------
 
 function MetaAdsPage() {
+    usePageTitle('Meta Ads');
     const [rows, setRows] = useState([]);
     const [loading, setLoading] = useState(true);
     const [syncing, setSyncing] = useState(false);
@@ -112,12 +136,13 @@ function MetaAdsPage() {
     const flashTimer = useRef(null);
 
     // Dado de mídia muda 1×/dia: carrega no mount, ao voltar para a aba e no
-    // refresh manual (sem polling curto).
-    const load = useCallback(async () => {
+    // refresh manual (sem polling curto). O refresh manual repuxa o dia
+    // corrente do Windsor (?sync=1 — o endpoint faz throttle de 10 min).
+    const load = useCallback(async (withSync = false) => {
         setSyncing(true);
         try {
             const [mediaResp, leadsResp] = await Promise.all([
-                fetch('/api/marketing', { headers: { Accept: 'application/json' } }),
+                fetch(`/api/marketing${withSync ? '?sync=1' : ''}`, { headers: { Accept: 'application/json' } }),
                 fetch('/api/leads', { headers: { Accept: 'application/json' } }),
             ]);
             if (!mediaResp.ok) throw new Error(`HTTP ${mediaResp.status}`);
@@ -201,6 +226,8 @@ function MetaAdsPage() {
         const impressions = sum(rowsInPeriod, 'impressions');
         const reach = sum(rowsInPeriod, 'reach');
         const clicks = sum(rowsInPeriod, 'clicks');
+        const messaging = sum(rowsInPeriod, 'actions_onsite_conversion_total_messaging_connection');
+        const firstReply = sum(rowsInPeriod, 'actions_onsite_conversion_messaging_first_reply');
         const leadsCount = leadsInPeriod.length;
         return {
             spend,
@@ -208,6 +235,10 @@ function MetaAdsPage() {
             reach,
             clicks,
             leadsCount,
+            messaging,
+            firstReply,
+            linkClicks: sum(rowsInPeriod, 'inline_link_clicks'),
+            engagement: sum(rowsInPeriod, 'actions_post_engagement'),
             ctr: impressions > 0 ? (clicks / impressions) * 100 : null,
             cpc: clicks > 0 ? spend / clicks : null,
             cpm: impressions > 0 ? (spend / impressions) * 1000 : null,
@@ -216,7 +247,8 @@ function MetaAdsPage() {
             landingViews: sum(rowsInPeriod, 'actions_landing_page_view'),
             leadsMeta: sum(rowsInPeriod, 'actions_lead'),
             registrations: sum(rowsInPeriod, 'actions_complete_registration'),
-            messaging: sum(rowsInPeriod, 'actions_onsite_conversion_total_messaging_connection'),
+            costPerConversation: messaging > 0 ? spend / messaging : null,
+            costPerReply: firstReply > 0 ? spend / firstReply : null,
         };
     }, [rowsInPeriod, leadsInPeriod]);
 
@@ -261,17 +293,29 @@ function MetaAdsPage() {
                 const entry = map.get(key) || {
                     key,
                     labels: labelFields.map((f) => row[f] || '—'),
+                    // Copy do anúncio (nível anúncio; Windsor title/body) —
+                    // primeiro valor não vazio do grupo.
+                    copyTitle: '',
+                    copyBody: '',
                     spend: 0,
                     impressions: 0,
                     reach: 0,
                     clicks: 0,
+                    linkClicks: 0,
+                    messaging: 0,
+                    firstReply: 0,
                     leadsMeta: 0,
                     registrations: 0,
                 };
+                if (!entry.copyTitle && row.title) entry.copyTitle = row.title;
+                if (!entry.copyBody && row.body) entry.copyBody = row.body;
                 entry.spend += Number(row.spend) || 0;
                 entry.impressions += Number(row.impressions) || 0;
                 entry.reach += Number(row.reach) || 0;
                 entry.clicks += Number(row.clicks) || 0;
+                entry.linkClicks += Number(row.inline_link_clicks) || 0;
+                entry.messaging += Number(row.actions_onsite_conversion_total_messaging_connection) || 0;
+                entry.firstReply += Number(row.actions_onsite_conversion_messaging_first_reply) || 0;
                 entry.leadsMeta += Number(row.actions_lead) || 0;
                 entry.registrations += Number(row.actions_complete_registration) || 0;
                 map.set(key, entry);
@@ -284,8 +328,14 @@ function MetaAdsPage() {
     const leadsByCampaign = useMemo(() => {
         const map = new Map();
         leadsInPeriod.forEach((lead) => {
-            const key = campaignKey(lead.utm_campaign);
-            if (key) map.set(key, (map.get(key) || 0) + 1);
+            const raw = String(lead.utm_campaign || '');
+            if (!raw.trim()) return;
+            // Registra sob as duas chaves: casamento por texto exato
+            // (campaignKey) e por slug (slugKey) — a campanha consulta as que
+            // souber (id, nome, slug) e pega o primeiro valor não vazio.
+            for (const k of new Set([campaignKey(raw), slugKey(raw)])) {
+                map.set(k, (map.get(k) || 0) + 1);
+            }
         });
         return map;
     }, [leadsInPeriod]);
@@ -294,7 +344,13 @@ function MetaAdsPage() {
         () =>
             aggregateBy('campaign_id', ['campaign']).map((entry) => ({
                 ...entry,
-                leadsCrm: leadsByCampaign.get(campaignKey(entry.labels[0])) || 0,
+                // Casa por campaign_id (utm_campaign dos anúncios), pelo nome
+                // exato ou pelo slug do nome.
+                leadsCrm:
+                    leadsByCampaign.get(campaignKey(entry.key)) ||
+                    leadsByCampaign.get(campaignKey(entry.labels[0])) ||
+                    leadsByCampaign.get(slugKey(entry.labels[0])) ||
+                    0,
             })),
         [aggregateBy, leadsByCampaign],
     );
@@ -352,6 +408,19 @@ function MetaAdsPage() {
         ? `${daily.buckets[0].date.split('-').reverse().join('/')} – ${daily.buckets[daily.buckets.length - 1].date.split('-').reverse().join('/')}`
         : '';
 
+    // Funil do período: mídia → site → WhatsApp → formulário (valores absolutos).
+    const funnel = [
+        { label: 'Impressões', value: totals.impressions },
+        { label: 'Alcance (pessoas)', value: totals.reach },
+        { label: 'Cliques (todos)', value: totals.clicks },
+        { label: 'Cliques em link', value: totals.linkClicks },
+        { label: 'Views da página', value: totals.landingViews },
+        { label: 'Conversas WhatsApp', value: totals.messaging },
+        { label: 'Respostas no WhatsApp', value: totals.firstReply },
+        { label: 'Leads (formulário)', value: totals.leadsCount },
+    ];
+    const funnelMax = Math.max(1, ...funnel.map((s) => s.value));
+
     return (
         <div className="min-h-screen bg-gray-900 text-white font-sans">
             {/* Header */}
@@ -384,10 +453,17 @@ function MetaAdsPage() {
                                 {rows.length > 0 ? `${fmtInt(rows.length)} linhas` : 'Ao vivo'}
                             </span>
                         )}
+                        <a
+                            href="/criativos"
+                            title="Biblioteca de criativos para o gestor de tráfego"
+                            className="hidden sm:flex items-center h-9 px-3 rounded-lg border border-gray-600 bg-gray-700 text-xs text-gray-300 hover:text-white hover:border-gray-500 transition"
+                        >
+                            Criativos
+                        </a>
                         <button
                             type="button"
-                            onClick={load}
-                            title="Atualizar agora"
+                            onClick={() => load(true)}
+                            title="Atualizar agora (repuxa o dia de hoje do Windsor)"
                             className="p-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:text-white hover:border-gray-500 transition"
                         >
                             <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
@@ -477,7 +553,23 @@ function MetaAdsPage() {
                             Limpar período
                         </button>
                     )}
-                    <span className="ml-auto text-xs text-gray-500 shrink-0">{rangeLabel}</span>
+                    <div className="ml-auto flex items-center gap-1.5">
+                        <span className="text-xs text-gray-500 shrink-0">{rangeLabel}</span>
+                        <span className="text-xs text-gray-400 shrink-0">Meta Ads:</span>
+                        {META_ADS_LINKS.map(({ label, url }) => (
+                            <a
+                                key={label}
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={`Abrir ${label} no Meta Ads`}
+                                className="flex items-center gap-1.5 h-10 px-3 rounded-lg border border-blue-500/40 bg-blue-600/10 text-blue-300 text-sm hover:bg-blue-600/25 hover:text-blue-200 transition shrink-0"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                                {label}
+                            </a>
+                        ))}
+                    </div>
                 </section>
 
                 {/* KPIs principais */}
@@ -496,10 +588,61 @@ function MetaAdsPage() {
                 <section className="flex flex-wrap gap-2">
                     <Chip label="Alcance" value={fmtInt(totals.reach)} />
                     <Chip label="Frequência" value={totals.frequency != null ? fmtNum(totals.frequency) : '—'} />
+                    <Chip label="Cliques em link" value={fmtInt(totals.linkClicks)} />
+                    <Chip label="Engajamento" value={fmtInt(totals.engagement)} />
                     <Chip label="Views de página" value={fmtInt(totals.landingViews)} />
                     <Chip label="Leads (Meta)" value={fmtInt(totals.leadsMeta)} />
                     <Chip label="Cadastros (pixel)" value={fmtInt(totals.registrations)} />
-                    <Chip label="Conversas WhatsApp" value={fmtInt(totals.messaging)} />
+                    <Chip
+                        label="Custo/conversa"
+                        value={totals.costPerConversation != null ? fmtBRL(totals.costPerConversation) : '—'}
+                    />
+                    <Chip
+                        label="Custo/resposta"
+                        value={totals.costPerReply != null ? fmtBRL(totals.costPerReply) : '—'}
+                    />
+                </section>
+
+                {/* Funil do período: mídia → site → WhatsApp → formulário */}
+                <section className="bg-gray-800 rounded-xl border border-gray-700 p-5">
+                    <h2 className="text-sm font-semibold text-gray-300 mb-1">
+                        Funil do período
+                        {rangeLabel && <span className="text-gray-500 font-normal">{' · '}{rangeLabel}</span>}
+                    </h2>
+                    <p className="text-xs text-gray-500 mb-4">
+                        Percentual = conversão em relação à etapa anterior · leads (formulário) vêm do CRM
+                    </p>
+                    <div className="space-y-2.5">
+                        {funnel.map((step, i) => {
+                            const prev = i > 0 ? funnel[i - 1].value : null;
+                            const pct = prev > 0 ? (step.value / prev) * 100 : null;
+                            const width = Math.max(2, Math.pow(step.value / funnelMax, 0.35) * 100);
+                            return (
+                                <div key={step.label} className="flex items-center gap-3">
+                                    <span className="w-44 shrink-0 text-xs text-gray-400 text-right truncate" title={step.label}>
+                                        {step.label}
+                                    </span>
+                                    <div className="flex-1 h-8 rounded-md bg-gray-900/60 border border-gray-700 overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-md flex items-center px-3 transition-all ${
+                                                i === funnel.length - 1
+                                                    ? 'bg-green-500/80'
+                                                    : 'bg-habilitar-orange/60'
+                                            }`}
+                                            style={{ width: `${width}%` }}
+                                        >
+                                            <span className="text-xs font-semibold text-gray-100 whitespace-nowrap">
+                                                {fmtInt(step.value)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span className="w-16 shrink-0 text-xs text-gray-500 text-right">
+                                        {pct != null ? fmtPct(pct) : '—'}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </section>
 
                 {/* Gráficos por dia */}
@@ -588,6 +731,7 @@ function MetaAdsPage() {
                                     <tr className="text-left text-xs uppercase tracking-wider text-gray-400 border-b border-gray-700">
                                         <th className="px-4 py-3 font-medium">{tab === 'campanha' ? 'Campanha' : tab === 'conjunto' ? 'Conjunto' : 'Anúncio'}</th>
                                         {tab !== 'campanha' && <th className="px-4 py-3 font-medium">{tab === 'conjunto' ? 'Campanha' : 'Conjunto'}</th>}
+                                        {tab === 'anuncio' && <th className="px-4 py-3 font-medium">Copy</th>}
                                         <th className="px-4 py-3 font-medium text-right">Invest.</th>
                                         <th className="px-4 py-3 font-medium text-right">Impr.</th>
                                         <th className="px-4 py-3 font-medium text-right">Alcance</th>
@@ -595,6 +739,8 @@ function MetaAdsPage() {
                                         <th className="px-4 py-3 font-medium text-right">CTR</th>
                                         <th className="px-4 py-3 font-medium text-right">CPC</th>
                                         <th className="px-4 py-3 font-medium text-right">CPM</th>
+                                        <th className="px-4 py-3 font-medium text-right">Conversas</th>
+                                        <th className="px-4 py-3 font-medium text-right">Custo/conversa</th>
                                         <th className="px-4 py-3 font-medium text-right">Leads CRM</th>
                                         <th className="px-4 py-3 font-medium text-right">CPL</th>
                                         <th className="px-4 py-3 font-medium text-right">Leads Meta</th>
@@ -606,6 +752,7 @@ function MetaAdsPage() {
                                         const cpc = entry.clicks > 0 ? entry.spend / entry.clicks : null;
                                         const cpm = entry.impressions > 0 ? (entry.spend / entry.impressions) * 1000 : null;
                                         const cpl = entry.leadsCrm > 0 ? entry.spend / entry.leadsCrm : null;
+                                        const costPerConversation = entry.messaging > 0 ? entry.spend / entry.messaging : null;
                                         const [primary, secondary] = entry.labels;
                                         return (
                                             <tr key={entry.key} className="border-b border-gray-800 hover:bg-gray-700/40 transition-colors">
@@ -617,6 +764,14 @@ function MetaAdsPage() {
                                                         {secondary}
                                                     </td>
                                                 )}
+                                                {tab === 'anuncio' && (
+                                                    <td
+                                                        className="px-4 py-3 text-gray-300 max-w-[260px] truncate"
+                                                        title={entry.copyBody ? `${entry.copyTitle || ''}\n\n${entry.copyBody}`.trim() : entry.copyTitle || ''}
+                                                    >
+                                                        {entry.copyTitle || (entry.copyBody ? entry.copyBody.slice(0, 80) : '—')}
+                                                    </td>
+                                                )}
                                                 <td className="px-4 py-3 text-right text-gray-100 whitespace-nowrap font-semibold">{fmtBRL(entry.spend)}</td>
                                                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">{fmtInt(entry.impressions)}</td>
                                                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">{fmtInt(entry.reach)}</td>
@@ -624,6 +779,10 @@ function MetaAdsPage() {
                                                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">{ctr != null ? fmtPct(ctr) : '—'}</td>
                                                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">{cpc != null ? fmtBRL(cpc) : '—'}</td>
                                                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">{cpm != null ? fmtBRL(cpm) : '—'}</td>
+                                                <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">{fmtInt(entry.messaging)}</td>
+                                                <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">
+                                                    {costPerConversation != null ? fmtBRL(costPerConversation) : '—'}
+                                                </td>
                                                 <td className="px-4 py-3 text-right text-gray-300 whitespace-nowrap">
                                                     {tab === 'campanha' && entry.leadsCrm > 0 ? fmtInt(entry.leadsCrm) : '—'}
                                                 </td>
@@ -642,7 +801,8 @@ function MetaAdsPage() {
 
                 <p className="text-xs text-gray-600 text-center pb-4">
                     Fonte: Windsor.ai (conector Facebook Ads) → Supabase · tabela marketing_performance · CTR/CPC/CPM/CPL
-                    calculados sobre o período selecionado. Leads CRM = tabela leads (formulário do site).
+                    calculados sobre o período selecionado. Leads CRM = tabela leads (formulário do site) · casados com a
+                    campanha por campaign_id ou nome (utm_campaign). Conversas/respostas WhatsApp = eventos atribuídos pela Meta.
                 </p>
             </main>
         </div>

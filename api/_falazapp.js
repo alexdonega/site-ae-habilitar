@@ -84,6 +84,7 @@ export function normalizeWhatsapp(whatsapp) {
 // Metadados de rastreamento enviados junto com o lead e gravados no contato
 // como "informações extras" (extraInfo). Campos vazios/nulos são ignorados.
 const EXTRA_INFO_FIELDS = [
+    'supabase_id', // id do lead na tabela "leads" — correlação direta com o CRM
     'produto',
     'created_at',
     'updated_at',
@@ -104,7 +105,14 @@ export function buildExtraInfo(tracking = {}) {
             const value = tracking[field];
             return value !== undefined && value !== null && String(value).trim() !== '';
         })
-        .map((field) => ({ name: field, value: String(tracking[field]) }));
+        .map((field) => ({ name: field, value: truncateExtraInfoValue(tracking[field]) }));
+}
+
+// A API da FalazApp rejeita (HTTP 500 "erro inesperado") valores de extraInfo
+// acima de ~255 caracteres — típico das page_url com fbclid longos. A versão
+// completa continua gravada na tabela "leads" do Supabase.
+export function truncateExtraInfoValue(value) {
+    return String(value).slice(0, 255);
 }
 
 // Mensagem de confirmação enviada ao lead logo após a criação do contato.
@@ -179,6 +187,95 @@ export async function sendFalazappTextMessage({ whatsapp, nome_completo, produto
         token,
         base,
         'Falha de comunicação com a API da FalazApp (mensagem)',
+    );
+}
+
+// Lista TODOS os contatos da empresa (GET /api/contacts/all — "API Obter
+// Contatos", sem payload/paginação). Devolve o array puro; cada contato traz
+// id, number, name, email, campos de endereço e extraInfo.
+export async function getFalazappContacts({ token, apiUrl }) {
+    if (!token) {
+        const err = new Error('FALAZAPP_API_TOKEN não configurada no ambiente');
+        err.statusCode = 500;
+        throw err;
+    }
+    const base = (apiUrl || FALAZAPP_DEFAULT_API_URL).replace(/\/$/, '');
+
+    let response;
+    try {
+        response = await fetch(`${base}/api/contacts/all`, {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+    } catch {
+        const err = new Error('Falha de comunicação com a API da FalazApp (lista de contatos)');
+        err.statusCode = 502;
+        throw err;
+    }
+    if (!response.ok) {
+        const err = new Error(`FalazApp respondeu ${response.status} ao listar contatos`);
+        err.statusCode = response.status;
+        throw err;
+    }
+    const data = await response.json();
+    return Array.isArray(data) ? data : (data.contacts || []);
+}
+
+// Campos aceitos pelo POST /api/contact/update ("API Atualizar Contato").
+// O id é a chave de atualização; os demais são passados como enviados.
+// ATENÇÃO: a API trata o extraInfo como lista completa (substitui a atual),
+// então quem chama deve enviar o array já mesclado com o que existia.
+export const UPDATEABLE_CONTACT_FIELDS = [
+    'name',
+    'number',
+    'email',
+    'cpfcnpj',
+    'genero',
+    'estado',
+    'cidade',
+    'referencia',
+    'aniversario',
+    'endereco',
+    'carteiraId',
+    'extraInfo',
+];
+
+export async function updateFalazappContact({ contactId, patch = {}, token, apiUrl }) {
+    if (!contactId) {
+        const err = new Error('contactId (id do contato na FalazApp) é obrigatório');
+        err.statusCode = 400;
+        throw err;
+    }
+    if (!token) {
+        const err = new Error('FALAZAPP_API_TOKEN não configurada no ambiente');
+        err.statusCode = 500;
+        throw err;
+    }
+
+    const body = { id: String(contactId) };
+    for (const field of UPDATEABLE_CONTACT_FIELDS) {
+        if (patch[field] === undefined) continue;
+        if (field === 'extraInfo' && Array.isArray(patch[field])) {
+            // Trunca cada valor: valores >255 chars derrubam a API (HTTP 500).
+            body[field] = patch[field].map((item) => ({
+                name: item.name,
+                value: truncateExtraInfoValue(item.value ?? ''),
+            }));
+        } else {
+            body[field] = patch[field];
+        }
+    }
+
+    const base = (apiUrl || FALAZAPP_DEFAULT_API_URL).replace(/\/$/, '');
+    return falazappPost(
+        '/api/contact/update',
+        body,
+        token,
+        base,
+        'Falha de comunicação com a API da FalazApp (atualizar contato)',
     );
 }
 

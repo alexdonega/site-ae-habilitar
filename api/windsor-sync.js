@@ -39,10 +39,30 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Não autorizado' });
     }
 
-    const days = Math.min(Math.max(Number(req.query && req.query.days) || 3, 1), 7);
+    // Janela: days (cron, 1–7) OU from/to explícitos (backfill manual via
+    // produção, sem precisar do service_role local). Limite de 92 dias por
+    // chamada para caber no maxDuration de 30s da função.
+    let window;
+    const qFrom = String((req.query && req.query.from) || '');
+    const qTo = String((req.query && req.query.to) || '');
+    if (qFrom || qTo) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(qFrom) || !/^\d{4}-\d{2}-\d{2}$/.test(qTo)) {
+            return res.status(400).json({ error: 'from/to devem ser YYYY-MM-DD' });
+        }
+        if (qFrom > qTo) {
+            return res.status(400).json({ error: 'from deve ser <= to' });
+        }
+        const spanDays = (Date.parse(qTo) - Date.parse(qFrom)) / 86400000;
+        if (spanDays > 92) {
+            return res.status(400).json({ error: 'Janela máxima de 92 dias por chamada' });
+        }
+        window = { from: qFrom, to: qTo };
+    } else {
+        window = { days: Math.min(Math.max(Number(req.query && req.query.days) || 3, 1), 7) };
+    }
 
     try {
-        const result = await syncMarketingPerformance({ days, timeoutMs: 20000 });
+        const result = await syncMarketingPerformance({ ...window, timeoutMs: 25000 });
         return res.status(200).json({ ok: true, ...result });
     } catch (err) {
         const status = err.invalidKey ? 401 : err.config ? 500 : 502;

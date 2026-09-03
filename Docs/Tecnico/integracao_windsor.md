@@ -8,10 +8,12 @@
 O [Windsor.ai](https://windsor.ai) é um ELT de dados de marketing (350+ fontes).
 Nesta integração ele puxa os dados da conta de anúncios (Meta/Facebook Ads) e
 alimenta a tabela fato **`marketing_performance`** com granularidade
-**anúncio × dia** e o schema completo de 33 colunas (14 dimensões + 19 métricas
+**anúncio × dia** e o schema completo de 40 colunas (14 dimensões + 26 métricas
 — nomes exatos do [catálogo de campos do conector
-Facebook](https://windsor.ai/data-field/facebook/)). Campanha, conjunto e anúncio
-são agregações dessa fato (via views ou no próprio `/meta-ads`).
+Facebook](https://windsor.ai/data-field/facebook/); as 7 últimas métricas são o
+funil WhatsApp/engajamento: respostas no WhatsApp, custo por conversa/resposta,
+engajamento, cliques em link). Campanha, conjunto e anúncio são agregações
+dessa fato (via views ou no próprio `/meta-ads`).
 
 **Escritor dos dados: nosso sync via Connectors API** (`api/_windsor.js`):
 busca em `https://connectors.windsor.ai/facebook?api_key=...&fields=<33>&date_from&date_to`
@@ -22,8 +24,8 @@ rodar de novo não duplica. A *destination task* "Supabase" do painel do Windsor
 
 Dois consumidores no site:
 
-- **`/dash`** — painel resumido de mídia (investimento, cliques, CPL médio) junto
-  dos leads, via `GET /api/marketing`;
+- **`/lead`** (antiga `/dash`) — painel resumido de mídia (investimento, cliques,
+  CPL médio) junto dos leads, via `GET /api/marketing`;
 - **`/meta-ads`** — dashboard completa de mídia (KPIs, CTR/CPC/CPM, séries
   diárias, tabelas por campanha/conjunto/anúncio), também via `GET /api/marketing`
   + `GET /api/leads` (para CPL cruzado com o CRM).
@@ -40,7 +42,7 @@ Meta Ads → Windsor.ai (conectado) ──Connectors API (api_key)──▶ api/
         │ /api/marketing (service_role)     │ views: v_meta_ads_diario,
         │ /api/leads    (service_role)      │ v_meta_ads_campanha, v_meta_ads_conjunto,
         ▼                                   │ v_meta_ads_anuncio, v_cpl_campanha
-  /dash (painel resumido) ·                 ▼
+  /lead (painel resumido, antigo /dash) ·  ▼
   /meta-ads (dashboard completa)      SQL Editor / análises
 ```
 
@@ -100,9 +102,27 @@ node scripts/windsor-sync.mjs --days=30 [--dry-run]   # últimos 30 dias
 node scripts/windsor-sync.mjs --from=2026-06-01 --to=2026-08-31
 ```
 
+**Backfill via produção (sem service_role local):** o endpoint aceita
+`?from=YYYY-MM-DD&to=YYYY-MM-DD` (máx. 92 dias por chamada) — repetir por
+janela até cobrir o período:
+
+```bash
+curl "https://autoescolahabilitar.vercel.app/api/windsor-sync?secret=$WINDSOR_SYNC_SECRET&from=2026-06-01&to=2026-08-31"
+```
+
+Histórico disponível na conta: desde **fev/2024** (verificado em 2026-09-02;
+backfill completo executado — ~2.480 linhas). Colunas novas cujo ALTER TABLE
+ainda não rodou são puladas automaticamente e reportadas em
+`written.skippedColumns`; depois de rodar o SQL, re-sincronizar as janelas
+para preenchê-las.
+
 **Sync contínuo (produção):** `vercel.json` agenda o cron
-`10 7 * * *` → `GET /api/windsor-sync` (janela default 3 dias — a Meta ainda
-revisa os últimos ~3 dias). Na Vercel, definir as variáveis:
+`10 7 * * *` → `GET /api/windsor-sync` (janela default 3 dias, **incluindo o
+dia corrente** — números de hoje são parciais e a Meta revisa; o replace por
+período é idempotente, cada sync regrava e converge). Para ver "hoje"
+atualizado durante o dia, o botão de refresh do `/meta-ads` repuxa o Windsor
+via `?sync=1` no `/api/marketing` (throttle de 10 min por instância). Na
+Vercel, definir as variáveis:
 
 | Variável | Onde | Função |
 |---|---|---|
@@ -126,7 +146,7 @@ curl "https://autoescolahabilitar.vercel.app/api/windsor-sync?secret=$WINDSOR_SY
 | `vercel.json` | — | Cron `10 7 * * *` → `/api/windsor-sync`. |
 | `api/marketing.js` | `GET /api/marketing` | Linhas de `marketing_performance` via `service_role` (order `date desc`, limit 5000). `405` método errado, `500` credenciais ausentes, `502` Supabase recusou (ex.: tabela inexistente). |
 | `vite.config.js` | — | Middlewares `devApiMarketing` e `devApiWindsorSync` replicam os endpoints no `npm run dev` (sync local sem segredo — só escuta em localhost). |
-| `src/Dash.jsx` | `/dash` | Painel de mídia resumido (investimento/cliques/CPL médio + tabela por campanha). |
+| `src/Dash.jsx` | `/lead` (antiga `/dash`, que redireciona) | Painel de mídia resumido (investimento/cliques/CPL médio + tabela por campanha). |
 | `src/MetaAds.jsx` | `/meta-ads` | Dashboard completa: 8 KPIs (Investimento, Leads CRM, CPL, Cliques, CTR, CPC, CPM, Impressões) + chips (alcance, frequência, views, leads Meta, cadastros, conversas WhatsApp) + gráficos investimento/leads por dia + tabelas por Campanha/Conjunto/Anúncio. Presets de período (Tudo/Hoje/7/14/30) + datas custom. |
 | `supabase/sql/2026-09-01-windsor-marketing-performance.sql` | — | DDL da tabela completa + RLS + índices + views (executado via SQL Editor). |
 
@@ -159,8 +179,10 @@ Variáveis de ambiente: `WINDSOR_API_KEY` (novo) + as já existentes
 - **Janela de refresh ~3 dias**: dados mais antigos são considerados estáveis
   pelo Windsor; correções além da janela exigem reprocesso no painel deles.
 - **Não renomear/remover colunas** da tabela manualmente — quebra o sync.
-- **`api/marketing.js` limita a 5000 linhas** (anúncio × dia) — suficiente para
-  mais de um ano de histórico desta operação.
+- **`api/marketing.js` pagina 1000 linhas por request** (limite do PostgREST
+  `db-max-rows`) até esgotar a tabela, com capa de 20k linhas — suficiente
+  para muitos anos de histórico anúncio × dia desta operação (~2,5k linhas
+  cobrindo fev/2024→hoje).
 - **Granularidade mínima**: evitar selecionar campos de *breakdown*
   (`publisher_platform`, `device_platform`, `impression_device`) na task, pois
   multiplicam as linhas por plataforma/dispositivo e quebram a aditividade do
@@ -175,6 +197,12 @@ data-preview é longa e o input corta visualmente — copie selecionando o texto
 inteiro. Se ainda assim falhar, a chave pode ter sido regerada: conferir em
 onboard.windsor.ai → Account/API keys. O CLI devolve essa dica automaticamente
 (em `.invalidKey`).
+
+**RESOLVIDO em 2026-09-02:** a chave do `.env` estava truncada (faltavam os 3
+últimos caracteres) e a variável `WINDSOR_API_KEY` nem existia na Vercel (o
+cron falhava com 500). Corrigido: chave completa no `.env` e criada na Vercel
+(production), `CRON_SECRET` rotacionado (novo valor no `.env` local como
+`WINDSOR_SYNC_SECRET`), primeiro sync e backfill completo executados.
 
 ### Destination task "Supabase" do Windsor: sucesso no painel, 0 linhas no banco
 

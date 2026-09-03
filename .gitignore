@@ -10,3 +10,5 @@ build/
 .vercel
 .env*
 !.env.example
+.context/
+.zcode/

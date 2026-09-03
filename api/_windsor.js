@@ -18,8 +18,13 @@
 //  bundle do navegador e nunca em log/output.
 // =============================================================================
 
-// 33 colunas — nomes idênticos ao catálogo de campos do conector Facebook Ads
+// 46 colunas — nomes idênticos ao catálogo de campos do conector Facebook Ads
 // (https://windsor.ai/data-field/facebook/) e ao DDL em supabase/sql/.
+// As 7 últimas (funil WhatsApp/engajamento) foram validadas na API em
+// 2026-09-02 — retornam dados para a conta Auto Escola Habilitar. As 6 de
+// copy (headline/body/title/description/image_url/thumbnail_url) foram
+// validadas em 2026-09-03 — body = texto principal do anúncio, title =
+// headline exibida; são campos de nível criativo (não multiplicam linhas).
 export const WINDSOR_FIELDS = [
     'date',
     'datasource',
@@ -35,6 +40,12 @@ export const WINDSOR_FIELDS = [
     'ad_id',
     'creative_id',
     'objective',
+    'headline',
+    'body',
+    'title',
+    'description',
+    'image_url',
+    'thumbnail_url',
     'clicks',
     'unique_clicks',
     'impressions',
@@ -54,9 +65,27 @@ export const WINDSOR_FIELDS = [
     'actions_onsite_conversion_messaging_conversation_started_7d',
     'cost_per_action_type_lead',
     'cost_per_action_type_complete_registration',
+    'actions_onsite_conversion_messaging_first_reply',
+    'cost_per_action_type_onsite_conversion_total_messaging_connection',
+    'cost_per_action_type_onsite_conversion_messaging_first_reply',
+    'cost_per_action_type_onsite_conversion_messaging_conversation_started_7d',
+    'actions_post_engagement',
+    'inline_link_clicks',
+    'cost_per_inline_link_click',
 ];
 
-const DIMENSION_FIELDS = new Set(WINDSOR_FIELDS.slice(0, 14));
+const DIMENSION_FIELDS = new Set(WINDSOR_FIELDS.slice(0, 20));
+
+// Campos cujo nome no Windsor excede os 63 bytes máximos de identificador do
+// Postgres — se gravados com o nome cheio, o ALTER TABLE trunca silenciosamente
+// e o INSERT passa a falhar com PGRST204. Gravam em colunas encurtadas:
+const COLUMN_ALIASES = {
+    cost_per_action_type_onsite_conversion_total_messaging_connection:
+        'cost_per_messaging_connection',
+    cost_per_action_type_onsite_conversion_messaging_conversation_started_7d:
+        'cost_per_messaging_started_7d',
+};
+
 const CONNECTOR_URL = 'https://connectors.windsor.ai/facebook';
 const SUPABASE_TABLE = 'marketing_performance';
 
@@ -94,8 +123,11 @@ export function resolveWindow(opts = {}) {
         return { from: opts.from, to: opts.to };
     }
     const days = Math.max(1, Number(opts.days) || 3);
-    // Até ontem: o dia corrente no Meta ainda muda ao longo do dia.
-    return { from: isoDay(-days), to: isoDay(-1) };
+    // Inclui o dia corrente: os números de hoje são parciais (a Meta revisa
+    // durante o dia), mas o replace por período é idempotente — cada sync
+    // regrava a janela e converge. O refresh do /meta-ads (?sync=1 em
+    // /api/marketing) repuxa o dia corrente sob demanda.
+    return { from: isoDay(-days), to: isoDay(0) };
 }
 
 function toNumber(v) {
@@ -109,16 +141,17 @@ export function normalizeRow(raw) {
     const row = {};
     for (const field of WINDSOR_FIELDS) {
         const value = raw[field];
+        const column = COLUMN_ALIASES[field] || field;
         if (field === 'date') {
             const day = value ? String(value).slice(0, 10) : null;
             row.date = /^\d{4}-\d{2}-\d{2}$/.test(day || '') ? day : null;
         } else if (DIMENSION_FIELDS.has(field)) {
-            row[field] =
+            row[column] =
                 value === null || value === undefined
                     ? null
                     : String(value);
         } else {
-            row[field] = toNumber(value);
+            row[column] = toNumber(value);
         }
     }
     return row;
@@ -255,7 +288,8 @@ export async function replaceRangeInSupabase({
     batchSize = 500,
 }) {
     requireSupabase(config);
-    const base = `${config.supabaseUrl.replace(/\/$/, '')}/rest/v1/${SUPABASE_TABLE}`;
+    const root = `${config.supabaseUrl.replace(/\/$/, '')}/rest/v1`;
+    const base = `${root}/${SUPABASE_TABLE}`;
 
     const valid = rows.filter((r) => r.date && r.date >= from && r.date <= to);
 
@@ -266,6 +300,62 @@ export async function replaceRangeInSupabase({
 
     if (dryRun) {
         return { deleted: 0, inserted: 0, wouldDelete: true, rows: deduped.length };
+    }
+
+    // Determina quais colunas do payload existem de fato na tabela (ex.:
+    // coluna nova do funil cujo ALTER TABLE ainda não rodou — sem isso o
+    // INSERT inteiro falharia com PGRST204). Não usa a spec OpenAPI do
+    // PostgREST porque ela pode vir cacheada/stale após DDL; o probe via
+    // select consulta o schema cache real: HTTP 400 nomeia a coluna
+    // inexistente → remove e repete. Colunas pendentes voltam em
+    // skippedColumns.
+    const wanted = [...new Set(deduped.flatMap((r) => Object.keys(r)))];
+    let probe = [...wanted];
+    for (let attempt = 0; attempt < 8 && probe.length; attempt++) {
+        const probeRes = await fetch(
+            `${base}?select=${probe.map(encodeURIComponent).join(',')}&limit=0`,
+            { headers: supabaseHeaders(config.serviceRoleKey) }
+        );
+        if (probeRes.ok) break;
+        const body = await probeRes.text();
+        // substring simples: o nome pode vir entre aspas simples (PGRST204)
+        // ou qualificado por tabela (42703 "column tbl.x does not exist")
+        const missing = probe.filter((c) => body.includes(c));
+        if (probeRes.status !== 400 || !missing.length) {
+            probe = [...wanted]; // resposta não interpretável — tenta com tudo
+            break;
+        }
+        probe = probe.filter((c) => !missing.includes(c));
+    }
+    const skippedColumns = wanted
+        .filter((c) => !probe.includes(c))
+        .sort();
+    let payload = deduped;
+    if (skippedColumns.length) {
+        const keep = new Set(probe);
+        payload = deduped.map((r) =>
+            Object.fromEntries(Object.entries(r).filter(([k]) => keep.has(k)))
+        );
+    }
+
+    // Canary de INSERT: valida ANTES de apagar o período que o payload será
+    // aceito (ex.: coluna inexistente/truncada). Sem isso, um INSERT ruim
+    // depois do DELETE deixaria a janela vazia. A linha-teste cai dentro de
+    // [from,to] e é removida pelo DELETE logo abaixo.
+    if (payload.length) {
+        const canaryRes = await fetch(base, {
+            method: 'POST',
+            headers: supabaseHeaders(config.serviceRoleKey, {
+                Prefer: 'return=minimal',
+            }),
+            body: JSON.stringify([payload[0]]),
+        });
+        if (!canaryRes.ok) {
+            const body = await canaryRes.text();
+            throw new Error(
+                `INSERT recusado antes do replace (HTTP ${canaryRes.status}): ${body.slice(0, 300)}`
+            );
+        }
     }
 
     // DELETE do período (conta via content-range com Prefer: count=exact).
@@ -289,8 +379,8 @@ export async function replaceRangeInSupabase({
     const deleted = Number((contentRange.match(/\/(\d+)/) || [])[1] || 0);
 
     let inserted = 0;
-    for (let i = 0; i < deduped.length; i += batchSize) {
-        const batch = deduped.slice(i, i + batchSize);
+    for (let i = 0; i < payload.length; i += batchSize) {
+        const batch = payload.slice(i, i + batchSize);
         const insRes = await fetch(base, {
             method: 'POST',
             headers: supabaseHeaders(config.serviceRoleKey, {
@@ -307,7 +397,12 @@ export async function replaceRangeInSupabase({
         inserted += batch.length;
     }
 
-    return { deleted, inserted, rows: deduped.length };
+    return {
+        deleted,
+        inserted,
+        rows: deduped.length,
+        ...(skippedColumns.length ? { skippedColumns } : {}),
+    };
 }
 
 function summarizeRows(rows) {

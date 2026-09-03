@@ -33,6 +33,22 @@ function AutoescolaHabilitarLanding() {
     const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     const getFirstName = (fullName) => fullName.trim().split(' ')[0];
 
+    // Normaliza o nome para o padrão pt-BR antes de salvar/enviar:
+    // cada palavra com inicial maiúscula, exceto conectores (da, de, dos...),
+    // que só ficam maiúsculos quando abrem o nome.
+    // "SILVANA GUEIZ DA SILVA" → "Silvana Gueiz da Silva"
+    const CONECTORES = new Set(['da', 'das', 'de', 'di', 'do', 'dos', 'du', 'e', 'na', 'no', 'nas', 'nos']);
+    const formatNomeCompleto = (name) => name
+        .trim()
+        .replace(/\s+/g, ' ')
+        .split(' ')
+        .map((word, i) => {
+            const lower = word.toLowerCase();
+            if (i > 0 && CONECTORES.has(lower)) return lower;
+            return lower.charAt(0).toUpperCase() + lower.slice(1);
+        })
+        .join(' ');
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError('');
@@ -64,7 +80,7 @@ function AutoescolaHabilitarLanding() {
         setIsSubmitting(true);
 
         const payload = {
-            nome_completo: formData.full_name,
+            nome_completo: formatNomeCompleto(formData.full_name),
             whatsapp: formData.phone,
             email: formData.email,
             categoria_desejada: formData.categoria
@@ -87,13 +103,14 @@ function AutoescolaHabilitarLanding() {
         // rótulo exibido no formulário.
         // IMPORTANTE: disparar antes do navigate(), porque os metadados da
         // página (URL com UTMs) são lidos no momento da chamada.
-        captureLead({
+        const supabaseInsert = captureLead({
             nome_completo: payload.nome_completo,
             email: payload.email,
             whatsapp: payload.whatsapp,
             produto: payload.categoria_desejada,
             formulario: 'pre_matricula_home',
-        }).catch(err => console.error('Erro Supabase:', err));
+        });
+        supabaseInsert.catch(err => console.error('Erro Supabase:', err));
 
         // Redirecionar IMEDIATAMENTE para página de obrigado, levando nome e
         // categoria na URL para a mensagem pré-preenchida do WhatsApp
@@ -128,22 +145,27 @@ function AutoescolaHabilitarLanding() {
         // /api/falazapp-contact (o Bearer token da API vive só no servidor).
         // Usa o leadMeta capturado antes do navigate() para as UTMs não se
         // perderem; no contato viram extraInfo (page_url, UTMs, referrer...).
-        fetch('/api/falazapp-contact', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                nome_completo: payload.nome_completo,
-                whatsapp: payload.whatsapp,
-                email: payload.email,
-                produto: payload.categoria_desejada,
-                // Mesmo instante do insert no Supabase (created_at = updated_at
-                // na criação, como a tabela "leads" faz automaticamente).
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                formulario: 'pre_matricula_home',
-                ...leadMeta
-            })
-        }).catch(err => console.error('Erro FalazApp:', err));
+        // Dispara DEPOIS do insert no Supabase commitar (catch(()=>{}) para
+        // seguir em frente mesmo se o insert falhar), porque o endpoint usa
+        // o id do lead recém-criado no extraInfo e no update de volta.
+        supabaseInsert.catch(() => {}).then(() => {
+            fetch('/api/falazapp-contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome_completo: payload.nome_completo,
+                    whatsapp: payload.whatsapp,
+                    email: payload.email,
+                    produto: payload.categoria_desejada,
+                    // Mesmo instante do insert no Supabase (created_at = updated_at
+                    // na criação, como a tabela "leads" faz automaticamente).
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    formulario: 'pre_matricula_home',
+                    ...leadMeta
+                })
+            }).catch(err => console.error('Erro FalazApp:', err));
+        });
     };
 
     useEffect(() => {
