@@ -15,6 +15,11 @@
 //  renderizador converte para o visual real; o botão "Copiar" devolve o
 //  texto exatamente como está no banco (cola perfeito no WhatsApp).
 //
+//  Orçamentos podem ter também uma ABERTURA (coluna "abertura"): a mensagem
+//  enviada antes do orçamento no mesmo atendimento (ex.: a MEGA OFERTA —
+//  "as condições completas eu já te mando agora 👇"). O mockup mostra as
+//  duas bolhas na ordem de envio e cada uma tem seu botão de copiar.
+//
 //  Helpers e o mockup são exportados para o editor (MensagensEditar.jsx).
 // =============================================================================
 
@@ -203,7 +208,41 @@ export const varsDe = (conteudo) =>
 
 const timeFor = (id) => `${9 + (id % 8)}:${String((id * 13) % 60).padStart(2, '0')}`
 
-export function WhatsAppChat({ text, mode = 'recebida' }) {
+// Uma bolha da conversa — a abertura e o orçamento são duas bolhas seguidas.
+function Bolha({ text, sent }) {
+    return (
+        <div className={`flex ${sent ? 'justify-end' : 'justify-start'}`}>
+            <div
+                className={`relative max-w-[86%] rounded-lg px-2 py-[6px] shadow-sm ${
+                    sent ? 'rounded-tr-none bg-[#D9FDD3]' : 'rounded-tl-none bg-white'
+                }`}
+            >
+                {/* Rabinho da bolha */}
+                <span
+                    aria-hidden
+                    className={`absolute top-0 h-0 w-0 border-t-[11px] ${
+                        sent
+                            ? '-right-[9px] border-r-[9px] border-r-transparent border-t-[#D9FDD3]'
+                            : '-left-[9px] border-l-[9px] border-l-transparent border-t-white'
+                    }`}
+                />
+                <div className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.35] text-[#111b21]">
+                    <WhatsAppText text={text || ''} />
+                    <span className="float-right ml-2 mt-[7px] inline-flex items-center text-[10px] leading-none text-[#667781]">
+                        {timeFor((text || '').length)}
+                        {sent && (
+                            <CheckCheck size={13} strokeWidth={2.4} className="ml-[2px] text-[#53bdeb]" />
+                        )}
+                    </span>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+// "abertura" (opcional) é a mensagem enviada antes da principal — renderizada
+// como bolha própria, na ordem real do envio.
+export function WhatsAppChat({ text, abertura = '', mode = 'recebida' }) {
     const bodyRef = useRef(null)
     const sent = mode === 'enviada'
 
@@ -211,7 +250,7 @@ export function WhatsAppChat({ text, mode = 'recebida' }) {
     useEffect(() => {
         const el = bodyRef.current
         if (el) el.scrollTop = el.scrollHeight
-    }, [text, mode])
+    }, [text, abertura, mode])
 
     return (
         <div className="relative flex h-[600px] flex-col overflow-hidden rounded-[2.1rem] bg-[#EFE7DD]">
@@ -250,31 +289,9 @@ export function WhatsAppChat({ text, mode = 'recebida' }) {
                     </span>
                 </div>
 
-                <div className={`flex ${sent ? 'justify-end' : 'justify-start'}`}>
-                    <div
-                        className={`relative max-w-[86%] rounded-lg px-2 py-[6px] shadow-sm ${
-                            sent ? 'rounded-tr-none bg-[#D9FDD3]' : 'rounded-tl-none bg-white'
-                        }`}
-                    >
-                        {/* Rabinho da bolha */}
-                        <span
-                            aria-hidden
-                            className={`absolute top-0 h-0 w-0 border-t-[11px] ${
-                                sent
-                                    ? '-right-[9px] border-r-[9px] border-r-transparent border-t-[#D9FDD3]'
-                                    : '-left-[9px] border-l-[9px] border-l-transparent border-t-white'
-                            }`}
-                        />
-                        <div className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.35] text-[#111b21]">
-                            <WhatsAppText text={text || ''} />
-                            <span className="float-right ml-2 mt-[7px] inline-flex items-center text-[10px] leading-none text-[#667781]">
-                                {timeFor((text || '').length)}
-                                {sent && (
-                                    <CheckCheck size={13} strokeWidth={2.4} className="ml-[2px] text-[#53bdeb]" />
-                                )}
-                            </span>
-                        </div>
-                    </div>
+                <div className="flex flex-col gap-[3px]">
+                    {abertura && <Bolha text={abertura} sent={sent} />}
+                    <Bolha text={text} sent={sent} />
                 </div>
             </div>
 
@@ -348,8 +365,9 @@ export function ModalWhatsApp({ msg, onFechar }) {
     }, [aberto, onFechar])
 
     if (!msg) return null
-    const vars = varsDe(msg.conteudo)
+    const vars = varsDe([msg.conteudo, msg.abertura].filter(Boolean).join('\n'))
     const copiado = copiadoKey === 'modal'
+    const copiadoAbertura = copiadoKey === 'modal-abertura'
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
@@ -360,6 +378,7 @@ export function ModalWhatsApp({ msg, onFechar }) {
                         <p className="truncate text-sm font-bold text-white">{msg.titulo}</p>
                         <p className="text-xs text-gray-400">
                             {msg.categoria}
+                            {msg.abertura && ' · envio em 2 mensagens'}
                             {vars.length > 0 && ` · variáveis ${vars.map((v) => `{${v}}`).join(', ')}`}
                         </p>
                     </div>
@@ -374,11 +393,27 @@ export function ModalWhatsApp({ msg, onFechar }) {
                 </div>
 
                 <PhoneMockup>
-                    <WhatsAppChat text={fillExampleVars(msg.conteudo)} mode={mode} />
+                    <WhatsAppChat
+                        text={fillExampleVars(msg.conteudo)}
+                        abertura={fillExampleVars(msg.abertura)}
+                        mode={mode}
+                    />
                 </PhoneMockup>
 
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
                     <AlternadorModo mode={mode} onChange={setMode} />
+                    {msg.abertura && (
+                        <button
+                            onClick={() => copiarTexto('modal-abertura', msg.abertura)}
+                            title="Copia a abertura — no WhatsApp cada mensagem vai num envio próprio"
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                                copiadoAbertura ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-200 hover:bg-gray-600'
+                            }`}
+                        >
+                            {copiadoAbertura ? <Check size={13} /> : <Copy size={13} />}
+                            {copiadoAbertura ? 'Copiado!' : 'Copiar abertura'}
+                        </button>
+                    )}
                     <button
                         onClick={() => copiarTexto('modal', msg.conteudo)}
                         className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition ${
@@ -386,7 +421,7 @@ export function ModalWhatsApp({ msg, onFechar }) {
                         }`}
                     >
                         {copiado ? <Check size={13} /> : <Copy size={13} />}
-                        {copiado ? 'Copiado!' : 'Copiar mensagem'}
+                        {copiado ? 'Copiado!' : msg.abertura ? 'Copiar orçamento' : 'Copiar mensagem'}
                     </button>
                 </div>
             </div>
@@ -630,7 +665,7 @@ export default function Mensagens() {
                                 ) : (
                                     filtrados.map((msg) => {
                                         const aberta = abertas.has(msg.id)
-                                        const vars = varsDe(msg.conteudo)
+                                        const vars = varsDe([msg.conteudo, msg.abertura].filter(Boolean).join('\n'))
                                         return (
                                             <tr
                                                 key={msg.id}
@@ -640,11 +675,21 @@ export default function Mensagens() {
                                             >
                                                 <td className={`${tdClass} font-medium leading-snug text-white`}>
                                                     {msg.titulo}
-                                                    {vars.length > 0 && (
-                                                        <span className="mt-0.5 block text-[11px] text-gray-500">
-                                                            variáveis: {vars.map((v) => `{${v}}`).join(', ')}
-                                                        </span>
-                                                    )}
+                                                    <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                                                        {msg.abertura && (
+                                                            <span
+                                                                title="Tem uma abertura que vai antes desta — o envio é em 2 mensagens"
+                                                                className="rounded bg-habilitar-orange/15 px-1.5 py-0.5 text-[10px] font-semibold text-habilitar-orange"
+                                                            >
+                                                                + abertura
+                                                            </span>
+                                                        )}
+                                                        {vars.length > 0 && (
+                                                            <span className="text-[11px] text-gray-500">
+                                                                variáveis: {vars.map((v) => `{${v}}`).join(', ')}
+                                                            </span>
+                                                        )}
+                                                    </span>
                                                 </td>
                                                 <td className={`${tdClass} whitespace-nowrap`}>
                                                     <span className="inline-block rounded-full bg-gray-700 px-2.5 py-0.5 text-[11px] font-medium text-gray-200">

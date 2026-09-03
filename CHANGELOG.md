@@ -5,6 +5,12 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2026-09-03
+### Adicionado
+- **Abertura nos orçamentos do `/mensagens`** — o atendimento de orçamento sai em 2 mensagens: primeiro a abertura (a MEGA OFERTA "Abertura do carrinho" — "as condições completas eu já te mando agora 👇"), logo depois o orçamento em si. No editor (`/mensagens/:id`) das mensagens de categoria Orçamentos, botão **"Adicionar mensagem"** abre o campo da abertura **pré-preenchido com a "Abertura do carrinho" da biblioteca** (quando existe), com "Copiar abertura" próprio e botão de remover; o mockup do celular passa a mostrar as **duas bolhas na ordem de envio**, atualizando ao vivo como sempre.
+- Modal de preview do `/mensagens` (olho na tabela): mostra as duas bolhas quando há abertura e ganha **"Copiar abertura"** além do "Copiar orçamento" (cada mensagem copiada à parte — no WhatsApp cada uma vai num envio próprio). A tabela marca essas mensagens com o chip **"+ abertura"** (tooltip explica o envio em 2 mensagens) e passa a listar as variáveis das duas mensagens.
+- Coluna `abertura` na tabela `mensagens` (texto puro com formatação WhatsApp, `NULL` = envio de 1 mensagem só) — DDL idempotente em `supabase/sql/2026-09-03-mensagens-abertura.sql` (a rodar no SQL Editor). `/api/mensagens` aceita `abertura` no POST/PATCH (vazia/null remove); com a coluna pendente, salvar sem abertura segue normal e salvar com abertura devolve erro claro pedindo o SQL.
+
 ## [1.14.0] - 2026-09-03
 ### Adicionado
 - Filtros no `/mensagens`: chips de categoria (com contagem por categoria e "Todas") + busca textual por título/mensagem/categoria, com contador "N de M" quando há filtro ativo e estado vazio próprio ("nenhuma mensagem com esses filtros").

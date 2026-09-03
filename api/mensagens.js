@@ -4,11 +4,13 @@
 //  Tabela "mensagens" (criada em supabase/sql/2026-09-03-mensagens.sql):
 //  categoria, titulo, conteudo (mensagem em texto PURO com formatação nativa
 //  do WhatsApp — *negrito*, _itálico_, ~riscado~, ```monoespaçado```), ordem,
-//  ativo.
+//  ativo, abertura (opcional — texto enviado ANTES do conteudo quando o
+//  atendimento sai em 2 mensagens, ex.: a MEGA OFERTA antes do orçamento;
+//  exige supabase/sql/2026-09-03-mensagens-abertura.sql).
 //
 //    GET    → todas as linhas ordenadas por ordem, id (inclusive inativas —
 //             /mensagens é página de gestão; /dashboard filtra ativo no client)
-//    POST   {categoria, titulo, conteudo, ordem?, ativo?} → cria (201)
+//    POST   {categoria, titulo, conteudo, abertura?, ordem?, ativo?} → cria (201)
 //    PATCH  ?id= {...campos} → atualiza
 //    DELETE ?id= → apaga a linha
 //
@@ -31,7 +33,39 @@ function sanitize(body) {
     if (body.conteudo !== undefined) row.conteudo = String(body.conteudo ?? '');
     if (body.ordem !== undefined) row.ordem = Math.trunc(Number(body.ordem)) || 0;
     if (body.ativo !== undefined) row.ativo = Boolean(body.ativo);
+    // abertura: vazia/null remove (o envio volta a ser de 1 mensagem).
+    if (body.abertura !== undefined) {
+        const v = body.abertura;
+        row.abertura = v === null || String(v ?? '').trim() === '' ? null : String(v);
+    }
     return row;
+}
+
+// PGRST204 citando "abertura" = a coluna ainda não existe no banco (DDL de
+// supabase/sql/2026-09-03-mensagens-abertura.sql pendente no SQL Editor).
+const aberturaPendente = (err) =>
+    /abertura/i.test(String(err?.message || '')) &&
+    (err?.code === 'PGRST204' || /schema cache|column/i.test(String(err?.message || '')));
+
+// Insert/update tolerante à coluna pendente: abertura vazia → regrava sem o
+// campo (nada muda para quem nunca usou); abertura preenchida → erro claro
+// pedindo o SQL, em vez de salvar em silêncio sem ela.
+async function gravar(executar, row) {
+    let { data, error } = await executar(row);
+    if (error && 'abertura' in row && aberturaPendente(error)) {
+        if (row.abertura != null) {
+            const err = new Error(
+                'Coluna "abertura" pendente — rode supabase/sql/2026-09-03-mensagens-abertura.sql ' +
+                'no SQL Editor do Supabase para poder salvar a abertura.',
+            );
+            err.status = 409;
+            throw err;
+        }
+        const { abertura, ...semAbertura } = row;
+        ({ data, error } = await executar(semAbertura));
+    }
+    if (error) throw error;
+    return data;
 }
 
 export default async function handler(req, res) {
@@ -81,12 +115,10 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: '"conteudo" não pode ficar vazio' });
             }
             if (!row.categoria) row.categoria = 'Comunicação';
-            const { data, error } = await supabase
-                .from('mensagens')
-                .insert(row)
-                .select()
-                .single();
-            if (error) throw error;
+            const data = await gravar(
+                (r) => supabase.from('mensagens').insert(r).select().single(),
+                row,
+            );
             return res.status(201).json({ row: data });
         }
 
@@ -105,13 +137,10 @@ export default async function handler(req, res) {
             if (Object.keys(row).length === 0) {
                 return res.status(400).json({ error: 'Nenhum campo para atualizar' });
             }
-            const { data, error } = await supabase
-                .from('mensagens')
-                .update(row)
-                .eq('id', id)
-                .select()
-                .single();
-            if (error) throw error;
+            const data = await gravar(
+                (r) => supabase.from('mensagens').update(r).eq('id', id).select().single(),
+                row,
+            );
             return res.status(200).json({ row: data });
         }
 
@@ -123,7 +152,7 @@ export default async function handler(req, res) {
         if (error) throw error;
         return res.status(200).json({ ok: true });
     } catch (err) {
-        return res.status(502).json({
+        return res.status(err.status || 502).json({
             error: 'Falha na tabela "mensagens"',
             detail: err.message,
         });
