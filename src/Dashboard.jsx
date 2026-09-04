@@ -13,9 +13,10 @@ import {
     AlertCircle,
     ExternalLink,
     Megaphone,
-    Sparkles,
     Home,
     GraduationCap,
+    Database,
+    Terminal,
 } from 'lucide-react';
 import usePageTitle from './lib/usePageTitle';
 
@@ -72,7 +73,6 @@ const PAGE_GROUPS = [
         itens: [
             { href: '/criativos', titulo: 'Criativos', desc: 'Biblioteca de criativos para o gestor de tráfego', icon: Palette },
             { href: '/imagens', titulo: 'Imagens', desc: 'Flyers de orçamento e fotos de perfil WhatsApp', icon: ImageIcon },
-            { href: '/studio', titulo: 'AE Studio', desc: 'Geração de imagens com IA', icon: Sparkles },
         ],
     },
     {
@@ -80,6 +80,23 @@ const PAGE_GROUPS = [
         itens: [
             { href: '/', titulo: 'Site', desc: 'Página de captura (pré-matrícula)', icon: Home },
             { href: '/mega-oferta', titulo: 'Mega Oferta', desc: 'Página de obrigado + WhatsApp', icon: GraduationCap },
+        ],
+    },
+    {
+        grupo: 'Supabase',
+        itens: [
+            {
+                href: 'https://supabase.com/dashboard/project/dtugwspbkkqxkeoajunf/editor/17534?schema=public',
+                titulo: 'Tabelas',
+                desc: 'Editor de tabelas do projeto no Supabase (abre o painel deles)',
+                icon: Database,
+            },
+            {
+                href: 'https://supabase.com/dashboard/project/dtugwspbkkqxkeoajunf/sql/new',
+                titulo: 'SQL',
+                desc: 'Editor de SQL do projeto no Supabase (abre o painel deles)',
+                icon: Terminal,
+            },
         ],
     },
 ];

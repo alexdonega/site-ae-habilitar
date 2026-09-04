@@ -5,6 +5,13 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.17.0] - 2026-09-04
+### Removido
+- **AE Studio** (`/studio`, `src/Studio.jsx`): página de geração de imagens/vídeos com IA (Z.ai) e as funções serverless `api/_zai.js`, `api/create-image.js`, `api/create-video.js` e `api/task-status.js` saíram do ar, junto com as variáveis `ZAI_API_KEY`/`ZAI_STUDIO_TOKEN` do `.env.example`, a rota no `main.jsx` e o card no índice do `/dashboard`. A compressão de imagem do `/imagens` (canvas → JPEG) segue de pé, agora sem depender do Studio.
+
+### Adicionado
+- Grupo **Supabase** no índice do `/dashboard`: cards **Tabelas** e **SQL** que abrem direto o Editor de Tabelas e o SQL Editor do projeto no painel do Supabase.
+
 ## [1.16.1] - 2026-09-04
 ### Alterado
 - Fileira de KPIs de mídia do `/lead` (Investimento/Cliques/Leads do período/CPL médio) trocada pelos **KPIs de Status do período**: um card por etapa — *Pagou, Passou documento, Vai passar dados, Vai na Autoescola* — com a contagem e a % dos leads embaixo do número, mais a linha "Sem status: X de Y leads no período". Os KPIs de mídia continuam no `/dashboard` e o detalhamento por campanha no `/meta-ads`; o `/lead` não consulta mais `/api/marketing` (código de mídia removido da página).

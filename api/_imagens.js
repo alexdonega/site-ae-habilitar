@@ -4,7 +4,7 @@
 //  Compartilhado por /api/produtos e /api/fotos-perfil (não vira rota — o
 //  prefixo "_" é ignorado pela Vercel). Cada endpoint é um CRUD completo na
 //  tabela informada, em que a imagem chega como dataURL base64 comprimido no
-//  navegador (mesmo formato usado pelo Studio) e é gravada no bucket público
+//  navegador (canvas → JPEG) e é gravada no bucket público
 //  "imagens" do Supabase Storage:
 //    produtos → pasta "produtos/"   (imagem do orçamento)
 //    perfil   → pasta "perfil/"     (foto de perfil do WhatsApp)

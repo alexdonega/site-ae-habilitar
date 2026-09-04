@@ -14,8 +14,8 @@
 //           se vier imagem_data_url, apagando o objeto antigo)
 //    DELETE ?id= → apaga a linha + o objeto do Storage
 //
-//  A imagem chega como dataURL base64 comprimido no navegador (padrão do
-//  Studio) — o upload no Storage usa a service_role, que nunca vai ao client.
+//  A imagem chega como dataURL base64 comprimido no navegador (canvas →
+//  JPEG) — o upload no Storage usa a service_role, que nunca vai ao client.
 //  Escritas abertas (decisão do Alex em 2026-09-03). Implementação
 //  compartilhada no factory api/_imagens.js.
 // =============================================================================

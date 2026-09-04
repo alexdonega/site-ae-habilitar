@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App.jsx'
 import GrupoVip from './GrupoVip.jsx'
-import Studio from './Studio.jsx'
 import Dash from './Dash.jsx'
 import Dashboard from './Dashboard.jsx'
 import MetaAds from './MetaAds.jsx'
@@ -25,7 +24,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 {/* Dashboard de leads (antiga /dash). */}
                 <Route path="/lead" element={<Dash />} />
                 <Route path="/dash" element={<Navigate to="/lead" replace />} />
-                <Route path="/studio" element={<Studio />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/meta-ads" element={<MetaAds />} />
                 <Route path="/mensagens" element={<Mensagens />} />
