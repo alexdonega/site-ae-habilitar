@@ -13,7 +13,9 @@ import {
     AlertCircle,
     Filter,
     DollarSign,
-    MousePointerClick,
+    FileCheck,
+    ClipboardList,
+    Car,
 } from 'lucide-react';
 import usePageTitle from './lib/usePageTitle';
 
@@ -24,10 +26,10 @@ import usePageTitle from './lib/usePageTitle';
 //  leitura direta pelo browser. A página faz polling a cada 10s e também ao
 //  voltar para a aba — novo lead aparece sozinho, com aviso flutuante.
 //
-//  Inclui KPIs de mídia (investimento/cliques/CPL médio), lidos da tabela
-//  "marketing_performance" — destino diário do Windsor.ai — via /api/marketing
-//  (mesmo padrão: service_role só no servidor). O detalhamento por campanha,
-//  conjunto e anúncio fica na página /meta-ads.
+//  A segunda fileira de KPIs acompanha o Status do atendimento no período
+//  (Pagou / Passou documento / Vai passar dados / Vai na Autoescola, com a
+//  contagem de leads sem status). Os KPIs de mídia (investimento, cliques,
+//  CPL médio) ficam no /dashboard e o detalhamento por campanha no /meta-ads.
 //
 //  A coluna Status (Pagou | Passou documento | Vai passar dados | Vai na
 //  Autoescola) é um select inline que grava direto no Supabase via PATCH
@@ -94,18 +96,11 @@ const dayKey = (d) =>
 const startOfUtcDay = (d) =>
     new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
 
-// "2026-09-01" ou "2026-09-01T00:00:00+00:00" → "2026-09-01" (coluna date da
-// tabela marketing_performance, comparável com os inputs de período).
-const dateOnly = (value) => String(value || '').slice(0, 10);
-
-// 1234.5 → "R$ 1.234,50"
-const fmtBRL = (value) =>
-    Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
 // --- Componentes internos ----------------------------------------------------
 
 // Aceita número (formata pt-BR) ou string já formatada (ex.: "R$ 1.234,50").
-const MetricCard = ({ title, value, icon: Icon, accent }) => (
+// "sub" é uma linha pequena opcional abaixo do valor (ex.: "% dos leads").
+const MetricCard = ({ title, value, icon: Icon, accent, sub }) => (
     <div className="bg-gray-800 rounded-xl p-5 border border-gray-700">
         <div className="flex justify-between items-start mb-2">
             <span className="text-gray-400 text-sm">{title}</span>
@@ -114,6 +109,7 @@ const MetricCard = ({ title, value, icon: Icon, accent }) => (
         <div className="text-3xl font-bold text-white">
             {typeof value === 'number' ? value.toLocaleString('pt-BR') : value}
         </div>
+        {sub && <div className="mt-1 text-xs text-gray-500">{sub}</div>}
     </div>
 );
 
@@ -268,12 +264,6 @@ function DashPage() {
     const [statusError, setStatusError] = useState(null);
     const statusErrorTimer = useRef(null);
 
-    // Mídia (Windsor → marketing_performance): dado muda 1×/dia, então não
-    // entra no polling de 10s — carrega no mount, ao voltar para a aba e no
-    // botão de refresh.
-    const [marketing, setMarketing] = useState([]);
-    const [marketingError, setMarketingError] = useState(null);
-
     const prevTotal = useRef(0);
     const flashTimer = useRef(null);
 
@@ -303,26 +293,12 @@ function DashPage() {
         }
     }, []);
 
-    const loadMarketing = useCallback(async () => {
-        try {
-            const resp = await fetch('/api/marketing', { headers: { Accept: 'application/json' } });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const json = await resp.json();
-            setMarketing(Array.isArray(json.rows) ? json.rows : []);
-            setMarketingError(null);
-        } catch {
-            setMarketingError('Sem dados de mídia — a tabela marketing_performance ainda não existe ou o Windsor ainda não sincronizou.');
-        }
-    }, []);
-
     useEffect(() => {
         load();
-        loadMarketing();
         const interval = setInterval(load, 10000);
         const onVisible = () => {
             if (!document.hidden) {
                 load();
-                loadMarketing();
             }
         };
         document.addEventListener('visibilitychange', onVisible);
@@ -332,7 +308,7 @@ function DashPage() {
             if (flashTimer.current) clearTimeout(flashTimer.current);
             if (statusErrorTimer.current) clearTimeout(statusErrorTimer.current);
         };
-    }, [load, loadMarketing]);
+    }, [load]);
 
     const setFilter = (key, value) => {
         setFilters((f) => ({ ...f, [key]: value }));
@@ -463,34 +439,25 @@ function DashPage() {
         return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     }, [filteredByDate]);
 
-    // --- Mídia (Windsor → marketing_performance) no período selecionado ---
+    // --- Status do atendimento no período selecionado (2ª fileira de KPIs) ---
 
-    const marketingByDate = useMemo(() => {
-        if (!dateFrom && !dateTo) return marketing;
-        return marketing.filter((row) => {
-            const d = dateOnly(row.date);
-            if (!d) return false;
-            if (dateFrom && d < dateFrom) return false;
-            if (dateTo && d > dateTo) return false;
-            return true;
+    const statusStats = useMemo(() => {
+        const counts = {
+            'Pagou': 0,
+            'Passou documento': 0,
+            'Vai passar dados': 0,
+            'Vai na Autoescola': 0,
+        };
+        filteredByDate.forEach((lead) => {
+            if (lead.status && lead.status in counts) counts[lead.status] += 1;
         });
-    }, [marketing, dateFrom, dateTo]);
+        const comStatus = Object.values(counts).reduce((a, b) => a + b, 0);
+        return { counts, semStatus: filteredByDate.length - comStatus };
+    }, [filteredByDate]);
 
-    const marketingTotals = useMemo(() => {
-        let spend = 0;
-        let clicks = 0;
-        marketingByDate.forEach((row) => {
-            spend += Number(row.spend) || 0;
-            clicks += Number(row.clicks) || 0;
-        });
-        return { spend, clicks };
-    }, [marketingByDate]);
-
-    // CPL médio (blended): investimento total ÷ leads do período. Não depende
-    // do casamento campanha ↔ utm_campaign, então funciona sempre.
-    const blendedCpl = metrics.total > 0 && marketingTotals.spend > 0
-        ? marketingTotals.spend / metrics.total
-        : null;
+    // "% dos leads" que cada etapa representa no período (linha sob o número).
+    const pctDe = (n) =>
+        metrics.total > 0 ? `${Math.round((n / metrics.total) * 100)}% dos leads` : '—';
 
     const buildOptions = useCallback(
         (accessor) => {
@@ -590,10 +557,7 @@ function DashPage() {
                         </a>
                         <button
                             type="button"
-                            onClick={() => {
-                                load();
-                                loadMarketing();
-                            }}
+                            onClick={() => load()}
                             title="Atualizar agora"
                             className="p-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:text-white hover:border-gray-500 transition"
                         >
@@ -773,21 +737,43 @@ function DashPage() {
                     </div>
                 </section>
 
-                {/* Mídia (Windsor → marketing_performance): investimento vs leads no período.
-                    O detalhamento por campanha vive na página /meta-ads. */}
+                {/* Status do atendimento no período selecionado — mesmas
+                    etapas da coluna Status da tabela. */}
                 <section className="space-y-4">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <MetricCard title="Investimento" value={fmtBRL(marketingTotals.spend)} icon={DollarSign} accent="text-yellow-400" />
-                        <MetricCard title="Cliques" value={Math.round(marketingTotals.clicks)} icon={MousePointerClick} accent="text-blue-400" />
-                        <MetricCard title="Leads (período)" value={metrics.total} icon={Users} accent="text-green-400" />
-                        <MetricCard title="CPL médio" value={blendedCpl != null ? fmtBRL(blendedCpl) : '—'} icon={TrendingUp} accent="text-purple-400" />
+                        <MetricCard
+                            title="Pagou"
+                            value={statusStats.counts['Pagou']}
+                            icon={DollarSign}
+                            accent="text-green-400"
+                            sub={pctDe(statusStats.counts['Pagou'])}
+                        />
+                        <MetricCard
+                            title="Passou documento"
+                            value={statusStats.counts['Passou documento']}
+                            icon={FileCheck}
+                            accent="text-blue-400"
+                            sub={pctDe(statusStats.counts['Passou documento'])}
+                        />
+                        <MetricCard
+                            title="Vai passar dados"
+                            value={statusStats.counts['Vai passar dados']}
+                            icon={ClipboardList}
+                            accent="text-yellow-400"
+                            sub={pctDe(statusStats.counts['Vai passar dados'])}
+                        />
+                        <MetricCard
+                            title="Vai na Autoescola"
+                            value={statusStats.counts['Vai na Autoescola']}
+                            icon={Car}
+                            accent="text-purple-400"
+                            sub={pctDe(statusStats.counts['Vai na Autoescola'])}
+                        />
                     </div>
-                    {marketingError && marketing.length === 0 && (
-                        <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                            {marketingError}
-                        </p>
-                    )}
+                    <p className="text-xs text-gray-500">
+                        Sem status: {statusStats.semStatus.toLocaleString('pt-BR')} de{' '}
+                        {metrics.total.toLocaleString('pt-BR')} leads no período — marque na coluna Status da tabela
+                    </p>
                 </section>
 
                 {/* Tabela de leads */}
