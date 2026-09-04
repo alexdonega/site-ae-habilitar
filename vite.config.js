@@ -39,11 +39,22 @@ function devApiLeads({ supabaseUrl, serviceRoleKey }) {
                         throw new Error('PUBLIC_SUPABASE_URL ou service_role ausente no .env')
                     }
 
-                    // PATCH → atualiza contato_realizado de um lead
+                    // PATCH → atualiza o status de atendimento de um lead
+                    // (mesmo contrato do PATCH de api/leads.js: ?id= + {status})
                     if (req.method === 'PATCH') {
-                        const { id, contato_realizado } = JSON.parse(await readBody(req) || '{}')
-                        if (!Number.isInteger(id) || typeof contato_realizado !== 'boolean') {
-                            return send(400, { error: 'Envie { id: number, contato_realizado: boolean }' })
+                        const url = new URL(req.url || '/', 'http://localhost')
+                        const id = Number(url.searchParams.get('id'))
+                        const body = JSON.parse(await readBody(req) || '{}')
+                        const status =
+                            body.status === null || body.status === undefined || body.status === ''
+                                ? null
+                                : String(body.status)
+                        const VALIDOS = ['Pagou', 'Passou documento', 'Vai passar dados', 'Vai na Autoescola']
+                        if (!Number.isInteger(id) || id <= 0) {
+                            return send(400, { error: '?id= é obrigatório' })
+                        }
+                        if (status !== null && !VALIDOS.includes(status)) {
+                            return send(400, { error: `Status inválido — use um destes: ${VALIDOS.join(', ')}` })
                         }
                         const rest = await fetch(
                             `${supabaseUrl}/rest/v1/leads?id=eq.${id}`,
@@ -55,11 +66,12 @@ function devApiLeads({ supabaseUrl, serviceRoleKey }) {
                                     'Content-Type': 'application/json',
                                     Prefer: 'return=representation',
                                 },
-                                body: JSON.stringify({ contato_realizado }),
+                                body: JSON.stringify({ status }),
                             },
                         )
                         if (!rest.ok) throw new Error(`Supabase respondeu ${rest.status}`)
                         const rows = await rest.json()
+                        if (!rows.length) return send(404, { error: 'Lead não encontrado' })
                         return send(200, { lead: rows[0] })
                     }
 

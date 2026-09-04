@@ -5,6 +5,11 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.0] - 2026-09-04
+### Adicionado
+- **Coluna Status no `/lead`** com as etapas do atendimento — *Pagou, Passou documento, Vai passar dados, Vai na Autoescola*: select inline colorido na tabela (verde/azul/amarelo/roxo por etapa, "Sem status" em cinza) que grava na hora via `PATCH /api/leads?id=` (atualização otimista; se falhar, volta ao valor anterior e mostra banner vermelho com o motivo). Novo **combobox de filtro Status** na barra de filtros (contagem por etapa, incluindo "Sem status").
+- Coluna `status` na tabela `leads` (text, `NULL` = sem status) — DDL idempotente em `supabase/sql/2026-09-04-leads-status.sql` (a rodar no SQL Editor). `/api/leads` ganha `PATCH ?id= {status}` validando os 4 valores (null limpa); com a coluna pendente, o PATCH devolve erro claro pedindo o SQL. O middleware dev do `vite.config.js` replica o PATCH (troca o `contato_realizado` antigo, que não era mais usado por página alguma).
+
 ## [1.15.1] - 2026-09-03
 ### Alterado
 - Botão **"Adicionar mensagem"** do editor de mensagens (`/mensagens/:id`) passou a aparecer em **qualquer mensagem**, não só nas de categoria Orçamentos — toda mensagem pode ter as duas caixas (1ª mensagem/abertura + a principal). Rótulos genéricos fora dos orçamentos: a 2ª caixa mostra "a principal" em vez de "o orçamento"; nos orçamentos as 9 linhas já saem de fábrica com a abertura MEGA OFERTA anexada.
@@ -40,6 +45,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Removido
 - Página `/webinar` (`src/Webinar.jsx`): a Mega Oferta é revelada pela página de obrigado (`/mega-oferta`), então a rota, o componente e o card no índice do `/dashboard` saíram do ar.
 - CRM legado (`/crm`, `/crm/:id` e o bookmark `/lead/:id` — `src/Leads.jsx` + `src/LeadDetail.jsx`): painel antigo de leads do Google Sheets, substituído pela dashboard `/lead` (Supabase). Levou junto a página `/login` (`src/Login.jsx`) e o fluxo `ae_habilitar_auth` do localStorage, que só protegiam esse CRM — nenhuma página restante exige login. O grupo "Administração" do índice no `/dashboard` saiu junto.
+- AE Studio (`/studio` — `src/Studio.jsx`) e suas funções serverless `/api/create-image`, `/api/create-video`, `/api/task-status` e `api/_zai.js` (geração de imagens GLM-Image e vídeos CogVideoX-3 via Z.ai): páginas e endpoints existiam só para esse fluxo. Variáveis `ZAI_API_KEY` e `ZAI_STUDIO_TOKEN` saíram do `.env.example` (podem ser removidas da Vercel). Card "AE Studio" do índice no `/dashboard` removido.
 
 ## [1.11.0] - 2026-09-03
 ### Adicionado

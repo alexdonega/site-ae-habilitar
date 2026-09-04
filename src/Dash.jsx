@@ -29,6 +29,12 @@ import usePageTitle from './lib/usePageTitle';
 //  (mesmo padrão: service_role só no servidor). O detalhamento por campanha,
 //  conjunto e anúncio fica na página /meta-ads.
 //
+//  A coluna Status (Pagou | Passou documento | Vai passar dados | Vai na
+//  Autoescola) é um select inline que grava direto no Supabase via PATCH
+//  /api/leads — coluna "status" da tabela leads (DDL em
+//  supabase/sql/2026-09-04-leads-status.sql); dá para filtrar por etapa no
+//  combobox "Status" da barra de filtros.
+//
 //  CRITÉRIO DE DIA: todos os limites ("Hoje", 7/30 dias, período, gráfico,
 //  coluna "Criado") usam o dia UTC — exatamente o que o editor do Supabase
 //  mostra para created_at (timestamptz). Assim os números da dashboard sempre
@@ -226,6 +232,20 @@ function Combobox({ label, value, onChange, options }) {
 // Quantidade de linhas carregadas por vez na tabela (scroll infinito).
 const PAGE_SIZE = 20;
 
+// Etapas de atendimento da coluna Status (mesma lista em api/leads.js e no
+// comment da coluna no Supabase). '' = sem status.
+const LEAD_STATUS = ['Pagou', 'Passou documento', 'Vai passar dados', 'Vai na Autoescola'];
+
+// Cor do select de status por etapa (cinza quando sem status).
+const STATUS_STYLE = {
+    '': 'bg-gray-700 text-gray-300 border-gray-600',
+    'Pagou': 'bg-green-900/60 text-green-300 border-green-700',
+    'Passou documento': 'bg-blue-900/60 text-blue-300 border-blue-700',
+    'Vai passar dados': 'bg-yellow-900/50 text-yellow-300 border-yellow-700',
+    'Vai na Autoescola': 'bg-purple-900/60 text-purple-300 border-purple-700',
+};
+const statusStyle = (s) => STATUS_STYLE[s] || STATUS_STYLE[''];
+
 // --- Página ------------------------------------------------------------------
 
 function DashPage() {
@@ -238,10 +258,15 @@ function DashPage() {
     const [newCount, setNewCount] = useState(0);
 
     const [search, setSearch] = useState('');
-    const [filters, setFilters] = useState({ produto: '', referrer: '', ig: '', utm_medium: '' });
+    const [filters, setFilters] = useState({ produto: '', referrer: '', ig: '', utm_medium: '', status: '' });
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+    // Erro do PATCH de status (ex.: coluna ainda não criada no Supabase) —
+    // aparece num banner vermelho por alguns segundos.
+    const [statusError, setStatusError] = useState(null);
+    const statusErrorTimer = useRef(null);
 
     // Mídia (Windsor → marketing_performance): dado muda 1×/dia, então não
     // entra no polling de 10s — carrega no mount, ao voltar para a aba e no
@@ -305,12 +330,38 @@ function DashPage() {
             clearInterval(interval);
             document.removeEventListener('visibilitychange', onVisible);
             if (flashTimer.current) clearTimeout(flashTimer.current);
+            if (statusErrorTimer.current) clearTimeout(statusErrorTimer.current);
         };
     }, [load, loadMarketing]);
 
     const setFilter = (key, value) => {
         setFilters((f) => ({ ...f, [key]: value }));
         setVisibleCount(PAGE_SIZE);
+    };
+
+    // Coluna Status: o select inline grava direto no Supabase via PATCH
+    // /api/leads (atualização otimista — volta ao valor anterior se falhar;
+    // o polling de 10s re-sincroniza de qualquer forma).
+    const setStatus = async (id, status) => {
+        const anterior = (leads.find((l) => l.id === id) || {}).status ?? null;
+        setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
+        setStatusError(null);
+        try {
+            const resp = await fetch(`/api/leads?id=${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            });
+            if (!resp.ok) {
+                const json = await resp.json().catch(() => ({}));
+                throw new Error(json.detail || json.error || `HTTP ${resp.status}`);
+            }
+        } catch (err) {
+            setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status: anterior } : l)));
+            setStatusError(`Não deu para salvar o status: ${err.message}`);
+            if (statusErrorTimer.current) clearTimeout(statusErrorTimer.current);
+            statusErrorTimer.current = setTimeout(() => setStatusError(null), 8000);
+        }
     };
 
     const hasActiveFilters = Boolean(
@@ -320,11 +371,12 @@ function DashPage() {
             || filters.produto
             || filters.referrer
             || filters.ig
-            || filters.utm_medium,
+            || filters.utm_medium
+            || filters.status,
     );
     const clearFilters = () => {
         setSearch('');
-        setFilters({ produto: '', referrer: '', ig: '', utm_medium: '' });
+        setFilters({ produto: '', referrer: '', ig: '', utm_medium: '', status: '' });
         setDateFrom('');
         setDateTo('');
         setVisibleCount(PAGE_SIZE);
@@ -456,6 +508,7 @@ function DashPage() {
     const referrerOptions = useMemo(() => buildOptions((l) => refHost(l.referrer)), [buildOptions]);
     const igOptions = useMemo(() => buildOptions((l) => igValue(l)), [buildOptions]);
     const utmMediumOptions = useMemo(() => buildOptions((l) => l.utm_medium || '—'), [buildOptions]);
+    const statusOptions = useMemo(() => buildOptions((l) => l.status || 'Sem status'), [buildOptions]);
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
@@ -468,6 +521,7 @@ function DashPage() {
             if (filters.referrer && refHost(lead.referrer) !== filters.referrer) return false;
             if (filters.ig && igValue(lead) !== filters.ig) return false;
             if (filters.utm_medium && (lead.utm_medium || '—') !== filters.utm_medium) return false;
+            if (filters.status && (lead.status || 'Sem status') !== filters.status) return false;
             return true;
         });
     }, [filteredByDate, search, filters]);
@@ -558,6 +612,14 @@ function DashPage() {
             )}
 
             <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+                {/* Erro ao salvar status (ex.: coluna "status" pendente no Supabase) */}
+                {statusError && (
+                    <div className="bg-red-500/10 border border-red-500/40 text-red-400 rounded-xl px-4 py-3 text-sm flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 shrink-0" />
+                        {statusError}
+                    </div>
+                )}
+
                 {error && !loading && leads.length === 0 ? (
                     <div className="bg-red-500/10 border border-red-500/40 text-red-400 rounded-xl px-4 py-3 text-sm flex items-center justify-between gap-3">
                         <span className="flex items-center gap-2">
@@ -746,6 +808,7 @@ function DashPage() {
                         </div>
 
                         <Combobox label="Produto" value={filters.produto} onChange={(v) => setFilter('produto', v)} options={produtoOptions} />
+                        <Combobox label="Status" value={filters.status} onChange={(v) => setFilter('status', v)} options={statusOptions} />
                         <Combobox label="Referrer" value={filters.referrer} onChange={(v) => setFilter('referrer', v)} options={referrerOptions} />
                         <Combobox label="IG" value={filters.ig} onChange={(v) => setFilter('ig', v)} options={igOptions} />
                         <Combobox label="UTM Medium" value={filters.utm_medium} onChange={(v) => setFilter('utm_medium', v)} options={utmMediumOptions} />
@@ -774,6 +837,7 @@ function DashPage() {
                                     <th className="px-4 py-3 font-medium">Nome completo</th>
                                     <th className="px-4 py-3 font-medium">WhatsApp</th>
                                     <th className="px-4 py-3 font-medium">Produto</th>
+                                    <th className="px-4 py-3 font-medium">Status</th>
                                     <th className="px-4 py-3 font-medium">Referrer</th>
                                     <th className="px-4 py-3 font-medium">IG</th>
                                     <th className="px-4 py-3 font-medium">UTM Medium</th>
@@ -784,7 +848,7 @@ function DashPage() {
                                 {loading && leads.length === 0
                                     ? Array.from({ length: 6 }).map((_, i) => (
                                           <tr key={i} className="border-b border-gray-800">
-                                              <td colSpan={8} className="px-4 py-3.5">
+                                              <td colSpan={9} className="px-4 py-3.5">
                                                   <div className="h-4 rounded bg-gray-700 animate-pulse" />
                                               </td>
                                           </tr>
@@ -816,6 +880,19 @@ function DashPage() {
                                                       <span className="inline-block px-2.5 py-1 rounded-full bg-habilitar-orange/15 text-habilitar-orange-light text-xs font-semibold">
                                                           {parseProduto(lead.produto)}
                                                       </span>
+                                                  </td>
+                                                  <td className="px-4 py-3 whitespace-nowrap">
+                                                      <select
+                                                          value={lead.status || ''}
+                                                          onChange={(e) => setStatus(lead.id, e.target.value || null)}
+                                                          title="Etapa do atendimento — clique para mudar (grava na hora)"
+                                                          className={`h-8 rounded-lg border text-xs font-semibold [color-scheme:dark] outline-none cursor-pointer ${statusStyle(lead.status || '')}`}
+                                                      >
+                                                          <option value="">Sem status</option>
+                                                          {LEAD_STATUS.map((s) => (
+                                                              <option key={s} value={s}>{s}</option>
+                                                          ))}
+                                                      </select>
                                                   </td>
                                                   <td className="px-4 py-3 text-gray-300 whitespace-nowrap" title={lead.referrer || ''}>
                                                       {refHost(lead.referrer)}
